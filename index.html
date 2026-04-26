@@ -350,7 +350,9 @@
           state.currentWord = null;
           state.wordTimer = 0;
           renderWordDisplay(0);
-          if (state.phase === "playing") endGame("win");
+          if (state.phase === "playing") {
+            endGame(state.sectionsCompleted === SECTION_COUNT ? "win" : "timeout");
+          }
           return;
         }
         state.currentWord = state.wordQueue.shift();
