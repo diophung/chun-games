@@ -149,13 +149,81 @@
       50%      { box-shadow: 0 0 0 12px rgba(85, 145, 255, 0); }
     }
     #sleep-btn.pulse { animation: sleep-pulse 1.4s ease-in-out infinite; }
+    #hero-stage svg {
+      width: clamp(150px, 40vw, 200px);
+      height: auto;
+      display: block;
+    }
+    .stage-svg .face-happy,
+    .stage-svg .face-tired,
+    .stage-svg .face-cry {
+      display: none;
+    }
+    .stage-svg.mood-happy .face-happy { display: inline; }
+    .stage-svg.mood-tired .face-tired { display: inline; }
+    .stage-svg.mood-cry   .face-cry   { display: inline; }
+    @keyframes age-up-bump {
+      0% { transform: scale(1.0); }
+      35% { transform: scale(1.18); }
+      100% { transform: scale(1.0); }
+    }
+    .stage-svg.age-up { animation: age-up-bump 600ms ease; transform-origin: 50% 100%; }
   </style>
 </head>
 <body>
   <main id="app">
     <header id="age-stage">Age 3 · Stage: Toddler</header>
     <div id="hero">
-      <div id="hero-stage"></div>
+      <div id="hero-stage">
+        <svg id="stage-0" class="stage-svg mood-happy" viewBox="0 0 150 200" aria-label="toddler">
+          <!-- legs -->
+          <rect x="60" y="150" width="12" height="30" rx="6" fill="#f6c89f" />
+          <rect x="78" y="150" width="12" height="30" rx="6" fill="#f6c89f" />
+          <!-- diaper -->
+          <rect x="50" y="120" width="50" height="40" rx="14" fill="#ffffff" stroke="#bcbccd" stroke-width="2" />
+          <!-- body -->
+          <rect x="55" y="90" width="40" height="40" rx="14" fill="#ffd6e0" />
+          <!-- arms -->
+          <rect x="35" y="95" width="22" height="10" rx="5" fill="#f6c89f" />
+          <rect x="93" y="95" width="22" height="10" rx="5" fill="#f6c89f" />
+          <!-- head -->
+          <circle cx="75" cy="60" r="32" fill="#f6c89f" />
+          <!-- hair tuft -->
+          <path d="M58,32 Q75,22 92,32 Q88,40 75,38 Q62,40 58,32 Z" fill="#5a3b25" />
+          <!-- cheeks -->
+          <circle cx="58" cy="68" r="4" fill="#f7a8a8" opacity="0.7" />
+          <circle cx="92" cy="68" r="4" fill="#f7a8a8" opacity="0.7" />
+          <!-- happy face -->
+          <g class="face-happy">
+            <circle cx="65" cy="58" r="3" fill="#222" />
+            <circle cx="85" cy="58" r="3" fill="#222" />
+            <path d="M65,72 Q75,82 85,72" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          </g>
+          <!-- tired face -->
+          <g class="face-tired">
+            <path d="M61,58 Q65,62 69,58" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M81,58 Q85,62 89,58" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M65,76 Q75,72 85,76" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          </g>
+          <!-- crying face -->
+          <g class="face-cry">
+            <path d="M61,56 L69,60 M61,60 L69,56" stroke="#222" stroke-width="2" stroke-linecap="round" />
+            <path d="M81,56 L89,60 M81,60 L89,56" stroke="#222" stroke-width="2" stroke-linecap="round" />
+            <ellipse cx="63" cy="74" rx="4" ry="6" fill="#7ec8ff" />
+            <ellipse cx="87" cy="74" rx="4" ry="6" fill="#7ec8ff" />
+            <path d="M65,82 Q75,76 85,82" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          </g>
+          <!-- teddy bear (held in left arm) -->
+          <g transform="translate(20,110)">
+            <circle cx="10" cy="14" r="10" fill="#a47148" />
+            <circle cx="4" cy="6"  r="4"  fill="#a47148" />
+            <circle cx="16" cy="6"  r="4"  fill="#a47148" />
+            <circle cx="8"  cy="13" r="1.5" fill="#222" />
+            <circle cx="12" cy="13" r="1.5" fill="#222" />
+            <path d="M8,17 Q10,19 12,17" stroke="#222" stroke-width="1" fill="none" />
+          </g>
+        </svg>
+      </div>
       <p id="status-text"></p>
     </div>
     <section id="bars"></section>
