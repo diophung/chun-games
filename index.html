@@ -297,11 +297,41 @@
         setBar("happiness", stats.happiness, `${stats.happiness}`, false);
       }
 
+      // ---------- Render: foods ----------
+
+      function buildActionButton({ id, emoji, name }, kind) {
+        const btn = document.createElement("button");
+        btn.dataset.kind = kind;
+        btn.dataset.id = id;
+        const emoji_ = document.createElement("span");
+        emoji_.className = "emoji";
+        emoji_.textContent = emoji;
+        const label = document.createElement("span");
+        label.className = "label";
+        label.textContent = name;
+        btn.appendChild(emoji_);
+        btn.appendChild(label);
+        return btn;
+      }
+
+      function ensureFoodButtons() {
+        if ($foodsGrid.childElementCount > 0) return;
+        for (const f of FOODS) $foodsGrid.appendChild(buildActionButton(f, "food"));
+      }
+
+      function renderFoods() {
+        ensureFoodButtons();
+        for (const btn of $foodsGrid.children) {
+          btn.disabled = false; // enabled state refined in Task 10
+        }
+      }
+
       // ---------- Render: top-level ----------
 
       function render() {
         ensureBars();
         renderBars();
+        renderFoods();
         $ageStage.textContent = `Age ${state.age} · Stage: ${STAGES[state.stage].name}`;
       }
 
@@ -309,7 +339,17 @@
 
       reset();
       render();
-      // Listeners attached in later tasks.
+
+      $foodsGrid.addEventListener("click", function (e) {
+        const btn = e.target.closest("button[data-kind='food']");
+        if (!btn || btn.disabled) return;
+        feed(btn.dataset.id);
+      });
+
+      function feed(foodId) {
+        // Wired up in Task 6.
+        console.log("feed", foodId);
+      }
 
       window.__game = {
         get state() { return state; },
