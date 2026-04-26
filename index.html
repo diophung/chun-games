@@ -191,6 +191,28 @@
       100% { opacity: 0; transform: translate(-50%, -32px); }
     }
     #age-up-floater.run { animation: age-up-floater-anim 700ms ease-out forwards; }
+    #end-screen {
+      background: rgba(255,255,255,0.85);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+    #end-screen h2 { margin: 4px 0 12px; font-size: 22px; }
+    #end-screen .end-illustration { margin: 8px 0 16px; display: flex; justify-content: center; }
+    #end-screen .end-illustration svg { width: 200px; height: auto; }
+    #end-screen ul { list-style: none; padding: 0; margin: 12px 0; font-size: 14px; }
+    #end-screen li { margin: 4px 0; }
+    #play-again {
+      margin-top: 12px;
+      padding: 10px 18px;
+      background: #ffd56b;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      border: 1px solid #c9a440;
+      flex-direction: row;
+    }
+    .game-hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -637,6 +659,75 @@
         });
       }
 
+      // ---------- End screen ----------
+
+      function endScreenVariant() {
+        const { stamina, strength, happiness } = state.stats;
+        const max = Math.max(stamina, strength, happiness);
+        if (max < 50) return { kind: "made-it", title: "🌱 They Made It", overlay: null };
+        // Tie-breaker: happiness > strength > stamina
+        if (happiness === max) return { kind: "joyful",   title: "😄 The Joyful Adult", overlay: "ending-joyful" };
+        if (strength  === max) return { kind: "athlete",  title: "🏃 The Athlete",     overlay: "ending-athlete" };
+        return { kind: "explorer", title: "🌍 The Explorer", overlay: "ending-explorer" };
+      }
+
+      function renderEndScreen() {
+        // Wipe and rebuild
+        $endScreen.replaceChildren();
+        const v = endScreenVariant();
+
+        const h2 = document.createElement("h2");
+        h2.textContent = v.title;
+        $endScreen.appendChild(h2);
+
+        // Clone the teen SVG so we can decorate it with the ending overlay class
+        // without affecting the in-game SVG used during play.
+        const teen = document.getElementById("stage-3");
+        const clone = teen.cloneNode(true);
+        clone.removeAttribute("id");
+        clone.removeAttribute("hidden");
+        clone.classList.remove("mood-tired", "mood-cry");
+        clone.classList.add("mood-happy");
+        clone.classList.remove("ending-athlete", "ending-joyful", "ending-explorer");
+        if (v.overlay) clone.classList.add(v.overlay);
+        const wrap = document.createElement("div");
+        wrap.className = "end-illustration";
+        wrap.appendChild(clone);
+        $endScreen.appendChild(wrap);
+
+        const subtitle = document.createElement("p");
+        subtitle.textContent = "You raised them from 3 to 18!";
+        $endScreen.appendChild(subtitle);
+
+        const ul = document.createElement("ul");
+        const lines = [
+          `Final stamina: ${state.stats.stamina}`,
+          `Final strength: ${state.stats.strength}`,
+          `Final happiness: ${state.stats.happiness}`,
+          `Meals: ${state.history.meals} (healthy ${state.history.healthyMeals} · junk ${state.history.junkMeals})`,
+          `Activities: ${state.history.activities}`,
+          `Sleeps: ${state.history.sleeps}`,
+          `Cry episodes: ${state.history.cryEpisodes}`,
+        ];
+        for (const line of lines) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          ul.appendChild(li);
+        }
+        $endScreen.appendChild(ul);
+
+        const btn = document.createElement("button");
+        btn.id = "play-again";
+        btn.textContent = "Play Again";
+        btn.addEventListener("click", playAgain);
+        $endScreen.appendChild(btn);
+      }
+
+      function playAgain() {
+        reset();
+        render();
+      }
+
       // ---------- Render: top-level ----------
 
       function render() {
@@ -649,6 +740,14 @@
         $sleepBtn.classList.toggle("pulse", state.crying);
         $sleepBtn.disabled = state.phase !== "playing";
         $statusText.textContent = state.crying ? "Baby is crying. Help them rest." : "";
+
+        const ended = state.phase === "ended";
+        for (const id of ["age-stage", "hero", "bars", "foods", "activities", "sleep-btn"]) {
+          document.getElementById(id).classList.toggle("game-hidden", ended);
+        }
+        $endScreen.hidden = !ended;
+        if (ended) renderEndScreen();
+        else $endScreen.replaceChildren();
       }
 
       // ---------- Init ----------
