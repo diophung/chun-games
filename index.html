@@ -240,8 +240,108 @@
         lastFrameMs: 0,
       };
 
+      // ----- DOM lookups (cached once) -----
+      const els = {
+        globalTimer: document.getElementById("global-timer"),
+        statsMini:   document.getElementById("stats-mini"),
+        wordDisplay: document.getElementById("word-display"),
+        wordFill:    document.getElementById("word-timer-fill"),
+        input:       document.getElementById("word-input"),
+        wordArea:    document.getElementById("word-area"),
+        endScreen:   document.getElementById("end-screen"),
+        endHeadline: document.getElementById("end-headline"),
+        endStats:    document.getElementById("end-stats"),
+        playAgain:   document.getElementById("play-again"),
+        citySvg:     document.getElementById("city-svg"),
+      };
+
+      // ----- Pure helpers -----
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function pickRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function formatSeconds(s) {
+        return (Math.max(0, s)).toFixed(1) + "s";
+      }
+
+      // ----- Render helpers (no innerHTML; build DOM nodes explicitly) -----
+      function renderWordDisplay(typedLen) {
+        const target = state.currentWord || "";
+        const frag = document.createDocumentFragment();
+        if (target.length === 0) {
+          frag.appendChild(document.createTextNode("\u2014")); // em dash
+        } else {
+          for (let i = 0; i < target.length; i++) {
+            const span = document.createElement("span");
+            span.className = i < typedLen ? "typed" : "untyped";
+            span.textContent = target[i];
+            frag.appendChild(span);
+          }
+        }
+        els.wordDisplay.replaceChildren(frag);
+      }
+
+      function renderTimers() {
+        els.globalTimer.textContent = formatSeconds(state.globalTimer);
+        els.statsMini.textContent = state.sectionsCompleted + " / " + SECTION_COUNT;
+        const total = (state.currentWord ? state.currentWord.length : 1) * WORD_TIMER_PER_CHAR;
+        const pct = Math.max(0, Math.min(100, (state.wordTimer / total) * 100));
+        els.wordFill.style.width = pct + "%";
+      }
+
+      function resetCityToGrey() {
+        const sections = els.citySvg.querySelectorAll("[data-section-id]");
+        sections.forEach(s => s.setAttribute("fill", "#aaaaaa"));
+      }
+
+      // ----- Game lifecycle -----
+      function startGame() {
+        state.phase = "playing";
+        state.endReason = null;
+        state.wordQueue = shuffle(WORDS).slice(0, SECTION_COUNT);
+        state.sectionQueue = shuffle(
+          Array.from({ length: SECTION_COUNT }, (_, i) => i)
+        );
+        state.globalTimer = GLOBAL_TIMER_START;
+        state.typos = 0;
+        state.correctChars = 0;
+        state.sectionsCompleted = 0;
+
+        resetCityToGrey();
+        els.endScreen.hidden = true;
+        els.wordArea.hidden = false;
+        els.input.value = "";
+
+        loadNextWord();
+        renderTimers();
+        els.input.focus();
+      }
+
+      function loadNextWord() {
+        if (state.wordQueue.length === 0) {
+          // All sections completed — endGame is wired in Task 9.
+          state.currentWord = null;
+          renderWordDisplay(0);
+          return;
+        }
+        state.currentWord = state.wordQueue.shift();
+        state.wordTimer = state.currentWord.length * WORD_TIMER_PER_CHAR;
+        els.input.value = "";
+        renderWordDisplay(0);
+        renderTimers();
+      }
+
       // Expose for manual smoke checks during development. Removed in Task 10.
-      window.__chunga = { WORDS, PALETTE, state };
+      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord };
     })();
   </script>
 </body>
