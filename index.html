@@ -337,9 +337,10 @@
 
       function loadNextWord() {
         if (state.wordQueue.length === 0) {
-          // All sections completed — endGame is wired in Task 9.
           state.currentWord = null;
+          state.wordTimer = 0;
           renderWordDisplay(0);
+          if (state.phase === "playing") endGame("win");
           return;
         }
         state.currentWord = state.wordQueue.shift();
@@ -359,9 +360,7 @@
         renderTimers();
 
         if (state.globalTimer <= 0) {
-          state.phase = "ended";
-          state.endReason = "timeout";
-          // Full end-screen rendering lands in Task 9.
+          endGame("timeout");
           return;
         }
 
@@ -370,6 +369,34 @@
         }
 
         requestAnimationFrame(tick);
+      }
+
+      function endGame(reason) {
+        state.phase = "ended";
+        state.endReason = reason;
+        const totalTime = (GLOBAL_TIMER_START - state.globalTimer).toFixed(1);
+        const denom = state.correctChars + state.typos;
+        const accuracy = denom === 0 ? 100 : Math.round((state.correctChars / denom) * 100);
+
+        els.endHeadline.textContent =
+          reason === "win" ? "City complete!" : "Time's up!";
+
+        const stats = [
+          "Time used: " + totalTime + "s",
+          "Words completed: " + state.sectionsCompleted + " / " + SECTION_COUNT,
+          "Typos: " + state.typos,
+          "Accuracy: " + accuracy + "%",
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+
+        els.endScreen.hidden = false;
+        els.playAgain.focus();
       }
 
       function completeSection() {
@@ -417,8 +444,26 @@
       // ----- Wire up DOM events -----
       els.input.addEventListener("input", onInput);
 
+      els.playAgain.addEventListener("click", () => {
+        startGame();
+      });
+
+      // Re-focus the input on any tap inside the page during play.
+      document.addEventListener("click", (e) => {
+        if (state.phase !== "playing") return;
+        if (e.target === els.input) return;
+        if (e.target === els.playAgain) return;
+        els.input.focus();
+      });
+
+      // Prevent paste cheating.
+      els.input.addEventListener("paste", (e) => e.preventDefault());
+
+      // Auto-start on load.
+      startGame();
+
       // Expose for manual smoke checks during development. Removed in Task 10.
-      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord, completeSection, tick };
+      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord, completeSection, tick, endGame };
     })();
   </script>
 </body>
