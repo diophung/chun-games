@@ -389,8 +389,61 @@
       });
 
       function feed(foodId) {
-        // Wired up in Task 6.
-        console.log("feed", foodId);
+        if (state.phase !== "playing" || state.crying) return;
+        const f = FOODS.find(x => x.id === foodId);
+        if (!f) return;
+        applyAction({
+          stamina: f.stamina,
+          strength: f.strength,
+          happiness: f.happiness,
+          xp: f.xp,
+          isMeal: true,
+          isHealthy: f.healthy,
+        });
+      }
+
+      function applyAction(deltas) {
+        // 1. Apply deltas
+        state.stats.stamina   += deltas.stamina   || 0;
+        state.stats.strength  += deltas.strength  || 0;
+        state.stats.happiness += deltas.happiness || 0;
+        state.xp              += deltas.xp        || 0;
+
+        // 2. Per-turn decay (skipped for sleep, which calls its own path)
+        state.stats.stamina   -= 1;
+        state.stats.happiness -= 1;
+
+        // 3. Clamp
+        state.stats.stamina   = clamp(state.stats.stamina,   0, MAX_STAT);
+        state.stats.strength  = clamp(state.stats.strength,  0, MAX_STAT);
+        state.stats.happiness = clamp(state.stats.happiness, 0, MAX_STAT);
+        state.xp              = clamp(state.xp,              0, XP_PER_AGE);
+
+        // 4. History
+        if (deltas.isMeal) {
+          state.history.meals++;
+          if (deltas.isHealthy) state.history.healthyMeals++;
+          else                  state.history.junkMeals++;
+        }
+        if (deltas.isActivity) state.history.activities++;
+
+        // 5. Age-up
+        if (state.xp >= XP_PER_AGE && state.age < MAX_AGE) {
+          state.age++;
+          state.xp = 0;
+          state.stage = computeStage(state.age);
+        }
+
+        // 6. Crying check
+        if (!state.crying && state.stats.happiness <= 0) {
+          state.crying = true;
+          state.history.cryEpisodes++;
+        }
+
+        // 7. End check
+        if (state.age >= MAX_AGE) state.phase = "ended";
+
+        render();
       }
 
       function doActivity(actId) {
