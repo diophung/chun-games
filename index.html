@@ -447,8 +447,18 @@
       }
 
       function doActivity(actId) {
-        // Wired up in Task 7.
-        console.log("activity", actId);
+        if (state.phase !== "playing" || state.crying) return;
+        const a = ACTIVITIES.find(x => x.id === actId);
+        if (!a) return;
+        if (state.age < a.unlock) return;
+        if (state.stats.stamina < Math.abs(a.stamina)) return;
+        applyAction({
+          stamina: a.stamina,
+          strength: a.strength,
+          happiness: a.happiness,
+          xp: a.xp,
+          isActivity: true,
+        });
       }
 
       window.__game = {
