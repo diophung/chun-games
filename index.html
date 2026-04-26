@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: #87ceeb;
+      color: #222;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
+    header {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.15);
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(14px, 3.5vw, 18px);
+    }
+    main {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 8px;
+    }
+    #word-area {
+      flex: 0 0 auto;
+      padding: 12px 16px 16px;
+      background: #fff;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+    }
+    #city-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      display: block;
+    }
+    [data-section-id] {
+      transition: fill 280ms ease-out;
+    }
+    #word-area {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    #word-display {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: clamp(28px, 8vw, 44px);
+      letter-spacing: 0.08em;
+      text-align: center;
+      font-weight: 700;
+      user-select: none;
+      min-height: 1.2em;
+      transition: transform 120ms ease;
+    }
+    #word-display .typed { color: #16a34a; }
+    #word-display .untyped { color: #888; }
+    #word-display.flash-red { animation: flashRed 220ms ease; }
+    @keyframes flashRed {
+      0%   { color: #dc2626; transform: translateX(0); }
+      25%  { transform: translateX(-4px); }
+      50%  { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+    #word-timer-bar {
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    #word-timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #16a34a, #facc15, #ef4444);
+      transition: width 120ms linear;
+    }
+    #word-input {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: clamp(20px, 5.5vw, 28px);
+      padding: 12px 14px;
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.08em;
+      width: 100%;
+    }
+    #word-input:focus {
+      border-color: #2563eb;
+    }
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.85);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      z-index: 10;
+    }
+    #end-screen[hidden] { display: none !important; }
+    #end-headline { font-size: clamp(28px, 8vw, 48px); margin: 0; }
+    #end-stats {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: clamp(16px, 4vw, 22px);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 4px 0; }
+    #play-again {
+      font-size: clamp(18px, 5vw, 24px);
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 48px;
+    }
+    #play-again:active { transform: translateY(1px); }
+@media (max-width: 480px) {
+  header { padding: 6px 10px; }
+  main { padding: 4px; }
+  #word-area { padding: 10px 12px 12px; }
+}
+@supports (height: 100dvh) {
+  body { min-height: 100dvh; height: 100dvh; }
+}
+#word-input::placeholder { color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <header>
+    <div id="global-timer">90.0s</div>
+    <div id="stats-mini">0 / 13</div>
+  </header>
+  <main id="city">
+  <svg id="city-svg" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax meet" aria-label="city skyline">
+    <!-- ground strip -->
+    <rect x="0" y="380" width="1000" height="20" fill="#7d8a96" />
+
+    <!-- decorative crane behind tall building 5 -->
+    <line x1="430" y1="380" x2="430" y2="40" stroke="#445566" stroke-width="3" />
+    <line x1="430" y1="50" x2="560" y2="50" stroke="#445566" stroke-width="3" />
+    <line x1="540" y1="50" x2="540" y2="90" stroke="#445566" stroke-width="2" />
+
+    <!-- 13 building sections, all grey -->
+    <rect data-section-id="0"  x="20"  y="240" width="70"  height="140" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="1"  x="90"  y="180" width="80"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="2"  x="170" y="220" width="60"  height="160" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="3"  x="230" y="140" width="90"  height="240" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="4"  x="320" y="200" width="70"  height="180" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="5"  x="390" y="100" width="80"  height="280" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="6"  x="470" y="160" width="80"  height="220" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="7"  x="550" y="220" width="70"  height="160" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="8"  x="620" y="180" width="80"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="9"  x="700" y="120" width="85"  height="260" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="10" x="785" y="200" width="70"  height="180" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="11" x="855" y="240" width="70"  height="140" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="12" x="925" y="180" width="55"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+
+    <!-- decorative window dots (purely visual, never colored) -->
+    <g fill="#ffffff" opacity="0.45">
+      <circle cx="55"  cy="280" r="3" /><circle cx="55"  cy="305" r="3" /><circle cx="55"  cy="330" r="3" />
+      <circle cx="265" cy="200" r="3" /><circle cx="265" cy="230" r="3" /><circle cx="285" cy="200" r="3" /><circle cx="285" cy="230" r="3" />
+      <circle cx="430" cy="180" r="3" /><circle cx="430" cy="220" r="3" /><circle cx="430" cy="260" r="3" />
+      <circle cx="660" cy="220" r="3" /><circle cx="660" cy="250" r="3" /><circle cx="680" cy="220" r="3" />
+      <circle cx="745" cy="180" r="3" /><circle cx="745" cy="220" r="3" /><circle cx="745" cy="260" r="3" />
+    </g>
+  </svg>
+</main>
+  <section id="word-area">
+  <div id="word-display" aria-live="polite">&mdash;</div>
+  <div id="word-timer-bar"><div id="word-timer-fill"></div></div>
+  <input
+    id="word-input"
+    type="text"
+    inputmode="latin"
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false"
+    autofocus
+    placeholder="type here"
+    aria-label="type the word"
+  />
+</section>
+<section id="end-screen" hidden>
+  <h2 id="end-headline"></h2>
+  <ul id="end-stats"></ul>
+  <button id="play-again" type="button">Play Again</button>
+</section>
+  <script>
+    (function () {
+      "use strict";
+
+      const SECTION_COUNT = 13;
+      const WORD_TIMER_PER_CHAR = 1.2;   // seconds per character
+      const GLOBAL_TIMER_START = 90;     // seconds
+      const TYPO_PENALTY = 2;            // seconds deducted from global timer per typo
+
+      const WORDS = [
+        "sedan","coupe","wagon","truck","tires","turbo","motor","drift","rally","viper",
+        "hybrid","engine","piston","brakes","clutch","wheels","bumper","fender","mirror",
+        "carbon","diesel","petrol","garage","tunnel","airbag","camaro","beetle","jaguar",
+        "gasket","gearbox","chassis","exhaust","highway","traffic","license","mileage",
+        "battery","sunroof","ferrari","mustang","porsche","shifter","muffler","antenna",
+        "ignition","radiator","seatbelt","steering"
+      ];
+
+      const PALETTE = [
+        "#e74c3c", "#3498db", "#f1c40f", "#27ae60",
+        "#9b59b6", "#e67e22", "#1abc9c", "#e84393"
+      ];
+
+      const state = {
+        phase: "idle",            // "idle" | "playing" | "ended"
+        endReason: null,          // null | "win" | "timeout"
+        wordQueue: [],
+        sectionQueue: [],
+        currentWord: null,
+        wordTimer: 0,
+        globalTimer: GLOBAL_TIMER_START,
+        typos: 0,
+        correctChars: 0,
+        sectionsCompleted: 0,
+        lastFrameMs: 0,
+      };
+
+      // ----- DOM lookups (cached once) -----
+      const els = {
+        globalTimer: document.getElementById("global-timer"),
+        statsMini:   document.getElementById("stats-mini"),
+        wordDisplay: document.getElementById("word-display"),
+        wordFill:    document.getElementById("word-timer-fill"),
+        input:       document.getElementById("word-input"),
+        wordArea:    document.getElementById("word-area"),
+        endScreen:   document.getElementById("end-screen"),
+        endHeadline: document.getElementById("end-headline"),
+        endStats:    document.getElementById("end-stats"),
+        playAgain:   document.getElementById("play-again"),
+        citySvg:     document.getElementById("city-svg"),
+      };
+
+      // ----- Pure helpers -----
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function pickRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function formatSeconds(s) {
+        return (Math.max(0, s)).toFixed(1) + "s";
+      }
+
+      // ----- Render helpers (no innerHTML; build DOM nodes explicitly) -----
+      function renderWordDisplay(typedLen) {
+        const target = state.currentWord || "";
+        const frag = document.createDocumentFragment();
+        if (target.length === 0) {
+          frag.appendChild(document.createTextNode("\u2014")); // em dash
+        } else {
+          for (let i = 0; i < target.length; i++) {
+            const span = document.createElement("span");
+            span.className = i < typedLen ? "typed" : "untyped";
+            span.textContent = target[i];
+            frag.appendChild(span);
+          }
+        }
+        els.wordDisplay.replaceChildren(frag);
+      }
+
+      function renderTimers() {
+        els.globalTimer.textContent = formatSeconds(state.globalTimer);
+        els.statsMini.textContent = state.sectionsCompleted + " / " + SECTION_COUNT;
+        const total = (state.currentWord ? state.currentWord.length : 1) * WORD_TIMER_PER_CHAR;
+        const pct = Math.max(0, Math.min(100, (state.wordTimer / total) * 100));
+        els.wordFill.style.width = pct + "%";
+      }
+
+      function flashRed() {
+        els.wordDisplay.classList.remove("flash-red");
+        // Force reflow so the animation can replay if triggered rapidly.
+        void els.wordDisplay.offsetWidth;
+        els.wordDisplay.classList.add("flash-red");
+      }
+
+      function resetCityToGrey() {
+        const sections = els.citySvg.querySelectorAll("[data-section-id]");
+        sections.forEach(s => s.setAttribute("fill", "#aaaaaa"));
+      }
+
+      // ----- Game lifecycle -----
+      function startGame() {
+        state.phase = "playing";
+        state.endReason = null;
+        state.wordQueue = shuffle(WORDS).slice(0, SECTION_COUNT);
+        state.sectionQueue = shuffle(
+          Array.from({ length: SECTION_COUNT }, (_, i) => i)
+        );
+        state.globalTimer = GLOBAL_TIMER_START;
+        state.typos = 0;
+        state.correctChars = 0;
+        state.sectionsCompleted = 0;
+
+        resetCityToGrey();
+        els.endScreen.hidden = true;
+        els.wordArea.hidden = false;
+        els.input.value = "";
+
+        loadNextWord();
+        renderTimers();
+        state.lastFrameMs = 0;
+        requestAnimationFrame(tick);
+        els.input.focus();
+      }
+
+      function loadNextWord() {
+        if (state.wordQueue.length === 0) {
+          state.currentWord = null;
+          state.wordTimer = 0;
+          renderWordDisplay(0);
+          if (state.phase === "playing") {
+            endGame(state.sectionsCompleted === SECTION_COUNT ? "win" : "timeout");
+          }
+          return;
+        }
+        state.currentWord = state.wordQueue.shift();
+        state.wordTimer = state.currentWord.length * WORD_TIMER_PER_CHAR;
+        els.input.value = "";
+        renderWordDisplay(0);
+        renderTimers();
+      }
+
+      function tick(now) {
+        if (state.phase !== "playing") return;
+        const dt = state.lastFrameMs ? (now - state.lastFrameMs) / 1000 : 0;
+        state.lastFrameMs = now;
+
+        state.globalTimer = Math.max(0, state.globalTimer - dt);
+        state.wordTimer   = Math.max(0, state.wordTimer - dt);
+        renderTimers();
+
+        if (state.globalTimer <= 0) {
+          endGame("timeout");
+          return;
+        }
+
+        if (state.wordTimer <= 0 && state.currentWord) {
+          loadNextWord();
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      function endGame(reason) {
+        state.phase = "ended";
+        state.endReason = reason;
+        const totalTime = (GLOBAL_TIMER_START - state.globalTimer).toFixed(1);
+        const denom = state.correctChars + state.typos;
+        const accuracy = denom === 0 ? 100 : Math.round((state.correctChars / denom) * 100);
+
+        els.endHeadline.textContent =
+          reason === "win" ? "City complete!" : "Time's up!";
+
+        const stats = [
+          "Time used: " + totalTime + "s",
+          "Words completed: " + state.sectionsCompleted + " / " + SECTION_COUNT,
+          "Typos: " + state.typos,
+          "Accuracy: " + accuracy + "%",
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+
+        els.endScreen.hidden = false;
+        els.playAgain.focus();
+      }
+
+      function completeSection() {
+        if (state.sectionQueue.length === 0) return;
+        const id = state.sectionQueue.shift();
+        const el = els.citySvg.querySelector('[data-section-id="' + id + '"]');
+        if (el) el.setAttribute("fill", pickRandom(PALETTE));
+        state.sectionsCompleted += 1;
+      }
+
+      function onInput() {
+        if (state.phase !== "playing" || !state.currentWord) return;
+        const current = els.input.value;
+        const target = state.currentWord;
+
+        // Find longest valid prefix.
+        let validLen = 0;
+        while (
+          validLen < current.length &&
+          validLen < target.length &&
+          current[validLen] === target[validLen]
+        ) {
+          validLen++;
+        }
+
+        if (validLen < current.length) {
+          els.input.value = current.slice(0, validLen);
+          state.typos += 1;
+          state.globalTimer = Math.max(0, state.globalTimer - TYPO_PENALTY);
+          flashRed();
+          renderWordDisplay(validLen);
+          renderTimers();
+          return;
+        }
+
+        renderWordDisplay(current.length);
+
+        if (current === target) {
+          state.correctChars += target.length;
+          completeSection();
+          loadNextWord();
+        }
+      }
+
+      // ----- Wire up DOM events -----
+      els.input.addEventListener("input", onInput);
+
+      els.playAgain.addEventListener("click", () => {
+        startGame();
+      });
+
+      // Re-focus the input on any tap inside the page during play.
+      document.addEventListener("click", (e) => {
+        if (state.phase !== "playing") return;
+        if (e.target === els.input) return;
+        if (e.target === els.playAgain) return;
+        els.input.focus();
+      });
+
+      // Prevent paste cheating.
+      els.input.addEventListener("paste", (e) => e.preventDefault());
+
+      // Auto-start on load.
+      startGame();
+
+
+    })();
+  </script>
+</body>
+</html>
