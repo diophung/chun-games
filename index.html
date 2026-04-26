@@ -388,6 +388,11 @@
         doActivity(btn.dataset.id);
       });
 
+      $sleepBtn.addEventListener("click", function () {
+        if ($sleepBtn.disabled) return;
+        sleep();
+      });
+
       function feed(foodId) {
         if (state.phase !== "playing" || state.crying) return;
         const f = FOODS.find(x => x.id === foodId);
@@ -459,6 +464,22 @@
           xp: a.xp,
           isActivity: true,
         });
+      }
+
+      function sleep() {
+        if (state.phase !== "playing") return;
+
+        // Special path — no per-turn decay.
+        state.stats.stamina = MAX_STAT;
+        state.stats.happiness += 30;
+        state.stats.happiness = clamp(state.stats.happiness, 0, MAX_STAT);
+        state.crying = false;
+        state.history.sleeps++;
+
+        // No XP gain. No age advance from sleep alone.
+        if (state.age >= MAX_AGE) state.phase = "ended";
+
+        render();
       }
 
       window.__game = {
