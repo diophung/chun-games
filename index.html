@@ -45,6 +45,15 @@
       background: #fff;
       box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
     }
+    #city-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      display: block;
+    }
+    [data-section-id] {
+      transition: fill 280ms ease-out;
+    }
   </style>
 </head>
 <body>
@@ -52,7 +61,41 @@
     <div id="global-timer">90.0s</div>
     <div id="stats-mini">0 / 13</div>
   </header>
-  <main id="city"></main>
+  <main id="city">
+  <svg id="city-svg" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax meet" aria-label="city skyline">
+    <!-- ground strip -->
+    <rect x="0" y="380" width="1000" height="20" fill="#7d8a96" />
+
+    <!-- decorative crane behind tall building 5 -->
+    <line x1="430" y1="380" x2="430" y2="40" stroke="#445566" stroke-width="3" />
+    <line x1="430" y1="50" x2="560" y2="50" stroke="#445566" stroke-width="3" />
+    <line x1="540" y1="50" x2="540" y2="90" stroke="#445566" stroke-width="2" />
+
+    <!-- 13 building sections, all grey -->
+    <rect data-section-id="0"  x="20"  y="240" width="70"  height="140" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="1"  x="90"  y="180" width="80"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="2"  x="170" y="220" width="60"  height="160" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="3"  x="230" y="140" width="90"  height="240" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="4"  x="320" y="200" width="70"  height="180" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="5"  x="390" y="100" width="80"  height="280" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="6"  x="470" y="160" width="80"  height="220" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="7"  x="550" y="220" width="70"  height="160" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="8"  x="620" y="180" width="80"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="9"  x="700" y="120" width="85"  height="260" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="10" x="785" y="200" width="70"  height="180" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="11" x="855" y="240" width="70"  height="140" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+    <rect data-section-id="12" x="925" y="180" width="55"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
+
+    <!-- decorative window dots (purely visual, never colored) -->
+    <g fill="#ffffff" opacity="0.45">
+      <circle cx="55"  cy="280" r="3" /><circle cx="55"  cy="305" r="3" /><circle cx="55"  cy="330" r="3" />
+      <circle cx="265" cy="200" r="3" /><circle cx="265" cy="230" r="3" /><circle cx="285" cy="200" r="3" /><circle cx="285" cy="230" r="3" />
+      <circle cx="430" cy="180" r="3" /><circle cx="430" cy="220" r="3" /><circle cx="430" cy="260" r="3" />
+      <circle cx="660" cy="220" r="3" /><circle cx="660" cy="250" r="3" /><circle cx="680" cy="220" r="3" />
+      <circle cx="745" cy="180" r="3" /><circle cx="745" cy="220" r="3" /><circle cx="745" cy="260" r="3" />
+    </g>
+  </svg>
+</main>
   <section id="word-area"></section>
   <script>
     (function () {
