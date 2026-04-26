@@ -131,7 +131,87 @@
   <script>
     (function () {
       "use strict";
-      // Game logic added in later tasks.
+
+      // ---------- Constants ----------
+
+      const XP_PER_AGE = 6;
+      const MAX_STAT = 100;
+      const TIRED_THRESHOLD = 25;
+      const MAX_AGE = 18;
+
+      const FOODS = [
+        { id: "apple",    emoji: "🍎", name: "Apple",    healthy: true,  stamina:  5, strength:  2, happiness:  3, xp:  1 },
+        { id: "broccoli", emoji: "🥦", name: "Broccoli", healthy: true,  stamina:  3, strength:  6, happiness: -2, xp:  1 },
+        { id: "milk",     emoji: "🥛", name: "Milk",     healthy: true,  stamina:  4, strength:  5, happiness:  2, xp:  1 },
+        { id: "egg",      emoji: "🥚", name: "Egg",      healthy: true,  stamina:  5, strength:  5, happiness:  1, xp:  1 },
+        { id: "bread",    emoji: "🍞", name: "Bread",    healthy: true,  stamina:  6, strength:  1, happiness:  1, xp:  1 },
+        { id: "fish",     emoji: "🐟", name: "Fish",     healthy: true,  stamina:  3, strength:  6, happiness:  2, xp:  1 },
+        { id: "carrot",   emoji: "🥕", name: "Carrot",   healthy: true,  stamina:  3, strength:  3, happiness:  1, xp:  1 },
+        { id: "cookie",   emoji: "🍪", name: "Cookie",   healthy: false, stamina:  1, strength: -2, happiness:  6, xp: -1 },
+        { id: "fries",    emoji: "🍟", name: "Fries",    healthy: false, stamina: -2, strength: -3, happiness:  5, xp: -1 },
+        { id: "burger",   emoji: "🍔", name: "Burger",   healthy: false, stamina:  1, strength: -3, happiness:  4, xp: -1 },
+        { id: "soda",     emoji: "🥤", name: "Soda",     healthy: false, stamina: -3, strength: -4, happiness:  6, xp: -1 },
+        { id: "cake",     emoji: "🍰", name: "Cake",     healthy: false, stamina: -1, strength: -4, happiness:  7, xp: -1 },
+      ];
+
+      const ACTIVITIES = [
+        { id: "toys",   emoji: "🧸",  name: "Toys",    unlock:  3, stamina: -10, strength:  0, happiness: 8, xp: 1 },
+        { id: "draw",   emoji: "🎨",  name: "Draw",    unlock:  5, stamina:  -5, strength:  0, happiness: 6, xp: 1 },
+        { id: "bike",   emoji: "🚲",  name: "Bike",    unlock:  6, stamina: -20, strength:  5, happiness: 6, xp: 1 },
+        { id: "read",   emoji: "📚",  name: "Read",    unlock:  8, stamina:  -5, strength:  1, happiness: 4, xp: 1 },
+        { id: "sports", emoji: "⚽",  name: "Sports",  unlock: 11, stamina: -25, strength: 10, happiness: 7, xp: 1 },
+        { id: "gym",    emoji: "🏋️", name: "Workout", unlock: 14, stamina: -30, strength: 14, happiness: 3, xp: 1 },
+      ];
+
+      const STAGES = [
+        { index: 0, min:  3, max:  5, name: "Toddler", svgId: "stage-0" },
+        { index: 1, min:  6, max:  9, name: "Kid",     svgId: "stage-1" },
+        { index: 2, min: 10, max: 13, name: "Tween",   svgId: "stage-2" },
+        { index: 3, min: 14, max: 18, name: "Teen",    svgId: "stage-3" },
+      ];
+
+      const INITIAL_STATE = Object.freeze({
+        phase: "playing",
+        age: 3,
+        stage: 0,
+        stats: { stamina: 60, strength: 50, happiness: 70 },
+        xp: 0,
+        crying: false,
+        history: { meals: 0, healthyMeals: 0, junkMeals: 0, activities: 0, sleeps: 0, cryEpisodes: 0 },
+      });
+
+      // Mutable game state. Filled in by reset().
+      let state;
+
+      // ---------- Helpers ----------
+
+      function clamp(n, lo, hi) {
+        return Math.max(lo, Math.min(hi, n));
+      }
+
+      function clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      function computeStage(age) {
+        for (const s of STAGES) if (age >= s.min && age <= s.max) return s.index;
+        return STAGES.length - 1;
+      }
+
+      function reset() {
+        state = clone(INITIAL_STATE);
+      }
+
+      // ---------- Init ----------
+
+      reset();
+      // Render and listeners attached in later tasks.
+
+      // Expose for in-browser debugging.
+      window.__game = {
+        get state() { return state; },
+        FOODS, ACTIVITIES, STAGES,
+      };
     })();
   </script>
 </body>
