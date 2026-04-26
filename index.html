@@ -588,6 +588,21 @@
         }
       }
 
+      // ---------- Render: stage + mood ----------
+
+      function applyStageAndMood() {
+        for (const s of STAGES) {
+          const svg = document.getElementById(s.svgId);
+          svg.hidden = s.index !== state.stage;
+        }
+        const activeSvg = document.getElementById(STAGES[state.stage].svgId);
+        const mood = state.crying ? "mood-cry"
+                   : state.stats.stamina < TIRED_THRESHOLD ? "mood-tired"
+                   : "mood-happy";
+        activeSvg.classList.remove("mood-happy", "mood-tired", "mood-cry");
+        activeSvg.classList.add(mood);
+      }
+
       // ---------- Render: top-level ----------
 
       function render() {
@@ -595,6 +610,7 @@
         renderBars();
         renderFoods();
         renderActivities();
+        applyStageAndMood();
         $ageStage.textContent = `Age ${state.age} · Stage: ${STAGES[state.stage].name}`;
         $sleepBtn.classList.toggle("pulse", state.crying);
         $sleepBtn.disabled = state.phase !== "playing";
