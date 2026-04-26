@@ -141,6 +141,15 @@
       min-height: 48px;
     }
     #play-again:active { transform: translateY(1px); }
+@media (max-width: 480px) {
+  header { padding: 6px 10px; }
+  main { padding: 4px; }
+  #word-area { padding: 10px 12px 12px; }
+}
+@supports (height: 100dvh) {
+  body { min-height: 100dvh; height: 100dvh; }
+}
+#word-input::placeholder { color: #9ca3af; }
   </style>
 </head>
 <body>
@@ -195,6 +204,7 @@
     autocapitalize="off"
     spellcheck="false"
     autofocus
+    placeholder="type here"
     aria-label="type the word"
   />
 </section>
@@ -462,8 +472,7 @@
       // Auto-start on load.
       startGame();
 
-      // Expose for manual smoke checks during development. Removed in Task 10.
-      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord, completeSection, tick, endGame };
+
     })();
   </script>
 </body>
