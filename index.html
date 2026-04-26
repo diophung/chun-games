@@ -206,7 +206,42 @@
   <script>
     (function () {
       "use strict";
-      // Game logic added in later tasks.
+
+      const SECTION_COUNT = 13;
+      const WORD_TIMER_PER_CHAR = 1.2;   // seconds per character
+      const GLOBAL_TIMER_START = 90;     // seconds
+      const TYPO_PENALTY = 2;            // seconds deducted from global timer per typo
+
+      const WORDS = [
+        "sedan","coupe","wagon","truck","tires","turbo","motor","drift","rally","viper",
+        "hybrid","engine","piston","brakes","clutch","wheels","bumper","fender","mirror",
+        "carbon","diesel","petrol","garage","tunnel","airbag","camaro","beetle","jaguar",
+        "gasket","gearbox","chassis","exhaust","highway","traffic","license","mileage",
+        "battery","sunroof","ferrari","mustang","porsche","shifter","muffler","antenna",
+        "ignition","radiator","seatbelt","steering"
+      ];
+
+      const PALETTE = [
+        "#e74c3c", "#3498db", "#f1c40f", "#27ae60",
+        "#9b59b6", "#e67e22", "#1abc9c", "#e84393"
+      ];
+
+      const state = {
+        phase: "idle",            // "idle" | "playing" | "ended"
+        endReason: null,          // null | "win" | "timeout"
+        wordQueue: [],
+        sectionQueue: [],
+        currentWord: null,
+        wordTimer: 0,
+        globalTimer: GLOBAL_TIMER_START,
+        typos: 0,
+        correctChars: 0,
+        sectionsCompleted: 0,
+        lastFrameMs: 0,
+      };
+
+      // Expose for manual smoke checks during development. Removed in Task 10.
+      window.__chunga = { WORDS, PALETTE, state };
     })();
   </script>
 </body>
