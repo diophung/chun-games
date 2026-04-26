@@ -330,6 +330,8 @@
 
         loadNextWord();
         renderTimers();
+        state.lastFrameMs = 0;
+        requestAnimationFrame(tick);
         els.input.focus();
       }
 
@@ -345,6 +347,29 @@
         els.input.value = "";
         renderWordDisplay(0);
         renderTimers();
+      }
+
+      function tick(now) {
+        if (state.phase !== "playing") return;
+        const dt = state.lastFrameMs ? (now - state.lastFrameMs) / 1000 : 0;
+        state.lastFrameMs = now;
+
+        state.globalTimer = Math.max(0, state.globalTimer - dt);
+        state.wordTimer   = Math.max(0, state.wordTimer - dt);
+        renderTimers();
+
+        if (state.globalTimer <= 0) {
+          state.phase = "ended";
+          state.endReason = "timeout";
+          // Full end-screen rendering lands in Task 9.
+          return;
+        }
+
+        if (state.wordTimer <= 0 && state.currentWord) {
+          loadNextWord();
+        }
+
+        requestAnimationFrame(tick);
       }
 
       function completeSection() {
@@ -393,7 +418,7 @@
       els.input.addEventListener("input", onInput);
 
       // Expose for manual smoke checks during development. Removed in Task 10.
-      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord, completeSection };
+      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord, completeSection, tick };
     })();
   </script>
 </body>
