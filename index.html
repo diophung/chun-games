@@ -168,6 +168,12 @@
       100% { transform: scale(1.0); }
     }
     .stage-svg.age-up { animation: age-up-bump 600ms ease; transform-origin: 50% 100%; }
+    .stage-svg .ending-athlete,
+    .stage-svg .ending-joyful,
+    .stage-svg .ending-explorer { display: none; }
+    .stage-svg.ending-athlete  .ending-athlete  { display: inline; }
+    .stage-svg.ending-joyful   .ending-joyful   { display: inline; }
+    .stage-svg.ending-explorer .ending-explorer { display: inline; }
   </style>
 </head>
 <body>
@@ -301,6 +307,73 @@
             <ellipse cx="64" cy="74" rx="3" ry="5" fill="#7ec8ff" />
             <ellipse cx="86" cy="74" rx="3" ry="5" fill="#7ec8ff" />
             <path d="M66,82 Q75,76 84,82" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+          </g>
+        </svg>
+        <svg id="stage-3" class="stage-svg mood-happy" viewBox="0 0 160 250" aria-label="teen" hidden>
+          <!-- legs (jeans + sneakers) -->
+          <rect x="60" y="160" width="14" height="45" fill="#2a4380" />
+          <rect x="80" y="160" width="14" height="45" fill="#2a4380" />
+          <rect x="56" y="203" width="24" height="9" rx="3" fill="#fff" stroke="#222" stroke-width="1" />
+          <rect x="76" y="203" width="24" height="9" rx="3" fill="#fff" stroke="#222" stroke-width="1" />
+          <!-- hoodie body -->
+          <rect x="48" y="98" width="56" height="65" rx="10" fill="#5a5a7a" />
+          <!-- hoodie pocket -->
+          <rect x="60" y="130" width="32" height="18" rx="4" fill="#4a4a6a" />
+          <!-- hood -->
+          <path d="M50,98 Q50,80 76,76 Q102,80 102,98 Z" fill="#5a5a7a" />
+          <!-- arms -->
+          <rect x="30" y="102" width="20" height="15" rx="6" fill="#5a5a7a" />
+          <rect x="102" y="102" width="20" height="15" rx="6" fill="#5a5a7a" />
+          <rect x="30" y="115" width="14" height="10" rx="4" fill="#f6c89f" />
+          <rect x="116" y="115" width="14" height="10" rx="4" fill="#f6c89f" />
+          <!-- neck -->
+          <rect x="69" y="85" width="14" height="13" fill="#f6c89f" />
+          <!-- head -->
+          <ellipse cx="76" cy="60" rx="26" ry="30" fill="#f6c89f" />
+          <!-- hair -->
+          <path d="M50,52 Q50,22 76,22 Q102,22 102,52 Q102,40 76,38 Q50,40 50,52 Z" fill="#3a2818" />
+          <!-- headphones -->
+          <path d="M48,58 Q48,30 76,28 Q104,30 104,58" stroke="#222" stroke-width="3" fill="none" />
+          <rect x="44" y="55" width="10" height="18" rx="3" fill="#222" />
+          <rect x="98" y="55" width="10" height="18" rx="3" fill="#222" />
+          <!-- happy face -->
+          <g class="face-happy">
+            <circle cx="68" cy="60" r="2.5" fill="#222" />
+            <circle cx="84" cy="60" r="2.5" fill="#222" />
+            <path d="M68,76 Q76,82 84,76" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+          </g>
+          <g class="face-tired">
+            <path d="M64,60 Q68,64 72,60" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+            <path d="M80,60 Q84,64 88,60" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+            <line x1="68" y1="76" x2="84" y2="76" stroke="#222" stroke-width="2" stroke-linecap="round" />
+          </g>
+          <g class="face-cry">
+            <path d="M64,58 L72,62 M64,62 L72,58" stroke="#222" stroke-width="2" stroke-linecap="round" />
+            <path d="M80,58 L88,62 M80,62 L88,58" stroke="#222" stroke-width="2" stroke-linecap="round" />
+            <ellipse cx="66" cy="74" rx="3" ry="5" fill="#7ec8ff" />
+            <ellipse cx="86" cy="74" rx="3" ry="5" fill="#7ec8ff" />
+            <path d="M68,82 Q76,76 84,82" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- ending overlays (hidden unless ending-* class set on the svg) -->
+          <g class="ending-athlete">
+            <rect x="115" y="120" width="14" height="20" fill="#d4af37" />
+            <rect x="110" y="138" width="24" height="6" fill="#a8862c" />
+            <path d="M115,125 Q110,130 115,135 M129,125 Q134,130 129,135" stroke="#d4af37" stroke-width="3" fill="none" />
+            <text x="118" y="135" font-size="10" font-weight="700" fill="#222">1</text>
+          </g>
+          <g class="ending-joyful">
+            <circle cx="20" cy="120" r="6" fill="#ff7aa2" />
+            <circle cx="14" cy="115" r="3.5" fill="#ffd6e0" />
+            <circle cx="26" cy="115" r="3.5" fill="#ffd6e0" />
+            <circle cx="14" cy="125" r="3.5" fill="#ffd6e0" />
+            <circle cx="26" cy="125" r="3.5" fill="#ffd6e0" />
+            <line x1="20" y1="126" x2="20" y2="160" stroke="#3a8a3a" stroke-width="2" />
+          </g>
+          <g class="ending-explorer">
+            <rect x="42" y="100" width="20" height="32" rx="6" fill="#7a4a2a" />
+            <rect x="46" y="106" width="12" height="6" rx="2" fill="#5a3a20" />
+            <path d="M44,100 Q44,90 52,90 Q60,90 60,100" stroke="#7a4a2a" stroke-width="3" fill="none" />
           </g>
         </svg>
       </div>
