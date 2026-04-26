@@ -144,6 +144,11 @@
       font-weight: 700;
     }
     button.too-tired { opacity: 0.5; }
+    @keyframes sleep-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(85, 145, 255, 0.55); }
+      50%      { box-shadow: 0 0 0 12px rgba(85, 145, 255, 0); }
+    }
+    #sleep-btn.pulse { animation: sleep-pulse 1.4s ease-in-out infinite; }
   </style>
 </head>
 <body>
@@ -331,7 +336,7 @@
       function renderFoods() {
         ensureFoodButtons();
         for (const btn of $foodsGrid.children) {
-          btn.disabled = false; // enabled state refined in Task 10
+          btn.disabled = state.phase !== "playing" || state.crying;
         }
       }
 
@@ -352,11 +357,12 @@
           const emojiSpan = btn.querySelector(".emoji");
           const locked = state.age < a.unlock;
           const tooTired = !locked && state.stats.stamina < Math.abs(a.stamina);
+          const blocked = state.crying || state.phase !== "playing";
           btn.classList.toggle("locked", locked);
           btn.classList.toggle("too-tired", tooTired);
           if (locked) emojiSpan.dataset.lock = `🔒${a.unlock}`;
           else delete emojiSpan.dataset.lock;
-          btn.disabled = locked || tooTired;
+          btn.disabled = locked || tooTired || blocked;
           btn.title = locked ? `Unlocks at age ${a.unlock}` : tooTired ? "Too tired" : "";
         }
       }
@@ -369,6 +375,9 @@
         renderFoods();
         renderActivities();
         $ageStage.textContent = `Age ${state.age} · Stage: ${STAGES[state.stage].name}`;
+        $sleepBtn.classList.toggle("pulse", state.crying);
+        $sleepBtn.disabled = state.phase !== "playing";
+        $statusText.textContent = state.crying ? "Baby is crying. Help them rest." : "";
       }
 
       // ---------- Init ----------
