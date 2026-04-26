@@ -107,6 +107,34 @@
       flex-direction: row;
       gap: 8px;
     }
+    .bar {
+      display: grid;
+      grid-template-columns: 80px 1fr 50px;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #444;
+      font-variant-numeric: tabular-nums;
+    }
+    .bar-track {
+      position: relative;
+      height: 14px;
+      background: #eee;
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 0%;
+      border-radius: 7px;
+      transition: width 220ms ease, background 220ms ease;
+    }
+    .bar-fill.tier-high { background: #4caf50; }
+    .bar-fill.tier-mid  { background: #f1c40f; }
+    .bar-fill.tier-low  { background: #e74c3c; }
+    .bar-fill.tier-xp   { background: #f3a712; }
+    .bar-value { text-align: right; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -202,15 +230,91 @@
         state = clone(INITIAL_STATE);
       }
 
+      // ---------- DOM lookups ----------
+
+      const $ageStage = document.getElementById("age-stage");
+      const $bars = document.getElementById("bars");
+      const $statusText = document.getElementById("status-text");
+      const $foodsGrid = document.getElementById("foods-grid");
+      const $activitiesGrid = document.getElementById("activities-grid");
+      const $sleepBtn = document.getElementById("sleep-btn");
+      const $endScreen = document.getElementById("end-screen");
+
+      // ---------- Render: bars ----------
+
+      function buildBarRow(id, label) {
+        const row = document.createElement("div");
+        row.className = "bar";
+        row.id = `bar-${id}`;
+        const lbl = document.createElement("span");
+        lbl.className = "bar-label";
+        lbl.textContent = label;
+        const track = document.createElement("div");
+        track.className = "bar-track";
+        const fill = document.createElement("div");
+        fill.className = "bar-fill";
+        fill.dataset.role = "fill";
+        track.appendChild(fill);
+        const val = document.createElement("span");
+        val.className = "bar-value";
+        val.dataset.role = "value";
+        row.appendChild(lbl);
+        row.appendChild(track);
+        row.appendChild(val);
+        return row;
+      }
+
+      function ensureBars() {
+        if ($bars.childElementCount > 0) return;
+        $bars.appendChild(buildBarRow("xp", "XP"));
+        $bars.appendChild(buildBarRow("stamina", "Stamina"));
+        $bars.appendChild(buildBarRow("strength", "Strength"));
+        $bars.appendChild(buildBarRow("happiness", "Happiness"));
+      }
+
+      function tierClass(value, isXp) {
+        if (isXp) return "tier-xp";
+        if (value >= 70) return "tier-high";
+        if (value >= 30) return "tier-mid";
+        return "tier-low";
+      }
+
+      function setBar(rowId, fillPct, valueText, isXp) {
+        const row = document.getElementById(`bar-${rowId}`);
+        const fill = row.querySelector('[data-role="fill"]');
+        const val = row.querySelector('[data-role="value"]');
+        fill.style.width = `${clamp(fillPct, 0, 100)}%`;
+        fill.classList.remove("tier-high", "tier-mid", "tier-low", "tier-xp");
+        fill.classList.add(tierClass(fillPct, isXp));
+        val.textContent = valueText;
+      }
+
+      function renderBars() {
+        const { stats, xp } = state;
+        setBar("xp", (xp / XP_PER_AGE) * 100, `${xp} / ${XP_PER_AGE}`, true);
+        setBar("stamina",   stats.stamina,   `${stats.stamina}`,   false);
+        setBar("strength",  stats.strength,  `${stats.strength}`,  false);
+        setBar("happiness", stats.happiness, `${stats.happiness}`, false);
+      }
+
+      // ---------- Render: top-level ----------
+
+      function render() {
+        ensureBars();
+        renderBars();
+        $ageStage.textContent = `Age ${state.age} · Stage: ${STAGES[state.stage].name}`;
+      }
+
       // ---------- Init ----------
 
       reset();
-      // Render and listeners attached in later tasks.
+      render();
+      // Listeners attached in later tasks.
 
-      // Expose for in-browser debugging.
       window.__game = {
         get state() { return state; },
         FOODS, ACTIVITIES, STAGES,
+        render, reset,
       };
     })();
   </script>
