@@ -135,6 +135,15 @@
     .bar-fill.tier-low  { background: #e74c3c; }
     .bar-fill.tier-xp   { background: #f3a712; }
     .bar-value { text-align: right; font-weight: 600; }
+    button.locked .emoji::after {
+      content: attr(data-lock);
+      display: block;
+      font-size: 10px;
+      margin-top: 2px;
+      color: #b00;
+      font-weight: 700;
+    }
+    button.too-tired { opacity: 0.5; }
   </style>
 </head>
 <body>
@@ -326,12 +335,39 @@
         }
       }
 
+      // ---------- Render: activities ----------
+
+      function ensureActivityButtons() {
+        if ($activitiesGrid.childElementCount > 0) return;
+        for (const a of ACTIVITIES) {
+          const btn = buildActionButton(a, "activity");
+          $activitiesGrid.appendChild(btn);
+        }
+      }
+
+      function renderActivities() {
+        ensureActivityButtons();
+        for (const btn of $activitiesGrid.children) {
+          const a = ACTIVITIES.find(x => x.id === btn.dataset.id);
+          const emojiSpan = btn.querySelector(".emoji");
+          const locked = state.age < a.unlock;
+          const tooTired = !locked && state.stats.stamina < Math.abs(a.stamina);
+          btn.classList.toggle("locked", locked);
+          btn.classList.toggle("too-tired", tooTired);
+          if (locked) emojiSpan.dataset.lock = `🔒${a.unlock}`;
+          else delete emojiSpan.dataset.lock;
+          btn.disabled = locked || tooTired;
+          btn.title = locked ? `Unlocks at age ${a.unlock}` : tooTired ? "Too tired" : "";
+        }
+      }
+
       // ---------- Render: top-level ----------
 
       function render() {
         ensureBars();
         renderBars();
         renderFoods();
+        renderActivities();
         $ageStage.textContent = `Age ${state.age} · Stage: ${STAGES[state.stage].name}`;
       }
 
@@ -346,9 +382,20 @@
         feed(btn.dataset.id);
       });
 
+      $activitiesGrid.addEventListener("click", function (e) {
+        const btn = e.target.closest("button[data-kind='activity']");
+        if (!btn || btn.disabled) return;
+        doActivity(btn.dataset.id);
+      });
+
       function feed(foodId) {
         // Wired up in Task 6.
         console.log("feed", foodId);
+      }
+
+      function doActivity(actId) {
+        // Wired up in Task 7.
+        console.log("activity", actId);
       }
 
       window.__game = {
