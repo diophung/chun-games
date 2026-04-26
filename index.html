@@ -298,6 +298,13 @@
         els.wordFill.style.width = pct + "%";
       }
 
+      function flashRed() {
+        els.wordDisplay.classList.remove("flash-red");
+        // Force reflow so the animation can replay if triggered rapidly.
+        void els.wordDisplay.offsetWidth;
+        els.wordDisplay.classList.add("flash-red");
+      }
+
       function resetCityToGrey() {
         const sections = els.citySvg.querySelectorAll("[data-section-id]");
         sections.forEach(s => s.setAttribute("fill", "#aaaaaa"));
@@ -364,10 +371,12 @@
         }
 
         if (validLen < current.length) {
-          // Mistype handling lands in Task 7. For now, just truncate to keep
-          // the input value consistent with what we display.
           els.input.value = current.slice(0, validLen);
+          state.typos += 1;
+          state.globalTimer = Math.max(0, state.globalTimer - TYPO_PENALTY);
+          flashRed();
           renderWordDisplay(validLen);
+          renderTimers();
           return;
         }
 
