@@ -340,8 +340,51 @@
         renderTimers();
       }
 
+      function completeSection() {
+        if (state.sectionQueue.length === 0) return;
+        const id = state.sectionQueue.shift();
+        const el = els.citySvg.querySelector('[data-section-id="' + id + '"]');
+        if (el) el.setAttribute("fill", pickRandom(PALETTE));
+        state.sectionsCompleted += 1;
+      }
+
+      function onInput() {
+        if (state.phase !== "playing" || !state.currentWord) return;
+        const current = els.input.value;
+        const target = state.currentWord;
+
+        // Find longest valid prefix.
+        let validLen = 0;
+        while (
+          validLen < current.length &&
+          validLen < target.length &&
+          current[validLen] === target[validLen]
+        ) {
+          validLen++;
+        }
+
+        if (validLen < current.length) {
+          // Mistype handling lands in Task 7. For now, just truncate to keep
+          // the input value consistent with what we display.
+          els.input.value = current.slice(0, validLen);
+          renderWordDisplay(validLen);
+          return;
+        }
+
+        renderWordDisplay(current.length);
+
+        if (current === target) {
+          state.correctChars += target.length;
+          completeSection();
+          loadNextWord();
+        }
+      }
+
+      // ----- Wire up DOM events -----
+      els.input.addEventListener("input", onInput);
+
       // Expose for manual smoke checks during development. Removed in Task 10.
-      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord };
+      window.__chunga = { WORDS, PALETTE, state, startGame, loadNextWord, completeSection };
     })();
   </script>
 </body>
