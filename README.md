@@ -10,6 +10,7 @@ Every game is a single self-contained HTML file: zero build step, no dependencie
 | --- | --- | --- |
 | [Chun-Ga Typing Game](#chun-ga-typing-game) | [`index.html`](./index.html) | 2D · SVG |
 | [Zoomy Cars](#zoomy-cars) | [`zoomy-car.html`](./zoomy-car.html) | 3D · Three.js |
+| [Child Feeder](#child-feeder) | [`child-feeder.html`](./child-feeder.html) | 2D · SVG |
 
 ---
 
@@ -51,6 +52,23 @@ A cartoon 3D racing game. Drive a googly-eyed car around a looped track, grab sp
 
 ---
 
+### Child Feeder
+
+Raise a cartoon child from age 3 to 18. Pick foods (healthy or junk), pick activities (age-gated), and put the child to sleep when they cry. Healthy choices grow them up faster; junk wears them down over time.
+
+**Controls:** mouse / touch — tap food, activity, or Sleep buttons.
+
+**Highlights**
+- 12 foods and 6 activities, with stat-specific effects
+- 4 hand-drawn SVG visual stages: Toddler, Kid, Tween, Teen
+- XP-bar progression: 6 healthy actions → +1 year
+- Crying state: only Sleep is available until happiness recovers
+- 4 ending variants based on the child's dominant final stat
+
+▶ [Open `child-feeder.html`](./child-feeder.html)
+
+---
+
 ## Built With Agents
 
 This repo is written collaboratively with AI coding agents — designs, specs, and implementation plans live under [`docs/superpowers/`](./docs/superpowers/). The goal is twofold: make playable little things, and learn how far agents can take an idea from "make me a typing game" to a finished, testable feature.
@@ -60,8 +78,9 @@ This repo is written collaboratively with AI coding agents — designs, specs, a
 No build step — just open the HTML files:
 
 ```sh
-open index.html        # typing game
-open zoomy-car.html    # racing game
+open index.html         # typing game
+open zoomy-car.html     # racing game
+open child-feeder.html  # child-feeder game
 ```
 
 Or serve the directory with any static file server, e.g.:
