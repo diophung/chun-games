@@ -116,6 +116,7 @@
       outline-offset: 3px;
     }
     .card-inner {
+      display: block;
       position: relative;
       width: 100%;
       height: 100%;
@@ -166,10 +167,10 @@
       border: 3px solid rgba(255,255,255,0.8);
     }
     .front[data-light="1"] { color: #1f2937; }
-    .emoji {
-      font-size: clamp(32px, 9vw, 54px);
-      line-height: 1;
-      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.18));
+    .picture {
+      width: min(58%, 72px);
+      aspect-ratio: 1;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.18));
     }
     .name {
       font-size: clamp(14px, 3.5vw, 18px);
@@ -296,14 +297,14 @@
       "use strict";
 
       const ITEMS = [
-        { name: "Dragon", emoji: "🐉", color: "#16a34a", prompt: "What treasure does your dragon guard?" },
-        { name: "Rocket", emoji: "🚀", color: "#2563eb", prompt: "Which planet should this rocket visit?" },
-        { name: "Paint", emoji: "🎨", color: "#f97316", prompt: "What magical picture could you paint?" },
-        { name: "Robot", emoji: "🤖", color: "#64748b", prompt: "What helpful job can this robot do?" },
-        { name: "Castle", emoji: "🏰", color: "#9333ea", prompt: "Who lives inside this castle?" },
-        { name: "Music", emoji: "🎵", color: "#db2777", prompt: "Make up a song title for this sound." },
-        { name: "Puzzle", emoji: "🧩", color: "#0d9488", prompt: "What is the next missing piece?" },
-        { name: "Star", emoji: "⭐", color: "#facc15", light: true, prompt: "Make a wish and remember it." },
+        { name: "Dragon", art: "dragon", color: "#16a34a", prompt: "What treasure does your dragon guard?" },
+        { name: "Rocket", art: "rocket", color: "#2563eb", prompt: "Which planet should this rocket visit?" },
+        { name: "Paint", art: "paint", color: "#f97316", prompt: "What magical picture could you paint?" },
+        { name: "Robot", art: "robot", color: "#64748b", prompt: "What helpful job can this robot do?" },
+        { name: "Castle", art: "castle", color: "#9333ea", prompt: "Who lives inside this castle?" },
+        { name: "Music", art: "music", color: "#db2777", prompt: "Make up a song title for this sound." },
+        { name: "Puzzle", art: "puzzle", color: "#0d9488", prompt: "What is the next missing piece?" },
+        { name: "Star", art: "star", color: "#facc15", light: true, prompt: "Make a wish and remember it." },
       ];
 
       const FLIP_BACK_DELAY = 850;
@@ -381,9 +382,7 @@
         front.style.background = item.color;
         if (item.light) front.dataset.light = "1";
 
-        const emoji = document.createElement("span");
-        emoji.className = "emoji";
-        emoji.textContent = item.emoji;
+        const picture = createPicture(item.art);
 
         const name = document.createElement("span");
         name.className = "name";
@@ -397,7 +396,7 @@
         check.className = "check";
         check.textContent = "✓";
 
-        front.appendChild(emoji);
+        front.appendChild(picture);
         front.appendChild(name);
         front.appendChild(hint);
         inner.appendChild(back);
@@ -407,6 +406,76 @@
 
         card.addEventListener("click", () => revealCard(card, item));
         return card;
+      }
+
+      function svgEl(name) {
+        return document.createElementNS("http://www.w3.org/2000/svg", name);
+      }
+
+      function addShape(parent, name, attrs) {
+        const el = svgEl(name);
+        for (const key of Object.keys(attrs)) el.setAttribute(key, attrs[key]);
+        parent.appendChild(el);
+        return el;
+      }
+
+      function createPicture(kind) {
+        const svg = svgEl("svg");
+        svg.classList.add("picture");
+        svg.setAttribute("viewBox", "0 0 100 100");
+        svg.setAttribute("aria-hidden", "true");
+
+        if (kind === "dragon") {
+          addShape(svg, "path", { d: "M20 61 C22 37 45 24 69 35 C83 41 88 55 80 69 C69 86 36 83 20 61 Z", fill: "#bbf7d0", stroke: "#14532d", "stroke-width": "5" });
+          addShape(svg, "path", { d: "M37 36 L29 16 L48 30 Z M62 35 L73 17 L76 41 Z", fill: "#fef08a", stroke: "#14532d", "stroke-width": "4" });
+          addShape(svg, "circle", { cx: "58", cy: "52", r: "6", fill: "#fff" });
+          addShape(svg, "circle", { cx: "60", cy: "52", r: "3", fill: "#111827" });
+          addShape(svg, "path", { d: "M77 58 C91 55 95 47 98 38 C89 42 84 38 77 58 Z", fill: "#fb923c" });
+          addShape(svg, "path", { d: "M26 62 C11 70 12 86 27 81", fill: "none", stroke: "#14532d", "stroke-width": "6", "stroke-linecap": "round" });
+        } else if (kind === "rocket") {
+          addShape(svg, "path", { d: "M50 8 C68 24 74 48 62 74 L38 74 C26 48 32 24 50 8 Z", fill: "#dbeafe", stroke: "#1e3a8a", "stroke-width": "5" });
+          addShape(svg, "circle", { cx: "50", cy: "39", r: "11", fill: "#93c5fd", stroke: "#1e3a8a", "stroke-width": "4" });
+          addShape(svg, "path", { d: "M38 65 L20 84 L35 83 Z M62 65 L80 84 L65 83 Z", fill: "#f43f5e", stroke: "#7f1d1d", "stroke-width": "4" });
+          addShape(svg, "path", { d: "M42 76 L50 96 L58 76 Z", fill: "#facc15", stroke: "#92400e", "stroke-width": "4" });
+        } else if (kind === "paint") {
+          addShape(svg, "path", { d: "M23 30 C39 11 75 17 82 42 C88 62 69 80 48 77 C42 76 42 67 49 66 C55 65 56 58 50 55 C39 50 12 54 23 30 Z", fill: "#fed7aa", stroke: "#7c2d12", "stroke-width": "5" });
+          addShape(svg, "circle", { cx: "41", cy: "33", r: "6", fill: "#ef4444" });
+          addShape(svg, "circle", { cx: "60", cy: "32", r: "6", fill: "#22c55e" });
+          addShape(svg, "circle", { cx: "69", cy: "48", r: "6", fill: "#3b82f6" });
+          addShape(svg, "circle", { cx: "33", cy: "51", r: "6", fill: "#a855f7" });
+          addShape(svg, "path", { d: "M58 73 L88 43", stroke: "#78350f", "stroke-width": "8", "stroke-linecap": "round" });
+          addShape(svg, "path", { d: "M82 38 L92 28", stroke: "#f8fafc", "stroke-width": "10", "stroke-linecap": "round" });
+        } else if (kind === "robot") {
+          addShape(svg, "rect", { x: "24", y: "27", width: "52", height: "46", rx: "10", fill: "#e2e8f0", stroke: "#1f2937", "stroke-width": "5" });
+          addShape(svg, "path", { d: "M50 27 V13", stroke: "#1f2937", "stroke-width": "5", "stroke-linecap": "round" });
+          addShape(svg, "circle", { cx: "50", cy: "11", r: "6", fill: "#facc15", stroke: "#1f2937", "stroke-width": "3" });
+          addShape(svg, "circle", { cx: "40", cy: "47", r: "7", fill: "#38bdf8" });
+          addShape(svg, "circle", { cx: "60", cy: "47", r: "7", fill: "#38bdf8" });
+          addShape(svg, "path", { d: "M39 61 H61", stroke: "#1f2937", "stroke-width": "5", "stroke-linecap": "round" });
+          addShape(svg, "path", { d: "M24 50 H12 M76 50 H88", stroke: "#1f2937", "stroke-width": "6", "stroke-linecap": "round" });
+        } else if (kind === "castle") {
+          addShape(svg, "rect", { x: "22", y: "43", width: "56", height: "38", fill: "#e9d5ff", stroke: "#581c87", "stroke-width": "5" });
+          addShape(svg, "rect", { x: "17", y: "31", width: "18", height: "50", fill: "#c4b5fd", stroke: "#581c87", "stroke-width": "5" });
+          addShape(svg, "rect", { x: "65", y: "31", width: "18", height: "50", fill: "#c4b5fd", stroke: "#581c87", "stroke-width": "5" });
+          addShape(svg, "path", { d: "M17 31 L26 16 L35 31 Z M65 31 L74 16 L83 31 Z M38 43 L50 23 L62 43 Z", fill: "#fef08a", stroke: "#581c87", "stroke-width": "4" });
+          addShape(svg, "path", { d: "M42 81 V66 C42 56 58 56 58 66 V81 Z", fill: "#7c2d12" });
+        } else if (kind === "music") {
+          addShape(svg, "path", { d: "M36 20 V68", stroke: "#fce7f3", "stroke-width": "9", "stroke-linecap": "round" });
+          addShape(svg, "path", { d: "M36 20 L72 13 V61", stroke: "#fce7f3", "stroke-width": "9", "stroke-linecap": "round", "stroke-linejoin": "round", fill: "none" });
+          addShape(svg, "ellipse", { cx: "28", cy: "72", rx: "16", ry: "11", fill: "#fce7f3", transform: "rotate(-20 28 72)" });
+          addShape(svg, "ellipse", { cx: "64", cy: "65", rx: "16", ry: "11", fill: "#fce7f3", transform: "rotate(-20 64 65)" });
+          addShape(svg, "path", { d: "M18 29 C28 16 43 15 53 27", fill: "none", stroke: "#f9a8d4", "stroke-width": "5", "stroke-linecap": "round" });
+        } else if (kind === "puzzle") {
+          addShape(svg, "path", { d: "M22 24 H42 C42 15 58 15 58 24 H78 V44 C88 44 88 60 78 60 V78 H58 C58 68 42 68 42 78 H22 V58 C32 58 32 44 22 44 Z", fill: "#ccfbf1", stroke: "#134e4a", "stroke-width": "5", "stroke-linejoin": "round" });
+          addShape(svg, "path", { d: "M50 25 V77 M23 51 H79", stroke: "#134e4a", "stroke-width": "4", "stroke-linecap": "round" });
+          addShape(svg, "circle", { cx: "38", cy: "38", r: "5", fill: "#0f766e" });
+          addShape(svg, "circle", { cx: "64", cy: "66", r: "5", fill: "#0f766e" });
+        } else {
+          addShape(svg, "path", { d: "M50 10 L61 36 L90 39 L68 58 L75 87 L50 72 L25 87 L32 58 L10 39 L39 36 Z", fill: "#fff7ad", stroke: "#92400e", "stroke-width": "5", "stroke-linejoin": "round" });
+          addShape(svg, "path", { d: "M34 48 L48 57 L69 35", fill: "none", stroke: "#f97316", "stroke-width": "6", "stroke-linecap": "round", "stroke-linejoin": "round" });
+        }
+
+        return svg;
       }
 
       function startGame() {
