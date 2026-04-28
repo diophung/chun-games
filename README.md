@@ -4,20 +4,24 @@ A small playground of browser games built **to learn coding and have fun — usi
 
 Every game is a single self-contained HTML file: zero build step, no dependencies to install. Open in any modern browser and play.
 
-The home page ([`index.html`](./index.html)) is a catalog with thumbnails linking to each game.
+The home page ([`index.html`](./index.html)) is a catalog with thumbnails linking to each game:
+
+![Game catalog home page](docs/screenshots/catalog.png)
 
 ## Games
 
-| Game | File | Style |
-| --- | --- | --- |
-| [Type2Build](#type2build) | [`games/type2build.html`](./games/type2build.html) | 2D · SVG |
-| [Zoomy Cars](#zoomy-cars) | [`games/zoomy-car.html`](./games/zoomy-car.html) | 3D · Three.js |
-| [Child Feeder](#child-feeder) | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
-| [Car Memory](#car-memory) | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
+| Game | Preview | File | Style |
+| --- | --- | --- | --- |
+| [Type2Build](#type2build) | <img src="docs/screenshots/type2build.png" width="240" alt="Type2Build preview" /> | [`games/type2build.html`](./games/type2build.html) | 2D · SVG |
+| [Zoomy Cars](#zoomy-cars) | <img src="docs/screenshots/zoomy-car.png" width="240" alt="Zoomy Cars preview" /> | [`games/zoomy-car.html`](./games/zoomy-car.html) | 3D · Three.js |
+| [Child Feeder](#child-feeder) | <img src="docs/screenshots/child-feeder.png" width="240" alt="Child Feeder preview" /> | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
+| [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
 
 ---
 
 ### Type2Build
+
+![Type2Build screenshot](docs/screenshots/type2build.png)
 
 Type car-themed words to color in a grey city skyline. Each word you finish lights up a random section in a random color. Race the 90-second clock to fill all 13 sections of the city — but watch out: every typo costs 2 seconds and rolls your input back to the last correct letter.
 
@@ -35,6 +39,8 @@ Type car-themed words to color in a grey city skyline. Each word you finish ligh
 ---
 
 ### Zoomy Cars
+
+![Zoomy Cars splash screen](docs/screenshots/zoomy-car.png)
 
 A cartoon 3D racing game. Drive a googly-eyed car around a looped track, grab spinning coins, hit boost pads for speed bursts, and try not to crash into cones, AI racers, or trees. Built with Three.js loaded from a CDN.
 
@@ -57,13 +63,17 @@ A cartoon 3D racing game. Drive a googly-eyed car around a looped track, grab sp
 
 ### Child Feeder
 
-Raise a cartoon child from age 3 to 18. Pick foods (healthy or junk), pick activities (age-gated), and put the child to sleep when they cry. Healthy choices grow them up faster; junk wears them down over time.
+![Child Feeder — randomized character at the Baby stage](docs/screenshots/child-feeder.png)
+
+Raise a cartoon child from age 1 to 18. Pick foods (healthy or junk), pick activities (age-gated), and put the child to sleep when they cry. Healthy choices grow them up faster; junk wears them down over time.
 
 **Controls:** mouse / touch — tap food, activity, or Sleep buttons.
 
 **Highlights**
 - 12 foods and 6 activities, with stat-specific effects
-- 4 hand-drawn SVG visual stages: Toddler, Kid, Tween, Teen
+- 4 hand-drawn SVG stages: **Baby** (1–3), **Kid** (4–8), **Boy/Girl** (9–12), **Teen** (13–18)
+- Per-game randomization: gender (boy/girl), outfit color (5 themes), hair color (4 shades) — character stays consistent across all 4 stages
+- Each new age adds a visual detail: pacifier, booties, cap, backpack, glasses, scarf, watch, necklace, phone, sunglasses, chain, and a 🎓 graduation cap at 18
 - XP-bar progression: 6 healthy actions → +1 year
 - Crying state: only Sleep is available until happiness recovers
 - 4 ending variants based on the child's dominant final stat
@@ -73,6 +83,8 @@ Raise a cartoon child from age 3 to 18. Pick foods (healthy or junk), pick activ
 ---
 
 ### Car Memory
+
+![Car Memory — 16 face-down cards in a 4×4 grid](docs/screenshots/car-memory.png)
 
 A classic memory match game with 8 unique car-brand pairs (16 cards). Tap a card to flip it; flip a second card and if the brands match, both lock with a green ✓ in the top-right corner. If not, they flip back. Find all 8 pairs to win.
 

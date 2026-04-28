@@ -154,6 +154,9 @@
       height: auto;
       display: block;
     }
+    #hero-stage svg[hidden] {
+      display: none;
+    }
     .stage-svg .face-happy,
     .stage-svg .face-tired,
     .stage-svg .face-cry {
@@ -162,6 +165,21 @@
     .stage-svg.mood-happy .face-happy { display: inline; }
     .stage-svg.mood-tired .face-tired { display: inline; }
     .stage-svg.mood-cry   .face-cry   { display: inline; }
+
+    /* Per-game character theming via CSS variables */
+    .stage-svg .shirt { fill: var(--outfit-shirt, #ffd56b); }
+    .stage-svg .pants { fill: var(--outfit-pants, #3a6ea5); }
+    .stage-svg .hair  { fill: var(--hair-color, #5a3b25); }
+    .stage-svg.outfit-red    { --outfit-shirt: #e74c3c; --outfit-pants: #6e3a2a; }
+    .stage-svg.outfit-blue   { --outfit-shirt: #4a90d9; --outfit-pants: #1f3a5f; }
+    .stage-svg.outfit-yellow { --outfit-shirt: #f1c40f; --outfit-pants: #6e4a2a; }
+    .stage-svg.outfit-green  { --outfit-shirt: #4caf50; --outfit-pants: #2d5e2f; }
+    .stage-svg.outfit-purple { --outfit-shirt: #9b59b6; --outfit-pants: #2c1f3d; }
+    .stage-svg.hair-brown    { --hair-color: #5a3b25; }
+    .stage-svg.hair-black    { --hair-color: #1a1a1a; }
+    .stage-svg.hair-blonde   { --hair-color: #d4a55a; }
+    .stage-svg.hair-auburn   { --hair-color: #a0522d; }
+    .stage-svg.gender-male .girl-only { display: none; }
     @keyframes age-up-bump {
       0% { transform: scale(1.0); }
       35% { transform: scale(1.18); }
@@ -226,21 +244,27 @@
     <div id="hero">
       <div id="hero-stage">
         <div id="age-up-floater">+1</div>
-        <svg id="stage-0" class="stage-svg mood-happy" viewBox="0 0 150 200" aria-label="toddler">
+        <svg id="stage-0" class="stage-svg mood-happy" viewBox="0 0 150 200" aria-label="baby">
           <!-- legs -->
           <rect x="60" y="150" width="12" height="30" rx="6" fill="#f6c89f" />
           <rect x="78" y="150" width="12" height="30" rx="6" fill="#f6c89f" />
           <!-- diaper -->
           <rect x="50" y="120" width="50" height="40" rx="14" fill="#ffffff" stroke="#bcbccd" stroke-width="2" />
-          <!-- body -->
-          <rect x="55" y="90" width="40" height="40" rx="14" fill="#ffd6e0" />
+          <!-- body (onesie) -->
+          <rect class="shirt" x="55" y="90" width="40" height="40" rx="14" fill="#ffd6e0" />
           <!-- arms -->
           <rect x="35" y="95" width="22" height="10" rx="5" fill="#f6c89f" />
           <rect x="93" y="95" width="22" height="10" rx="5" fill="#f6c89f" />
           <!-- head -->
           <circle cx="75" cy="60" r="32" fill="#f6c89f" />
           <!-- hair tuft -->
-          <path d="M58,32 Q75,22 92,32 Q88,40 75,38 Q62,40 58,32 Z" fill="#5a3b25" />
+          <path class="hair" d="M58,32 Q75,22 92,32 Q88,40 75,38 Q62,40 58,32 Z" fill="#5a3b25" />
+          <!-- girl-only: pink hair bow on top -->
+          <g class="girl-only" transform="translate(75, 28)">
+            <ellipse cx="-7" cy="-3" rx="5" ry="3.5" fill="#ff7aa2" />
+            <ellipse cx="7" cy="-3" rx="5" ry="3.5" fill="#ff7aa2" />
+            <circle cx="0" cy="-3" r="2.5" fill="#d63072" />
+          </g>
           <!-- cheeks -->
           <circle cx="58" cy="68" r="4" fill="#f7a8a8" opacity="0.7" />
           <circle cx="92" cy="68" r="4" fill="#f7a8a8" opacity="0.7" />
@@ -273,6 +297,16 @@
             <circle cx="12" cy="13" r="1.5" fill="#222" />
             <path d="M8,17 Q10,19 12,17" stroke="#222" stroke-width="1" fill="none" />
           </g>
+          <!-- age 2: pacifier -->
+          <g data-min-age="2">
+            <circle cx="75" cy="86" r="3.5" fill="#7ec8ff" stroke="#333" stroke-width="0.6"/>
+            <ellipse cx="75" cy="80" rx="2" ry="1.6" fill="#ffd6e0" />
+          </g>
+          <!-- age 3: pink booties -->
+          <g data-min-age="3">
+            <rect x="58" y="174" width="16" height="8" rx="3" fill="#ff7aa2" stroke="#333" stroke-width="0.5"/>
+            <rect x="76" y="174" width="16" height="8" rx="3" fill="#ff7aa2" stroke="#333" stroke-width="0.5"/>
+          </g>
         </svg>
         <svg id="stage-1" class="stage-svg mood-happy" viewBox="0 0 150 220" aria-label="kid" hidden>
           <!-- legs (shorts -> bare leg -> shoes) -->
@@ -281,9 +315,9 @@
           <rect x="56" y="178" width="20" height="10" rx="3" fill="#3a3a3a" />
           <rect x="74" y="178" width="20" height="10" rx="3" fill="#3a3a3a" />
           <!-- shorts -->
-          <rect x="55" y="135" width="40" height="28" rx="6" fill="#3a6ea5" />
+          <rect class="pants" x="55" y="135" width="40" height="28" rx="6" fill="#3a6ea5" />
           <!-- t-shirt -->
-          <rect x="50" y="95" width="50" height="45" rx="8" fill="#ffd56b" />
+          <rect class="shirt" x="50" y="95" width="50" height="45" rx="8" fill="#ffd56b" />
           <!-- arms -->
           <rect x="32" y="100" width="22" height="12" rx="6" fill="#f6c89f" />
           <rect x="96" y="100" width="22" height="12" rx="6" fill="#f6c89f" />
@@ -292,7 +326,33 @@
           <!-- head -->
           <circle cx="75" cy="60" r="28" fill="#f6c89f" />
           <!-- hair (full cap) -->
-          <path d="M48,55 Q50,30 75,28 Q100,30 102,55 Q98,40 75,40 Q52,40 48,55 Z" fill="#5a3b25" />
+          <path class="hair" d="M48,55 Q50,30 75,28 Q100,30 102,55 Q98,40 75,40 Q52,40 48,55 Z" fill="#5a3b25" />
+          <!-- girl-only: pink bow on side of head -->
+          <g class="girl-only">
+            <ellipse cx="100" cy="42" rx="5" ry="3.5" fill="#ff7aa2" transform="rotate(-20, 100, 42)" />
+            <ellipse cx="100" cy="42" rx="5" ry="3.5" fill="#ff7aa2" transform="rotate(20, 100, 42)" />
+            <circle cx="100" cy="42" r="2" fill="#d63072" />
+          </g>
+          <!-- age 5: red cap -->
+          <g data-min-age="5">
+            <ellipse cx="75" cy="34" rx="26" ry="10" fill="#e74c3c" />
+            <rect x="60" y="38" width="32" height="5" rx="2" fill="#a83a30" />
+          </g>
+          <!-- age 6: backpack strap across chest -->
+          <g data-min-age="6">
+            <path d="M52,100 L 96,138" stroke="#9b59b6" stroke-width="5" fill="none" stroke-linecap="round" />
+          </g>
+          <!-- age 7: glasses -->
+          <g data-min-age="7">
+            <circle cx="66" cy="58" r="6" stroke="#222" stroke-width="1.5" fill="none" />
+            <circle cx="84" cy="58" r="6" stroke="#222" stroke-width="1.5" fill="none" />
+            <line x1="72" y1="58" x2="78" y2="58" stroke="#222" stroke-width="1.5" />
+          </g>
+          <!-- age 8: blue scarf -->
+          <g data-min-age="8">
+            <rect x="58" y="86" width="34" height="8" rx="2" fill="#3498db" />
+            <rect x="76" y="92" width="6" height="14" fill="#3498db" />
+          </g>
           <!-- cheeks -->
           <circle cx="58" cy="66" r="3" fill="#f7a8a8" opacity="0.7" />
           <circle cx="92" cy="66" r="3" fill="#f7a8a8" opacity="0.7" />
@@ -315,14 +375,14 @@
             <path d="M66,80 Q75,74 84,80" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round" />
           </g>
         </svg>
-        <svg id="stage-2" class="stage-svg mood-happy" viewBox="0 0 150 240" aria-label="tween" hidden>
+        <svg id="stage-2" class="stage-svg mood-happy" viewBox="0 0 150 240" aria-label="boy or girl" hidden>
           <!-- legs (jeans + sneakers) -->
-          <rect x="58" y="155" width="14" height="40" fill="#3556a4" />
-          <rect x="78" y="155" width="14" height="40" fill="#3556a4" />
+          <rect class="pants" x="58" y="155" width="14" height="40" fill="#3556a4" />
+          <rect class="pants" x="78" y="155" width="14" height="40" fill="#3556a4" />
           <rect x="54" y="193" width="22" height="8" rx="3" fill="#222" />
           <rect x="74" y="193" width="22" height="8" rx="3" fill="#222" />
           <!-- t-shirt -->
-          <rect x="50" y="98" width="50" height="60" rx="8" fill="#aac7ff" />
+          <rect class="shirt" x="50" y="98" width="50" height="60" rx="8" fill="#aac7ff" />
           <!-- arms -->
           <rect x="32" y="102" width="22" height="14" rx="6" fill="#f6c89f" />
           <rect x="96" y="102" width="22" height="14" rx="6" fill="#f6c89f" />
@@ -331,7 +391,27 @@
           <!-- head -->
           <ellipse cx="75" cy="60" rx="26" ry="30" fill="#f6c89f" />
           <!-- longer hair -->
-          <path d="M48,52 Q48,22 75,22 Q102,22 102,52 Q102,68 96,72 Q98,46 75,42 Q52,46 54,72 Q48,68 48,52 Z" fill="#5a3b25" />
+          <path class="hair" d="M48,52 Q48,22 75,22 Q102,22 102,52 Q102,68 96,72 Q98,46 75,42 Q52,46 54,72 Q48,68 48,52 Z" fill="#5a3b25" />
+          <!-- girl-only: pink hair clip -->
+          <g class="girl-only">
+            <ellipse cx="55" cy="36" rx="6" ry="3" fill="#ff7aa2" transform="rotate(-25, 55, 36)" />
+            <circle cx="50" cy="34" r="1.6" fill="#d63072" />
+          </g>
+          <!-- age 10: watch on right wrist -->
+          <g data-min-age="10">
+            <rect x="106" y="105" width="10" height="7" rx="1" fill="#222" />
+            <rect x="108" y="107" width="6" height="3" fill="#7ec8ff" />
+          </g>
+          <!-- age 11: gold necklace -->
+          <g data-min-age="11">
+            <path d="M64,98 Q75,110 86,98" stroke="#d4af37" stroke-width="1.5" fill="none" />
+            <circle cx="75" cy="108" r="2.5" fill="#d4af37" />
+          </g>
+          <!-- age 12: green cap -->
+          <g data-min-age="12">
+            <ellipse cx="75" cy="32" rx="28" ry="11" fill="#27ae60" />
+            <rect x="58" y="36" width="34" height="5" rx="2" fill="#1e7e34" />
+          </g>
           <!-- cheeks (subtle) -->
           <circle cx="58" cy="68" r="2" fill="#f7a8a8" opacity="0.5" />
           <circle cx="92" cy="68" r="2" fill="#f7a8a8" opacity="0.5" />
@@ -356,19 +436,19 @@
         </svg>
         <svg id="stage-3" class="stage-svg mood-happy" viewBox="0 0 160 250" aria-label="teen" hidden>
           <!-- legs (jeans + sneakers) -->
-          <rect x="60" y="160" width="14" height="45" fill="#2a4380" />
-          <rect x="80" y="160" width="14" height="45" fill="#2a4380" />
+          <rect class="pants" x="60" y="160" width="14" height="45" fill="#2a4380" />
+          <rect class="pants" x="80" y="160" width="14" height="45" fill="#2a4380" />
           <rect x="56" y="203" width="24" height="9" rx="3" fill="#fff" stroke="#222" stroke-width="1" />
           <rect x="76" y="203" width="24" height="9" rx="3" fill="#fff" stroke="#222" stroke-width="1" />
           <!-- hoodie body -->
-          <rect x="48" y="98" width="56" height="65" rx="10" fill="#5a5a7a" />
+          <rect class="shirt" x="48" y="98" width="56" height="65" rx="10" fill="#5a5a7a" />
           <!-- hoodie pocket -->
           <rect x="60" y="130" width="32" height="18" rx="4" fill="#4a4a6a" />
           <!-- hood -->
-          <path d="M50,98 Q50,80 76,76 Q102,80 102,98 Z" fill="#5a5a7a" />
+          <path class="shirt" d="M50,98 Q50,80 76,76 Q102,80 102,98 Z" fill="#5a5a7a" />
           <!-- arms -->
-          <rect x="30" y="102" width="20" height="15" rx="6" fill="#5a5a7a" />
-          <rect x="102" y="102" width="20" height="15" rx="6" fill="#5a5a7a" />
+          <rect class="shirt" x="30" y="102" width="20" height="15" rx="6" fill="#5a5a7a" />
+          <rect class="shirt" x="102" y="102" width="20" height="15" rx="6" fill="#5a5a7a" />
           <rect x="30" y="115" width="14" height="10" rx="4" fill="#f6c89f" />
           <rect x="116" y="115" width="14" height="10" rx="4" fill="#f6c89f" />
           <!-- neck -->
@@ -376,7 +456,12 @@
           <!-- head -->
           <ellipse cx="76" cy="60" rx="26" ry="30" fill="#f6c89f" />
           <!-- hair -->
-          <path d="M50,52 Q50,22 76,22 Q102,22 102,52 Q102,40 76,38 Q50,40 50,52 Z" fill="#3a2818" />
+          <path class="hair" d="M50,52 Q50,22 76,22 Q102,22 102,52 Q102,40 76,38 Q50,40 50,52 Z" fill="#3a2818" />
+          <!-- girl-only: longer hair on the sides (behind hoodie) -->
+          <g class="girl-only">
+            <path class="hair" d="M50,52 Q44,82 52,108 L 60,108 Q56,80 60,52 Z" fill="#3a2818" />
+            <path class="hair" d="M102,52 Q108,82 100,108 L 92,108 Q96,80 92,52 Z" fill="#3a2818" />
+          </g>
           <!-- headphones -->
           <path d="M48,58 Q48,30 76,28 Q104,30 104,58" stroke="#222" stroke-width="3" fill="none" />
           <rect x="44" y="55" width="10" height="18" rx="3" fill="#222" />
@@ -398,6 +483,34 @@
             <ellipse cx="66" cy="74" rx="3" ry="5" fill="#7ec8ff" />
             <ellipse cx="86" cy="74" rx="3" ry="5" fill="#7ec8ff" />
             <path d="M68,82 Q76,76 84,82" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- age 14: phone in right hand -->
+          <g data-min-age="14">
+            <rect x="118" y="116" width="7" height="11" rx="1" fill="#222" />
+            <rect x="119" y="118" width="5" height="7" fill="#7ec8ff" />
+          </g>
+          <!-- age 15: sunglasses -->
+          <g data-min-age="15">
+            <rect x="60" y="55" width="32" height="7" rx="2" fill="#1a1a1a" />
+            <line x1="76" y1="58" x2="76" y2="62" stroke="#1a1a1a" stroke-width="0.5" />
+          </g>
+          <!-- age 16: red scarf around neck -->
+          <g data-min-age="16">
+            <rect x="55" y="100" width="42" height="8" rx="2" fill="#e74c3c" />
+            <rect x="74" y="106" width="6" height="14" fill="#e74c3c" />
+          </g>
+          <!-- age 17: gold chain -->
+          <g data-min-age="17">
+            <path d="M64,108 Q76,120 88,108" stroke="#d4af37" stroke-width="1.5" fill="none" />
+            <circle cx="76" cy="118" r="2.6" fill="#d4af37" />
+          </g>
+          <!-- age 18: graduation cap -->
+          <g data-min-age="18">
+            <rect x="55" y="22" width="42" height="6" fill="#1a1a1a" />
+            <rect x="48" y="20" width="56" height="4" fill="#1a1a1a" />
+            <line x1="76" y1="22" x2="86" y2="38" stroke="#d4af37" stroke-width="1.5" />
+            <circle cx="86" cy="40" r="2.5" fill="#d4af37" />
           </g>
 
           <!-- ending overlays (hidden unless ending-* class set on the svg) -->
@@ -472,15 +585,19 @@
       ];
 
       const STAGES = [
-        { index: 0, min:  3, max:  5, name: "Toddler", svgId: "stage-0" },
-        { index: 1, min:  6, max:  9, name: "Kid",     svgId: "stage-1" },
-        { index: 2, min: 10, max: 13, name: "Tween",   svgId: "stage-2" },
-        { index: 3, min: 14, max: 18, name: "Teen",    svgId: "stage-3" },
+        { index: 0, min:  1, max:  3, name: "Baby", svgId: "stage-0" },
+        { index: 1, min:  4, max:  8, name: "Kid",  svgId: "stage-1" },
+        { index: 2, min:  9, max: 12, names: { male: "Boy", female: "Girl" }, svgId: "stage-2" },
+        { index: 3, min: 13, max: 18, name: "Teen", svgId: "stage-3" },
       ];
+
+      const GENDERS = ["male", "female"];
+      const OUTFITS = ["red", "blue", "yellow", "green", "purple"];
+      const HAIR_COLORS = ["brown", "black", "blonde", "auburn"];
 
       const INITIAL_STATE = Object.freeze({
         phase: "playing",
-        age: 3,
+        age: 1,
         stage: 0,
         stats: { stamina: 60, strength: 50, happiness: 70 },
         xp: 0,
@@ -501,13 +618,30 @@
         return JSON.parse(JSON.stringify(obj));
       }
 
+      function pickRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function randomCharacter() {
+        return {
+          gender: pickRandom(GENDERS),
+          outfit: pickRandom(OUTFITS),
+          hairColor: pickRandom(HAIR_COLORS),
+        };
+      }
+
       function computeStage(age) {
         for (const s of STAGES) if (age >= s.min && age <= s.max) return s.index;
         return STAGES.length - 1;
       }
 
+      function stageName(stage, gender) {
+        return stage.names ? stage.names[gender] : stage.name;
+      }
+
       function reset() {
         state = clone(INITIAL_STATE);
+        state.character = randomCharacter();
       }
 
       // ---------- DOM lookups ----------
@@ -635,10 +769,22 @@
 
       // ---------- Render: stage + mood ----------
 
+      function setCharacterClasses(svg) {
+        const c = state.character;
+        const stale = [];
+        svg.classList.forEach(cls => {
+          if (cls.startsWith("gender-") || cls.startsWith("outfit-") || cls.startsWith("hair-")) stale.push(cls);
+        });
+        for (const cls of stale) svg.classList.remove(cls);
+        svg.classList.add(`gender-${c.gender}`, `outfit-${c.outfit}`, `hair-${c.hairColor}`);
+      }
+
       function applyStageAndMood() {
         for (const s of STAGES) {
           const svg = document.getElementById(s.svgId);
-          svg.hidden = s.index !== state.stage;
+          if (s.index === state.stage) svg.removeAttribute("hidden");
+          else svg.setAttribute("hidden", "");
+          setCharacterClasses(svg);
         }
         const activeSvg = document.getElementById(STAGES[state.stage].svgId);
         const mood = state.crying ? "mood-cry"
@@ -646,6 +792,15 @@
                    : "mood-happy";
         activeSvg.classList.remove("mood-happy", "mood-tired", "mood-cry");
         activeSvg.classList.add(mood);
+        applyAgeAccessories();
+      }
+
+      function applyAgeAccessories() {
+        const accessories = document.querySelectorAll(".stage-svg [data-min-age]");
+        for (const acc of accessories) {
+          const minAge = parseInt(acc.dataset.minAge, 10);
+          acc.style.display = state.age >= minAge ? "" : "none";
+        }
       }
 
       function queueAgeUpAnimation() {
@@ -701,7 +856,7 @@
         $endScreen.appendChild(wrap);
 
         const subtitle = document.createElement("p");
-        subtitle.textContent = "You raised them from 3 to 18!";
+        subtitle.textContent = "You raised them from 1 to 18!";
         $endScreen.appendChild(subtitle);
 
         const ul = document.createElement("ul");
@@ -741,7 +896,7 @@
         renderFoods();
         renderActivities();
         applyStageAndMood();
-        $ageStage.textContent = `Age ${state.age} · Stage: ${STAGES[state.stage].name}`;
+        $ageStage.textContent = `Age ${state.age} · Stage: ${stageName(STAGES[state.stage], state.character.gender)}`;
         $sleepBtn.classList.toggle("pulse", state.crying);
         $sleepBtn.disabled = state.phase !== "playing";
         $statusText.textContent = state.crying ? "Baby is crying. Help them rest." : "";
