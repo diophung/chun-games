@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Guess Who Detective</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at 20% 8%, rgba(255,255,255,0.72), transparent 22%),
+        linear-gradient(160deg, #fef3c7 0%, #fed7aa 42%, #fecdd3 100%);
+      color: #3f2f24;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+    #app {
+      width: 100%;
+      max-width: 960px;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+    header, .panel, #board-wrap {
+      background: rgba(255,255,255,0.78);
+      border: 2px solid rgba(255,255,255,0.85);
+      border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(127,29,29,0.12);
+    }
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 14px;
+      font-variant-numeric: tabular-nums;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(23px, 6vw, 36px);
+      color: #9a3412;
+      line-height: 1;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.8);
+    }
+    .stats, nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #fff7ed;
+      border: 2px solid #fdba74;
+      color: #7c2d12;
+      font-size: clamp(13px, 3vw, 15px);
+      font-weight: 800;
+    }
+    .stat strong { margin-left: 4px; color: #db2777; }
+    nav a, button.linky {
+      color: #9a3412;
+      font: inherit;
+      font-weight: 900;
+      text-decoration: none;
+      border: none;
+      border-bottom: 2px dashed rgba(154,52,18,0.35);
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
+    .panel {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel h2 {
+      margin: 0;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9a3412;
+    }
+    #clue {
+      margin: 0;
+      min-height: 4.2em;
+      padding: 12px;
+      border-radius: 16px;
+      background: #fff7ed;
+      border: 2px solid #fed7aa;
+      font-size: clamp(15px, 3.4vw, 17px);
+      font-weight: 800;
+      line-height: 1.35;
+      color: #5f3f2d;
+    }
+    #questions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .question {
+      min-height: 44px;
+      border: 2px solid #fdba74;
+      border-radius: 13px;
+      background: #fff;
+      color: #7c2d12;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
+      padding: 9px 10px;
+      transition: transform 90ms ease, background 120ms ease, opacity 120ms ease;
+    }
+    .question:hover:not(:disabled) { background: #ffedd5; transform: translateY(-1px); }
+    .question:active:not(:disabled) { transform: translateY(0); }
+    .question:disabled { cursor: default; opacity: 0.46; }
+    #board-wrap { padding: 14px; }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .person {
+      position: relative;
+      border: 3px solid #fdba74;
+      border-radius: 18px;
+      min-height: 142px;
+      padding: 8px 6px 10px;
+      background: #fff;
+      color: #3f2f24;
+      font: inherit;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: 0 7px 16px rgba(127,29,29,0.1);
+      transition: transform 120ms ease, opacity 160ms ease, filter 160ms ease;
+    }
+    .person:hover:not(:disabled) { transform: translateY(-2px); }
+    .person:focus-visible { outline: 4px solid #db2777; outline-offset: 3px; }
+    .person.eliminated {
+      opacity: 0.34;
+      filter: grayscale(0.95);
+      cursor: default;
+    }
+    .person.eliminated::after {
+      content: "";
+      position: absolute;
+      left: 7px;
+      right: 7px;
+      top: 50%;
+      height: 5px;
+      border-radius: 99px;
+      background: #dc2626;
+      transform: rotate(-16deg);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.85);
+    }
+    .portrait {
+      display: grid;
+      place-items: center;
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 6px;
+      border-radius: 50%;
+      background: var(--shirt-color);
+      border: 4px solid rgba(255,255,255,0.82);
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.12);
+      font-size: 38px;
+    }
+    .name {
+      display: block;
+      font-weight: 1000;
+      font-size: clamp(14px, 3vw, 17px);
+      color: #7c2d12;
+    }
+    .traits {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 3px;
+      min-height: 22px;
+      margin-top: 5px;
+    }
+    .trait {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #ffedd5;
+      font-size: 13px;
+    }
+    .shirt-label {
+      margin-top: 4px;
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      color: #7c2d12;
+      opacity: 0.75;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(67,20,7,0.9);
+      color: #fff;
+      text-align: center;
+    }
+    #end-screen[hidden] { display: none !important; }
+    .end-card {
+      width: min(520px, 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #fff7ed, #fed7aa);
+      color: #7c2d12;
+      box-shadow: 0 18px 42px rgba(0,0,0,0.3);
+    }
+    .end-card h2 {
+      margin: 0;
+      font-size: clamp(30px, 8vw, 48px);
+    }
+    #end-details {
+      margin: 0;
+      font-size: clamp(16px, 4vw, 21px);
+      font-weight: 800;
+      line-height: 1.35;
+    }
+    .primary {
+      min-height: 48px;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 26px;
+      background: #db2777;
+      color: #fff;
+      font: inherit;
+      font-size: clamp(17px, 4vw, 21px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    }
+    @media (max-width: 820px) {
+      #app { grid-template-columns: 1fr; }
+      #questions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 540px) {
+      body { padding: 8px; }
+      header { justify-content: center; text-align: center; }
+      #questions { grid-template-columns: 1fr; }
+      #board { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+      .person { min-height: 122px; padding: 7px 4px; border-radius: 14px; }
+      .portrait { width: 56px; height: 56px; font-size: 31px; }
+      .trait { width: 19px; height: 19px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <header>
+      <h1>🕵️ Guess Who Detective</h1>
+      <div class="stats" aria-label="game stats">
+        <div class="stat">Questions<strong id="questions-count">0</strong></div>
+        <div class="stat">Possible<strong id="possible-count">12</strong></div>
+        <div class="stat">Guesses<strong id="guesses-count">0</strong></div>
+      </div>
+      <nav aria-label="game navigation">
+        <a href="../index.html">Home</a>
+        <button class="linky" id="restart-btn" type="button">New Mystery</button>
+      </nav>
+    </header>
+
+    <aside class="panel" aria-label="detective questions">
+      <h2>Ask A Yes Or No Question</h2>
+      <p id="clue">I picked one mystery friend. Ask smart questions, remove suspects, then tap the friend you think it is.</p>
+      <div id="questions"></div>
+    </aside>
+
+    <section id="board-wrap" aria-label="suspect board">
+      <div id="board"></div>
+    </section>
+  </main>
+
+  <section id="end-screen" hidden>
+    <div class="end-card">
+      <h2>🎉 Case Solved!</h2>
+      <p id="end-details"></p>
+      <button class="primary" id="play-again" type="button">Play Again</button>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const SHIRT_COLORS = {
+        blue: "#60a5fa",
+        red: "#fb7185",
+        green: "#86efac",
+        yellow: "#fde047",
+        purple: "#c084fc",
+        orange: "#fdba74",
+      };
+
+      const PEOPLE = [
+        { id: "milo", name: "Milo", face: "🧒", hair: "brown", shirt: "blue", attrs: { hat: true, glasses: false, pet: false, cape: false, stripes: true, scarf: false, star: false } },
+        { id: "lina", name: "Lina", face: "👧", hair: "black", shirt: "red", attrs: { hat: false, glasses: true, pet: false, cape: false, stripes: false, scarf: true, star: false } },
+        { id: "zara", name: "Zara", face: "👧", hair: "blond", shirt: "green", attrs: { hat: false, glasses: false, pet: true, cape: false, stripes: false, scarf: false, star: true } },
+        { id: "ben", name: "Ben", face: "🧒", hair: "black", shirt: "yellow", attrs: { hat: true, glasses: true, pet: false, cape: false, stripes: false, scarf: false, star: false } },
+        { id: "nora", name: "Nora", face: "👧", hair: "brown", shirt: "purple", attrs: { hat: false, glasses: false, pet: false, cape: true, stripes: true, scarf: false, star: false } },
+        { id: "otto", name: "Otto", face: "🧒", hair: "blond", shirt: "orange", attrs: { hat: false, glasses: true, pet: true, cape: false, stripes: false, scarf: false, star: false } },
+        { id: "aria", name: "Aria", face: "👧", hair: "black", shirt: "blue", attrs: { hat: true, glasses: false, pet: false, cape: true, stripes: false, scarf: false, star: true } },
+        { id: "kai", name: "Kai", face: "🧒", hair: "brown", shirt: "green", attrs: { hat: false, glasses: false, pet: true, cape: false, stripes: true, scarf: true, star: false } },
+        { id: "ivy", name: "Ivy", face: "👧", hair: "blond", shirt: "red", attrs: { hat: true, glasses: false, pet: false, cape: false, stripes: false, scarf: true, star: false } },
+        { id: "leo", name: "Leo", face: "🧒", hair: "black", shirt: "purple", attrs: { hat: false, glasses: true, pet: false, cape: true, stripes: false, scarf: false, star: false } },
+        { id: "mia", name: "Mia", face: "👧", hair: "brown", shirt: "yellow", attrs: { hat: false, glasses: false, pet: true, cape: false, stripes: false, scarf: false, star: true } },
+        { id: "sam", name: "Sam", face: "🧒", hair: "blond", shirt: "orange", attrs: { hat: true, glasses: true, pet: false, cape: false, stripes: true, scarf: false, star: false } },
+      ];
+
+      const QUESTIONS = [
+        { text: "Do they wear a hat?", yes: "Yes. Keep friends with hats.", no: "No. Cross out friends with hats.", test: person => person.attrs.hat },
+        { text: "Do they wear glasses?", yes: "Yes. Keep friends with glasses.", no: "No. Cross out friends with glasses.", test: person => person.attrs.glasses },
+        { text: "Do they have a pet?", yes: "Yes. Look for the pet badge.", no: "No. Remove pet badges.", test: person => person.attrs.pet },
+        { text: "Do they wear a cape?", yes: "Yes. A cape is part of the clue.", no: "No. Cross out capes.", test: person => person.attrs.cape },
+        { text: "Do they have stripes?", yes: "Yes. Keep striped friends.", no: "No. Remove striped friends.", test: person => person.attrs.stripes },
+        { text: "Do they wear a scarf?", yes: "Yes. The mystery friend has a scarf.", no: "No. Cross out scarves.", test: person => person.attrs.scarf },
+        { text: "Do they have a star badge?", yes: "Yes. Keep the star badge friends.", no: "No. Remove star badges.", test: person => person.attrs.star },
+        { text: "Is their hair brown?", yes: "Yes. Brown hair is the clue.", no: "No. Cross out brown hair.", test: person => person.hair === "brown" },
+        { text: "Is their hair black?", yes: "Yes. Black hair is the clue.", no: "No. Cross out black hair.", test: person => person.hair === "black" },
+        { text: "Is their hair blond?", yes: "Yes. Blond hair is the clue.", no: "No. Cross out blond hair.", test: person => person.hair === "blond" },
+        { text: "Is their shirt blue or green?", yes: "Yes. Keep blue and green shirts.", no: "No. Cross out blue and green shirts.", test: person => person.shirt === "blue" || person.shirt === "green" },
+        { text: "Is their shirt red or yellow?", yes: "Yes. Keep red and yellow shirts.", no: "No. Cross out red and yellow shirts.", test: person => person.shirt === "red" || person.shirt === "yellow" },
+      ];
+
+      const state = {
+        phase: "playing",
+        secret: null,
+        eliminated: new Set(),
+        questionsAsked: 0,
+        guesses: 0,
+      };
+
+      const els = {
+        board: document.getElementById("board"),
+        questions: document.getElementById("questions"),
+        clue: document.getElementById("clue"),
+        questionsCount: document.getElementById("questions-count"),
+        possibleCount: document.getElementById("possible-count"),
+        guessesCount: document.getElementById("guesses-count"),
+        restart: document.getElementById("restart-btn"),
+        endScreen: document.getElementById("end-screen"),
+        endDetails: document.getElementById("end-details"),
+        playAgain: document.getElementById("play-again"),
+      };
+
+      function startGame() {
+        state.phase = "playing";
+        state.secret = PEOPLE[Math.floor(Math.random() * PEOPLE.length)];
+        state.eliminated = new Set();
+        state.questionsAsked = 0;
+        state.guesses = 0;
+        els.clue.textContent = "I picked one mystery friend. Ask smart questions, remove suspects, then tap the friend you think it is.";
+        els.endScreen.hidden = true;
+        renderQuestions();
+        renderBoard();
+        renderStats();
+      }
+
+      function possibleCount() {
+        return PEOPLE.length - state.eliminated.size;
+      }
+
+      function renderStats() {
+        els.questionsCount.textContent = String(state.questionsAsked);
+        els.possibleCount.textContent = String(possibleCount());
+        els.guessesCount.textContent = String(state.guesses);
+      }
+
+      function traitIcons(person) {
+        const icons = [];
+        if (person.attrs.hat) icons.push("🧢");
+        if (person.attrs.glasses) icons.push("👓");
+        if (person.attrs.pet) icons.push("🐾");
+        if (person.attrs.cape) icons.push("🦸");
+        if (person.attrs.stripes) icons.push("〰️");
+        if (person.attrs.scarf) icons.push("🧣");
+        if (person.attrs.star) icons.push("⭐");
+        return icons;
+      }
+
+      function renderBoard() {
+        const frag = document.createDocumentFragment();
+        for (const person of PEOPLE) {
+          const card = document.createElement("button");
+          card.className = "person";
+          card.type = "button";
+          card.style.setProperty("--shirt-color", SHIRT_COLORS[person.shirt]);
+          if (state.eliminated.has(person.id)) {
+            card.classList.add("eliminated");
+            card.disabled = true;
+          }
+          card.setAttribute("aria-label", "Guess " + person.name);
+          card.addEventListener("click", () => makeGuess(person));
+
+          const portrait = document.createElement("span");
+          portrait.className = "portrait";
+          portrait.textContent = person.face;
+
+          const name = document.createElement("span");
+          name.className = "name";
+          name.textContent = person.name;
+
+          const traits = document.createElement("span");
+          traits.className = "traits";
+          for (const icon of traitIcons(person)) {
+            const badge = document.createElement("span");
+            badge.className = "trait";
+            badge.textContent = icon;
+            traits.appendChild(badge);
+          }
+
+          const shirt = document.createElement("span");
+          shirt.className = "shirt-label";
+          shirt.textContent = person.hair + " hair · " + person.shirt;
+
+          card.appendChild(portrait);
+          card.appendChild(name);
+          card.appendChild(traits);
+          card.appendChild(shirt);
+          frag.appendChild(card);
+        }
+        els.board.replaceChildren(frag);
+      }
+
+      function renderQuestions() {
+        const frag = document.createDocumentFragment();
+        for (const question of QUESTIONS) {
+          const button = document.createElement("button");
+          button.className = "question";
+          button.type = "button";
+          button.textContent = question.text;
+          button.addEventListener("click", () => askQuestion(question, button));
+          frag.appendChild(button);
+        }
+        els.questions.replaceChildren(frag);
+      }
+
+      function askQuestion(question, button) {
+        if (state.phase !== "playing") return;
+        const answer = question.test(state.secret);
+        state.questionsAsked += 1;
+        button.disabled = true;
+        button.textContent = (answer ? "Yes: " : "No: ") + question.text;
+
+        for (const person of PEOPLE) {
+          if (state.eliminated.has(person.id)) continue;
+          if (question.test(person) !== answer) {
+            state.eliminated.add(person.id);
+          }
+        }
+
+        els.clue.textContent = answer ? question.yes : question.no;
+        if (possibleCount() === 1) {
+          els.clue.textContent += " Only one friend is left. Tap them to solve it.";
+        }
+        renderBoard();
+        renderStats();
+      }
+
+      function makeGuess(person) {
+        if (state.phase !== "playing") return;
+        if (state.eliminated.has(person.id)) return;
+        state.guesses += 1;
+
+        if (person.id === state.secret.id) {
+          renderStats();
+          endGame();
+          return;
+        }
+
+        state.eliminated.add(person.id);
+        els.clue.textContent = "Not " + person.name + ". Good detective work means learning from every guess.";
+        renderBoard();
+        renderStats();
+      }
+
+      function endGame() {
+        state.phase = "ended";
+        els.endDetails.textContent = "The mystery friend was " + state.secret.name + ". You solved it with " + state.questionsAsked + " questions and " + state.guesses + " guesses.";
+        els.endScreen.hidden = false;
+        els.playAgain.focus();
+      }
+
+      els.restart.addEventListener("click", startGame);
+      els.playAgain.addEventListener("click", startGame);
+      startGame();
+    })();
+  </script>
+</body>
+</html>

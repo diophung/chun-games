@@ -292,6 +292,80 @@
         </div>
       </article>
 
+      <!-- ========== Dragon Eating Cheese ========== -->
+      <article class="card">
+        <a class="thumb-link" href="games/dragon.html" aria-label="Play Dragon Eating Cheese">
+          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="dragon chasing a cheese wedge on a grid">
+            <defs>
+              <linearGradient id="dr-bg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1a1a2e"/>
+                <stop offset="100%" stop-color="#0f0f23"/>
+              </linearGradient>
+              <linearGradient id="dr-cheese" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffe066"/>
+                <stop offset="100%" stop-color="#e0a020"/>
+              </linearGradient>
+              <radialGradient id="dr-glow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stop-color="rgba(0,212,255,0.55)"/>
+                <stop offset="100%" stop-color="rgba(0,212,255,0)"/>
+              </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="url(#dr-bg)"/>
+            <!-- subtle grid -->
+            <g stroke="rgba(0,212,255,0.10)" stroke-width="1">
+              <path d="M40 0 V180 M80 0 V180 M120 0 V180 M160 0 V180 M200 0 V180 M240 0 V180 M280 0 V180"/>
+              <path d="M0 30 H320 M0 60 H320 M0 90 H320 M0 120 H320 M0 150 H320"/>
+            </g>
+            <!-- arena border with cyan glow -->
+            <rect x="10" y="10" width="300" height="160" rx="10" fill="none"
+                  stroke="#00d4ff" stroke-width="2"
+                  style="filter: drop-shadow(0 0 6px rgba(0,212,255,0.7));"/>
+            <!-- cheese wedge (top right) with glow -->
+            <circle cx="232" cy="58" r="26" fill="url(#dr-glow)"/>
+            <g transform="translate(218, 44)">
+              <path d="M2 22 L30 6 L30 22 Z"
+                    fill="url(#dr-cheese)" stroke="#7a4a00" stroke-width="1.5" stroke-linejoin="round"/>
+              <circle cx="11" cy="18" r="1.7" fill="#7a4a00"/>
+              <circle cx="18" cy="14" r="1.4" fill="#7a4a00"/>
+              <circle cx="24" cy="19" r="1.2" fill="#7a4a00"/>
+            </g>
+            <!-- snake body (segments trailing dragon) -->
+            <g fill="#22c55e" stroke="#0b3d1c" stroke-width="1">
+              <circle cx="80"  cy="118" r="6"/>
+              <circle cx="96"  cy="118" r="7"/>
+              <circle cx="112" cy="118" r="8"/>
+              <circle cx="128" cy="118" r="9"/>
+            </g>
+            <!-- dragon head -->
+            <g transform="translate(150, 118)">
+              <ellipse cx="0" cy="0" rx="14" ry="11" fill="#16a34a" stroke="#0b3d1c" stroke-width="1.5"/>
+              <!-- horns -->
+              <path d="M -6 -10 L -8 -16 L -3 -11 Z" fill="#0b3d1c"/>
+              <path d="M  6 -10 L  8 -16 L  3 -11 Z" fill="#0b3d1c"/>
+              <!-- eye -->
+              <circle cx="5" cy="-3" r="3" fill="#fff"/>
+              <circle cx="6" cy="-3" r="1.6" fill="#111"/>
+              <!-- nostril -->
+              <circle cx="11" cy="1" r="1" fill="#0b3d1c"/>
+              <!-- fire breath toward cheese -->
+              <path d="M 14 -2 Q 30 -8 42 -22 Q 48 -28 54 -34"
+                    stroke="#ff8a3d" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.85"/>
+              <path d="M 14 -2 Q 28 -6 40 -18"
+                    stroke="#ffd700" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </a>
+        <div class="body">
+          <h2>Dragon Eating Cheese</h2>
+          <p class="desc">Steer a hungry dragon snake to gobble cheese wedges. Pick game speed and cheese size — every bite levels you up.</p>
+          <div class="tags">
+            <span class="tag">Snake</span>
+            <span class="tag">2D · Canvas</span>
+          </div>
+          <a class="play" href="games/dragon.html">Play →</a>
+        </div>
+      </article>
+
       <!-- ========== Car Memory ========== -->
       <article class="card">
         <a class="thumb-link" href="games/car-memory.html" aria-label="Play Car Memory">
@@ -366,6 +440,180 @@
             <span class="tag">2D · CSS</span>
           </div>
           <a class="play" href="games/car-memory.html">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Memory Match Cards ========== -->
+      <article class="card">
+        <a class="thumb-link" href="games/memory-match.html" aria-label="Play Memory Match Cards">
+          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="colorful memory cards grid">
+            <defs>
+              <linearGradient id="mm-bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#8be9fd"/>
+                <stop offset="55%" stop-color="#bdf7d1"/>
+                <stop offset="100%" stop-color="#fff7ad"/>
+              </linearGradient>
+              <linearGradient id="mm-card" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+            <rect width="320" height="180" fill="url(#mm-bg)"/>
+            <text x="160" y="28" text-anchor="middle" font-size="16" font-weight="800" fill="#184e77">Memory Match</text>
+            <g transform="translate(40, 48)">
+              <g>
+                <rect width="46" height="58" rx="8" fill="url(#mm-card)" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="38" text-anchor="middle" font-size="24" fill="#fff">?</text>
+              </g>
+              <g transform="translate(58,0)">
+                <rect width="46" height="58" rx="8" fill="#16a34a" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="37" text-anchor="middle" font-size="24">🐉</text>
+              </g>
+              <g transform="translate(116,0)">
+                <rect width="46" height="58" rx="8" fill="url(#mm-card)" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="38" text-anchor="middle" font-size="24" fill="#fff">?</text>
+              </g>
+              <g transform="translate(174,0)">
+                <rect width="46" height="58" rx="8" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="37" text-anchor="middle" font-size="24">🚀</text>
+              </g>
+              <g transform="translate(29,70)">
+                <rect width="46" height="58" rx="8" fill="url(#mm-card)" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="38" text-anchor="middle" font-size="24" fill="#fff">?</text>
+              </g>
+              <g transform="translate(87,70)">
+                <rect width="46" height="58" rx="8" fill="#f97316" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="37" text-anchor="middle" font-size="24">🎨</text>
+              </g>
+              <g transform="translate(145,70)">
+                <rect width="46" height="58" rx="8" fill="url(#mm-card)" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="38" text-anchor="middle" font-size="24" fill="#fff">?</text>
+              </g>
+              <g transform="translate(203,70)">
+                <rect width="46" height="58" rx="8" fill="#facc15" stroke="#fff" stroke-width="2"/>
+                <text x="23" y="37" text-anchor="middle" font-size="24">⭐</text>
+              </g>
+            </g>
+          </svg>
+        </a>
+        <div class="body">
+          <h2>Memory Match Cards</h2>
+          <p class="desc">Flip colorful idea cards, remember their hiding spots, and match pairs with tiny creative story prompts.</p>
+          <div class="tags">
+            <span class="tag">Memory</span>
+            <span class="tag">2D · CSS</span>
+          </div>
+          <a class="play" href="games/memory-match.html">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Guess Who Detective ========== -->
+      <article class="card">
+        <a class="thumb-link" href="games/guess-who.html" aria-label="Play Guess Who Detective">
+          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="guess who character board">
+            <defs>
+              <linearGradient id="gw-bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#fef3c7"/>
+                <stop offset="55%" stop-color="#fed7aa"/>
+                <stop offset="100%" stop-color="#fecdd3"/>
+              </linearGradient>
+            </defs>
+            <rect width="320" height="180" fill="url(#gw-bg)"/>
+            <rect x="16" y="20" width="94" height="140" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
+            <text x="63" y="44" text-anchor="middle" font-size="13" font-weight="800" fill="#9a3412">Ask Clues</text>
+            <rect x="30" y="58" width="66" height="18" rx="9" fill="#fff" stroke="#fdba74"/>
+            <text x="63" y="71" text-anchor="middle" font-size="8" fill="#7c2d12">Hat?</text>
+            <rect x="30" y="84" width="66" height="18" rx="9" fill="#ffedd5" stroke="#fdba74"/>
+            <text x="63" y="97" text-anchor="middle" font-size="8" fill="#7c2d12">Glasses?</text>
+            <rect x="30" y="110" width="66" height="18" rx="9" fill="#fff" stroke="#fdba74"/>
+            <text x="63" y="123" text-anchor="middle" font-size="8" fill="#7c2d12">Pet?</text>
+            <g transform="translate(136,28)">
+              <g>
+                <rect width="44" height="50" rx="9" fill="#fff" stroke="#fdba74" stroke-width="2"/>
+                <circle cx="22" cy="20" r="13" fill="#60a5fa"/>
+                <text x="22" y="27" text-anchor="middle" font-size="18">🧒</text>
+                <text x="22" y="43" text-anchor="middle" font-size="7" font-weight="800" fill="#7c2d12">Milo</text>
+              </g>
+              <g transform="translate(56,0)" opacity="0.35">
+                <rect width="44" height="50" rx="9" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+                <line x1="8" y1="40" x2="36" y2="10" stroke="#dc2626" stroke-width="4"/>
+                <circle cx="22" cy="20" r="13" fill="#fb7185"/>
+                <text x="22" y="27" text-anchor="middle" font-size="18">👧</text>
+              </g>
+              <g transform="translate(112,0)">
+                <rect width="44" height="50" rx="9" fill="#fff" stroke="#fdba74" stroke-width="2"/>
+                <circle cx="22" cy="20" r="13" fill="#86efac"/>
+                <text x="22" y="27" text-anchor="middle" font-size="18">👧</text>
+                <text x="22" y="43" text-anchor="middle" font-size="7" font-weight="800" fill="#7c2d12">Zara</text>
+              </g>
+              <g transform="translate(0,62)" opacity="0.35">
+                <rect width="44" height="50" rx="9" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+                <line x1="8" y1="40" x2="36" y2="10" stroke="#dc2626" stroke-width="4"/>
+                <circle cx="22" cy="20" r="13" fill="#fde047"/>
+                <text x="22" y="27" text-anchor="middle" font-size="18">🧒</text>
+              </g>
+              <g transform="translate(56,62)">
+                <rect width="44" height="50" rx="9" fill="#fff" stroke="#fdba74" stroke-width="2"/>
+                <circle cx="22" cy="20" r="13" fill="#c084fc"/>
+                <text x="22" y="27" text-anchor="middle" font-size="18">👧</text>
+                <text x="22" y="43" text-anchor="middle" font-size="7" font-weight="800" fill="#7c2d12">Nora</text>
+              </g>
+              <g transform="translate(112,62)">
+                <rect width="44" height="50" rx="9" fill="#fff" stroke="#fdba74" stroke-width="2"/>
+                <circle cx="22" cy="20" r="13" fill="#fdba74"/>
+                <text x="22" y="27" text-anchor="middle" font-size="18">🧒</text>
+                <text x="22" y="43" text-anchor="middle" font-size="7" font-weight="800" fill="#7c2d12">Otto</text>
+              </g>
+            </g>
+          </svg>
+        </a>
+        <div class="body">
+          <h2>Guess Who Detective</h2>
+          <p class="desc">Ask yes/no questions, eliminate suspects, and solve the mystery friend using careful deduction.</p>
+          <div class="tags">
+            <span class="tag">Logic</span>
+            <span class="tag">Deduction</span>
+          </div>
+          <a class="play" href="games/guess-who.html">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Tangram Puzzles ========== -->
+      <article class="card">
+        <a class="thumb-link" href="games/tangram-puzzles.html" aria-label="Play Tangram Puzzles">
+          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tangram pieces on a puzzle board">
+            <defs>
+              <linearGradient id="tg-bg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#dbeafe"/>
+                <stop offset="100%" stop-color="#fef3c7"/>
+              </linearGradient>
+            </defs>
+            <rect width="320" height="180" fill="url(#tg-bg)"/>
+            <rect x="18" y="18" width="284" height="144" rx="16" fill="#fff" opacity="0.72" stroke="#93c5fd" stroke-width="2"/>
+            <text x="160" y="42" text-anchor="middle" font-size="16" font-weight="900" fill="#1d4ed8">Tangram Puzzles</text>
+            <g transform="translate(160, 92)" opacity="0.35" stroke="#1e40af" stroke-width="2" stroke-dasharray="5 5" fill="#bfdbfe">
+              <polygon points="0,-30 30,30 -30,30" transform="translate(-34,-4) rotate(45)"/>
+              <polygon points="0,-30 30,30 -30,30" transform="translate(34,-4) rotate(315)"/>
+              <polygon points="-18,-18 18,-18 18,18 -18,18" transform="translate(0,36)"/>
+              <polygon points="-30,-16 10,-16 30,16 -10,16" transform="translate(0,2)"/>
+            </g>
+            <g stroke="#1f2937" stroke-width="1.2" stroke-linejoin="round">
+              <polygon points="0,-28 28,28 -28,28" transform="translate(74,112) rotate(45)" fill="#ef4444"/>
+              <polygon points="0,-28 28,28 -28,28" transform="translate(126,118) rotate(315)" fill="#f97316"/>
+              <polygon points="0,-22 22,22 -22,22" transform="translate(196,112)" fill="#eab308"/>
+              <polygon points="-18,-18 18,-18 18,18 -18,18" transform="translate(244,118) rotate(45)" fill="#3b82f6"/>
+              <polygon points="-26,-14 8,-14 26,14 -8,14" transform="translate(164,140)" fill="#a855f7"/>
+            </g>
+          </svg>
+        </a>
+        <div class="body">
+          <h2>Tangram Puzzles</h2>
+          <p class="desc">Drag, rotate, and snap seven geometric pieces into house, rocket, and cat puzzle outlines.</p>
+          <div class="tags">
+            <span class="tag">Spatial</span>
+            <span class="tag">SVG · Drag</span>
+          </div>
+          <a class="play" href="games/tangram-puzzles.html">Play →</a>
         </div>
       </article>
 

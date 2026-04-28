@@ -16,6 +16,9 @@ The home page ([`index.html`](./index.html)) is a catalog with thumbnails linkin
 | [Zoomy Cars](#zoomy-cars) | <img src="docs/screenshots/zoomy-car.png" width="240" alt="Zoomy Cars preview" /> | [`games/zoomy-car.html`](./games/zoomy-car.html) | 3D · Three.js |
 | [Child Feeder](#child-feeder) | <img src="docs/screenshots/child-feeder.png" width="240" alt="Child Feeder preview" /> | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
+| [Memory Match Cards](#memory-match-cards) | Catalog card | [`games/memory-match.html`](./games/memory-match.html) | 2D · CSS |
+| [Guess Who Detective](#guess-who-detective) | Catalog card | [`games/guess-who.html`](./games/guess-who.html) | 2D · CSS |
+| [Tangram Puzzles](#tangram-puzzles) | Catalog card | [`games/tangram-puzzles.html`](./games/tangram-puzzles.html) | 2D · SVG |
 
 ---
 
@@ -100,6 +103,54 @@ A classic memory match game with 8 unique car-brand pairs (16 cards). Tap a card
 
 ---
 
+### Memory Match Cards
+
+A playful 4x4 memory game with 8 creative idea pairs. Flip two cards, remember where each one hides, and match dragons, rockets, robots, castles, music, puzzles, paint, and stars.
+
+**Controls:** mouse / touch — tap any face-down card to reveal.
+
+**Highlights**
+- 8 idea pairs focused on imagination and memory
+- Moves, pair count, and live timer
+- Matched pairs reveal a tiny creative story prompt
+- 3D card-flip animation, shake on wrong pairs, end screen with stats
+
+▶ [Open `games/memory-match.html`](./games/memory-match.html)
+
+---
+
+### Guess Who Detective
+
+A single-player deduction game inspired by yes/no mystery guessing. The game secretly picks one friend; ask questions about hats, glasses, pets, hair, shirts, and badges to eliminate suspects before making a final guess.
+
+**Controls:** mouse / touch — tap question buttons, then tap a remaining suspect to guess.
+
+**Highlights**
+- 12 cartoon suspects with visible traits
+- Yes/no question buttons automatically cross out impossible suspects
+- Tracks questions, guesses, and remaining possibilities
+- Encourages logic, observation, and careful elimination
+
+▶ [Open `games/guess-who.html`](./games/guess-who.html)
+
+---
+
+### Tangram Puzzles
+
+Drag, rotate, and snap seven geometric pieces onto dotted outlines to complete kid-friendly tangram puzzles.
+
+**Controls:** mouse / touch — drag pieces; tap a piece and use **Rotate Selected 45°** to turn it.
+
+**Highlights**
+- 3 puzzles: Little House, Space Rocket, Clever Cat
+- 7 colorful SVG tangram pieces
+- Snap-to-place behavior when both position and rotation match
+- Builds spatial reasoning, patience, and problem solving
+
+▶ [Open `games/tangram-puzzles.html`](./games/tangram-puzzles.html)
+
+---
+
 ## Built With Agents
 
 This repo is written collaboratively with AI coding agents — designs, specs, and implementation plans live under [`docs/superpowers/`](./docs/superpowers/). The goal is twofold: make playable little things, and learn how far agents can take an idea from "make me a typing game" to a finished, testable feature.
@@ -114,6 +165,9 @@ open games/type2build.html     # typing game
 open games/zoomy-car.html      # racing game
 open games/child-feeder.html   # child-feeder game
 open games/car-memory.html     # memory game
+open games/memory-match.html   # creative memory game
+open games/guess-who.html      # deduction game
+open games/tangram-puzzles.html # tangram puzzle game
 ```
 
 Or serve the directory with any static file server, e.g.:

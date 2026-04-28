@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Memory Match Cards</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255,255,255,0.75), transparent 24%),
+        radial-gradient(circle at 85% 18%, rgba(255,255,255,0.55), transparent 22%),
+        linear-gradient(180deg, #8be9fd 0%, #bdf7d1 52%, #fff7ad 100%);
+      color: #17324d;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+    #app {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.7);
+      border: 2px solid rgba(255,255,255,0.75);
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(31,41,55,0.12);
+      font-variant-numeric: tabular-nums;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 6vw, 34px);
+      line-height: 1;
+      color: #184e77;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.8);
+    }
+    .stats, nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: #ffffff;
+      border: 2px solid #d9f99d;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: clamp(13px, 3.2vw, 15px);
+      font-weight: 700;
+      color: #335c67;
+    }
+    .stat strong { color: #ef476f; margin-left: 4px; }
+    nav a, button.linky {
+      color: #184e77;
+      font: inherit;
+      font-weight: 800;
+      text-decoration: none;
+      border: none;
+      border-bottom: 2px dashed rgba(24,78,119,0.35);
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
+    #message {
+      margin: 0;
+      min-height: 2.6em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.72);
+      border-radius: 16px;
+      color: #335c67;
+      font-size: clamp(15px, 3.7vw, 18px);
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(31,41,55,0.08);
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      perspective: 1000px;
+      width: 100%;
+    }
+    .card {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 16px;
+    }
+    .card:focus-visible {
+      outline: 4px solid #ef476f;
+      outline-offset: 3px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 460ms cubic-bezier(.35,.2,.2,1.25);
+    }
+    .card.revealed .card-inner,
+    .card.matched .card-inner {
+      transform: rotateY(180deg);
+    }
+    .face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 16px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      box-shadow: 0 10px 20px rgba(31,41,55,0.2);
+      overflow: hidden;
+    }
+    .back {
+      background:
+        radial-gradient(circle at 26% 22%, rgba(255,255,255,0.35), transparent 28%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.15) 0 8px, transparent 8px 16px),
+        linear-gradient(135deg, #7c3aed, #06b6d4);
+      border: 3px solid rgba(255,255,255,0.75);
+      color: #fff;
+    }
+    .back-icon {
+      font-size: clamp(34px, 10vw, 58px);
+      filter: drop-shadow(0 4px 3px rgba(0,0,0,0.22));
+    }
+    .back span:last-child {
+      font-size: clamp(11px, 2.8vw, 14px);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .front {
+      transform: rotateY(180deg);
+      padding: 8px;
+      color: #fff;
+      text-align: center;
+      border: 3px solid rgba(255,255,255,0.8);
+    }
+    .front[data-light="1"] { color: #1f2937; }
+    .emoji {
+      font-size: clamp(32px, 9vw, 54px);
+      line-height: 1;
+      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.18));
+    }
+    .name {
+      font-size: clamp(14px, 3.5vw, 18px);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+    .hint {
+      font-size: clamp(10px, 2.6vw, 13px);
+      font-weight: 700;
+      line-height: 1.2;
+      opacity: 0.92;
+    }
+    .check {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: #16a34a;
+      color: #fff;
+      font-weight: 900;
+      opacity: 0;
+      transform: scale(0.4);
+      transition: opacity 180ms ease, transform 220ms cubic-bezier(.2,1.7,.4,1);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.28);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .card.matched { cursor: default; }
+    .card.matched .check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .card.matched .front {
+      box-shadow: 0 0 0 4px #16a34a, 0 10px 20px rgba(31,41,55,0.2);
+    }
+    .card.shake .card-inner { animation: shake 360ms ease; }
+    @keyframes shake {
+      0%, 100% { transform: rotateY(180deg) translateX(0); }
+      25% { transform: rotateY(180deg) translateX(-7px); }
+      75% { transform: rotateY(180deg) translateX(7px); }
+    }
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 22px;
+      background: rgba(23,50,77,0.92);
+      color: #fff;
+      text-align: center;
+    }
+    #end-screen[hidden] { display: none !important; }
+    #end-screen h2 {
+      margin: 0;
+      font-size: clamp(32px, 9vw, 54px);
+    }
+    #end-stats {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: clamp(17px, 4vw, 22px);
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 4px 0; }
+    .primary {
+      min-height: 48px;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 26px;
+      background: #ffd166;
+      color: #17324d;
+      font: inherit;
+      font-size: clamp(17px, 4vw, 21px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+    }
+    .primary:active { transform: translateY(1px); }
+    @media (max-width: 520px) {
+      body { padding: 8px; }
+      header { justify-content: center; text-align: center; }
+      #board { gap: 7px; }
+      .face { border-radius: 12px; }
+      .front, .back { border-width: 2px; }
+      .check { width: 22px; height: 22px; font-size: 13px; top: 5px; right: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <header>
+      <h1>🃏 Memory Match</h1>
+      <div class="stats" aria-label="game stats">
+        <div class="stat">Moves<strong id="moves-count">0</strong></div>
+        <div class="stat">Pairs<strong id="pairs-count">0 / 8</strong></div>
+        <div class="stat">Time<strong id="time-count">0s</strong></div>
+      </div>
+      <nav aria-label="game navigation">
+        <a href="../index.html">Home</a>
+        <button class="linky" id="restart-btn" type="button">Restart</button>
+      </nav>
+    </header>
+
+    <p id="message">Flip two cards. Match the same ideas and tell a tiny story about each pair.</p>
+    <section id="board" aria-label="memory match board"></section>
+  </main>
+
+  <section id="end-screen" hidden>
+    <h2>🌟 You matched them all!</h2>
+    <ul id="end-stats"></ul>
+    <button class="primary" id="play-again" type="button">Play Again</button>
+  </section>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const ITEMS = [
+        { name: "Dragon", emoji: "🐉", color: "#16a34a", prompt: "What treasure does your dragon guard?" },
+        { name: "Rocket", emoji: "🚀", color: "#2563eb", prompt: "Which planet should this rocket visit?" },
+        { name: "Paint", emoji: "🎨", color: "#f97316", prompt: "What magical picture could you paint?" },
+        { name: "Robot", emoji: "🤖", color: "#64748b", prompt: "What helpful job can this robot do?" },
+        { name: "Castle", emoji: "🏰", color: "#9333ea", prompt: "Who lives inside this castle?" },
+        { name: "Music", emoji: "🎵", color: "#db2777", prompt: "Make up a song title for this sound." },
+        { name: "Puzzle", emoji: "🧩", color: "#0d9488", prompt: "What is the next missing piece?" },
+        { name: "Star", emoji: "⭐", color: "#facc15", light: true, prompt: "Make a wish and remember it." },
+      ];
+
+      const FLIP_BACK_DELAY = 850;
+      const PAIR_COUNT = ITEMS.length;
+
+      const state = {
+        phase: "playing",
+        revealed: [],
+        matchesFound: 0,
+        moves: 0,
+        startTime: 0,
+        timerId: 0,
+        locked: false,
+      };
+
+      const els = {
+        board: document.getElementById("board"),
+        moves: document.getElementById("moves-count"),
+        pairs: document.getElementById("pairs-count"),
+        time: document.getElementById("time-count"),
+        message: document.getElementById("message"),
+        restart: document.getElementById("restart-btn"),
+        endScreen: document.getElementById("end-screen"),
+        endStats: document.getElementById("end-stats"),
+        playAgain: document.getElementById("play-again"),
+      };
+
+      function shuffle(items) {
+        const copy = items.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function elapsedSeconds() {
+        return Math.floor((performance.now() - state.startTime) / 1000);
+      }
+
+      function updateTimer() {
+        els.time.textContent = elapsedSeconds() + "s";
+      }
+
+      function renderStats() {
+        els.moves.textContent = String(state.moves);
+        els.pairs.textContent = state.matchesFound + " / " + PAIR_COUNT;
+        updateTimer();
+      }
+
+      function buildCard(item, pairId) {
+        const card = document.createElement("button");
+        card.className = "card";
+        card.type = "button";
+        card.dataset.pairId = String(pairId);
+        card.setAttribute("aria-label", "Hidden card");
+
+        const inner = document.createElement("span");
+        inner.className = "card-inner";
+
+        const back = document.createElement("span");
+        back.className = "face back";
+
+        const backIcon = document.createElement("span");
+        backIcon.className = "back-icon";
+        backIcon.textContent = "?";
+
+        const backLabel = document.createElement("span");
+        backLabel.textContent = "Memory";
+        back.appendChild(backIcon);
+        back.appendChild(backLabel);
+
+        const front = document.createElement("span");
+        front.className = "face front";
+        front.style.background = item.color;
+        if (item.light) front.dataset.light = "1";
+
+        const emoji = document.createElement("span");
+        emoji.className = "emoji";
+        emoji.textContent = item.emoji;
+
+        const name = document.createElement("span");
+        name.className = "name";
+        name.textContent = item.name;
+
+        const hint = document.createElement("span");
+        hint.className = "hint";
+        hint.textContent = "Remember me";
+
+        const check = document.createElement("span");
+        check.className = "check";
+        check.textContent = "✓";
+
+        front.appendChild(emoji);
+        front.appendChild(name);
+        front.appendChild(hint);
+        inner.appendChild(back);
+        inner.appendChild(front);
+        card.appendChild(inner);
+        card.appendChild(check);
+
+        card.addEventListener("click", () => revealCard(card, item));
+        return card;
+      }
+
+      function startGame() {
+        clearInterval(state.timerId);
+        state.phase = "playing";
+        state.revealed = [];
+        state.matchesFound = 0;
+        state.moves = 0;
+        state.locked = false;
+        state.startTime = performance.now();
+        state.timerId = setInterval(updateTimer, 500);
+        els.message.textContent = "Flip two cards. Match the same ideas and tell a tiny story about each pair.";
+        els.endScreen.hidden = true;
+
+        const deck = shuffle(
+          ITEMS.flatMap((item, idx) => [
+            { item, pairId: idx },
+            { item, pairId: idx },
+          ])
+        );
+
+        const frag = document.createDocumentFragment();
+        for (const cardData of deck) {
+          frag.appendChild(buildCard(cardData.item, cardData.pairId));
+        }
+        els.board.replaceChildren(frag);
+        renderStats();
+      }
+
+      function revealCard(card, item) {
+        if (state.phase !== "playing") return;
+        if (state.locked) return;
+        if (card.classList.contains("revealed") || card.classList.contains("matched")) return;
+
+        card.classList.add("revealed");
+        card.setAttribute("aria-label", item.name + " card");
+        state.revealed.push({ card, item });
+
+        if (state.revealed.length === 2) {
+          state.moves += 1;
+          renderStats();
+          checkPair();
+        }
+      }
+
+      function checkPair() {
+        const [first, second] = state.revealed;
+        const matched = first.card.dataset.pairId === second.card.dataset.pairId;
+
+        if (matched) {
+          first.card.classList.add("matched");
+          second.card.classList.add("matched");
+          first.card.disabled = true;
+          second.card.disabled = true;
+          state.revealed = [];
+          state.matchesFound += 1;
+          els.message.textContent = "Matched " + first.item.name + ": " + first.item.prompt;
+          renderStats();
+          if (state.matchesFound === PAIR_COUNT) endGame();
+        } else {
+          state.locked = true;
+          first.card.classList.add("shake");
+          second.card.classList.add("shake");
+          els.message.textContent = "Try again. Where did those two ideas hide?";
+          setTimeout(() => {
+            first.card.classList.remove("revealed", "shake");
+            second.card.classList.remove("revealed", "shake");
+            first.card.setAttribute("aria-label", "Hidden card");
+            second.card.setAttribute("aria-label", "Hidden card");
+            state.revealed = [];
+            state.locked = false;
+          }, FLIP_BACK_DELAY);
+        }
+      }
+
+      function endGame() {
+        state.phase = "ended";
+        clearInterval(state.timerId);
+        const stats = [
+          "Time: " + elapsedSeconds() + "s",
+          "Moves: " + state.moves,
+          "Pairs: " + state.matchesFound + " / " + PAIR_COUNT,
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+        els.endScreen.hidden = false;
+        els.playAgain.focus();
+      }
+
+      els.restart.addEventListener("click", startGame);
+      els.playAgain.addEventListener("click", startGame);
+      startGame();
+    })();
+  </script>
+</body>
+</html>

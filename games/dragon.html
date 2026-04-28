@@ -1103,10 +1103,340 @@
                 document.getElementById('highScore').textContent = highScore;
             }
 
-            // Show game over screen
+            // Cinematic ending — modal appears once the explosion finishes
+            const head = snake[0];
+            const targetX = head.x * GRID_SIZE + GRID_SIZE / 2;
+            const targetY = head.y * GRID_SIZE + GRID_SIZE / 2;
+            startEndingAnimation(targetX, targetY);
+        }
+
+        // === Ending animation: rocket launcher slides in, fires a wandering missile, explodes on dragon ===
+        let endingAnim = null;
+        const SLIDE_MS = 450;
+        const FIRE_MS = 220;
+        const EXPLODE_MS = 900;
+
+        function showGameOverModal() {
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalLevel').textContent = level;
             document.getElementById('gameOver').classList.remove('hidden');
+        }
+
+        function cancelEndingAnimation() {
+            if (endingAnim) {
+                if (endingAnim.frameId) cancelAnimationFrame(endingAnim.frameId);
+                endingAnim = null;
+            }
+        }
+
+        function startEndingAnimation(targetX, targetY) {
+            const W = canvas.width, H = canvas.height;
+            const edges = ['top', 'bottom', 'left', 'right'];
+            const edge = edges[Math.floor(Math.random() * edges.length)];
+            const offMargin = 90;
+            const inset = 70;
+
+            let slideStart, slideEnd, facing;
+            if (edge === 'top') {
+                const along = 80 + Math.random() * (W - 160);
+                slideStart = { x: along, y: -offMargin };
+                slideEnd   = { x: along, y: inset };
+                facing = 'down';
+            } else if (edge === 'bottom') {
+                const along = 80 + Math.random() * (W - 160);
+                slideStart = { x: along, y: H + offMargin };
+                slideEnd   = { x: along, y: H - inset };
+                facing = 'up';
+            } else if (edge === 'left') {
+                const along = 80 + Math.random() * (H - 160);
+                slideStart = { x: -offMargin, y: along };
+                slideEnd   = { x: inset,      y: along };
+                facing = 'right';
+            } else {
+                const along = 80 + Math.random() * (H - 160);
+                slideStart = { x: W + offMargin, y: along };
+                slideEnd   = { x: W - inset,     y: along };
+                facing = 'left';
+            }
+
+            const muzzle = getMuzzleOffset(facing, 32);
+            const muzzleX = slideEnd.x + muzzle.x;
+            const muzzleY = slideEnd.y + muzzle.y;
+
+            // Random Bezier control points so the missile wanders 1–3s across the screen.
+            const flightDuration = 1000 + Math.random() * 2000;
+            const ctrl1 = {
+                x: muzzleX + (Math.random() - 0.5) * W * 1.0,
+                y: muzzleY + (Math.random() - 0.5) * H * 1.0,
+            };
+            const ctrl2 = {
+                x: targetX + (Math.random() - 0.5) * W * 0.7,
+                y: targetY + (Math.random() - 0.5) * H * 0.7,
+            };
+
+            endingAnim = {
+                phase: 'slide',
+                phaseStart: performance.now(),
+                slideStart, slideEnd, facing,
+                targetX, targetY,
+                flightDuration,
+                path: { p0: { x: muzzleX, y: muzzleY }, p1: ctrl1, p2: ctrl2, p3: { x: targetX, y: targetY } },
+                smokeTrail: [],
+                particles: [],
+                lastTick: performance.now(),
+                frameId: null,
+            };
+            endingAnim.frameId = requestAnimationFrame(endingTick);
+        }
+
+        function getMuzzleOffset(facing, dist) {
+            switch (facing) {
+                case 'up':    return { x: 0, y: -dist };
+                case 'down':  return { x: 0, y:  dist };
+                case 'left':  return { x: -dist, y: 0 };
+                case 'right': return { x:  dist, y: 0 };
+            }
+            return { x: 0, y: 0 };
+        }
+
+        function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+        function bezierPoint(t, p0, p1, p2, p3) {
+            const u = 1 - t;
+            return {
+                x: u*u*u*p0.x + 3*u*u*t*p1.x + 3*u*t*t*p2.x + t*t*t*p3.x,
+                y: u*u*u*p0.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p3.y,
+            };
+        }
+
+        function bezierTangent(t, p0, p1, p2, p3) {
+            const u = 1 - t;
+            return {
+                x: 3*u*u*(p1.x - p0.x) + 6*u*t*(p2.x - p1.x) + 3*t*t*(p3.x - p2.x),
+                y: 3*u*u*(p1.y - p0.y) + 6*u*t*(p2.y - p1.y) + 3*t*t*(p3.y - p2.y),
+            };
+        }
+
+        function endingTick(timestamp) {
+            if (!endingAnim) return;
+            const a = endingAnim;
+            const dt = timestamp - a.lastTick;
+            a.lastTick = timestamp;
+            const elapsed = timestamp - a.phaseStart;
+
+            // Repaint the frozen game world below.
+            draw();
+
+            let launcherPos = a.slideEnd;
+            let missilePos = null, missileAngle = 0;
+            let drawMissile = false, drawExplosion = false;
+
+            if (a.phase === 'slide') {
+                const t = Math.min(1, elapsed / SLIDE_MS);
+                const e = easeOutCubic(t);
+                launcherPos = {
+                    x: a.slideStart.x + (a.slideEnd.x - a.slideStart.x) * e,
+                    y: a.slideStart.y + (a.slideEnd.y - a.slideStart.y) * e,
+                };
+                if (t >= 1) { a.phase = 'fire'; a.phaseStart = timestamp; }
+            } else if (a.phase === 'fire') {
+                if (elapsed >= FIRE_MS) { a.phase = 'flight'; a.phaseStart = timestamp; }
+            } else if (a.phase === 'flight') {
+                const t = Math.min(1, elapsed / a.flightDuration);
+                missilePos = bezierPoint(t, a.path.p0, a.path.p1, a.path.p2, a.path.p3);
+                const tan = bezierTangent(t, a.path.p0, a.path.p1, a.path.p2, a.path.p3);
+                missileAngle = Math.atan2(tan.y, tan.x);
+                drawMissile = true;
+                a.smokeTrail.push({ x: missilePos.x, y: missilePos.y, age: 0, life: 550 });
+                if (t >= 1) {
+                    a.phase = 'explode';
+                    a.phaseStart = timestamp;
+                    snake = [];  // missile vaporizes the dragon
+                    for (let i = 0; i < 36; i++) {
+                        const ang = Math.random() * Math.PI * 2;
+                        const sp = 1.5 + Math.random() * 5.5;
+                        a.particles.push({
+                            x: a.targetX, y: a.targetY,
+                            vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+                            color: ['#ff4444','#ffd700','#ff8800','#ffffff','#ff2200'][Math.floor(Math.random()*5)],
+                            size: 2 + Math.random() * 5,
+                        });
+                    }
+                }
+            } else if (a.phase === 'explode') {
+                drawExplosion = true;
+                if (elapsed >= EXPLODE_MS) {
+                    showGameOverModal();
+                    cancelEndingAnimation();
+                    return;
+                }
+            }
+
+            // Smoke trail
+            for (const s of a.smokeTrail) s.age += dt;
+            a.smokeTrail = a.smokeTrail.filter(s => s.age < s.life);
+            for (const s of a.smokeTrail) {
+                const k = s.age / s.life;
+                ctx.fillStyle = `rgba(190, 190, 190, ${(1 - k) * 0.55})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 2.5 + k * 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Launcher (always rendered until explosion phase)
+            if (a.phase !== 'explode') {
+                drawLauncherShape(launcherPos.x, launcherPos.y, a.facing);
+            } else {
+                // keep launcher visible during explosion too — looks more grounded
+                drawLauncherShape(a.slideEnd.x, a.slideEnd.y, a.facing);
+            }
+
+            // Muzzle flash on fire
+            if (a.phase === 'fire') {
+                const ft = elapsed / FIRE_MS;
+                const flashR = (1 - Math.abs(ft * 2 - 1)) * 32;
+                const m = getMuzzleOffset(a.facing, 32);
+                const fx = launcherPos.x + m.x, fy = launcherPos.y + m.y;
+                const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, Math.max(flashR, 1));
+                g.addColorStop(0, 'rgba(255,255,200,0.95)');
+                g.addColorStop(0.5, 'rgba(255,150,0,0.6)');
+                g.addColorStop(1, 'rgba(255,80,0,0)');
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(fx, fy, Math.max(flashR, 1), 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if (drawMissile && missilePos) drawMissileShape(missilePos.x, missilePos.y, missileAngle);
+
+            if (drawExplosion) {
+                const t = elapsed / EXPLODE_MS;
+                const r = 30 + t * 90;
+                const g = ctx.createRadialGradient(a.targetX, a.targetY, 0, a.targetX, a.targetY, r);
+                g.addColorStop(0,    `rgba(255,255,255,${(1 - t) * 0.95})`);
+                g.addColorStop(0.3,  `rgba(255,210,40,${(1 - t) * 0.75})`);
+                g.addColorStop(0.7,  `rgba(255,90,0,${(1 - t) * 0.45})`);
+                g.addColorStop(1,    'rgba(0,0,0,0)');
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(a.targetX, a.targetY, r, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = `rgba(255,255,255,${(1 - t) * 0.7})`;
+                ctx.lineWidth = 2 * (1 - t);
+                ctx.beginPath();
+                ctx.arc(a.targetX, a.targetY, t * 110, 0, Math.PI * 2);
+                ctx.stroke();
+
+                for (const p of a.particles) {
+                    p.x += p.vx; p.y += p.vy;
+                    p.vy += 0.15;
+                    p.vx *= 0.97; p.vy *= 0.97;
+                }
+                ctx.globalAlpha = 1 - t;
+                for (const p of a.particles) {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * (1 - t * 0.5), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            if (endingAnim) endingAnim.frameId = requestAnimationFrame(endingTick);
+        }
+
+        function drawLauncherShape(x, y, facing) {
+            ctx.save();
+            ctx.translate(x, y);
+            let rot = 0;
+            if (facing === 'up')   rot = -Math.PI / 2;
+            if (facing === 'down') rot =  Math.PI / 2;
+            if (facing === 'left') rot =  Math.PI;
+            ctx.rotate(rot);
+
+            // Tread base
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(-24, 8, 48, 14);
+            ctx.fillStyle = '#111';
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.arc(i * 9, 15, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            // Body
+            ctx.fillStyle = '#5a6e3d';
+            ctx.fillRect(-20, -8, 38, 18);
+            ctx.strokeStyle = '#2e3b1d';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-20, -8, 38, 18);
+            // Hatch
+            ctx.fillStyle = '#7a8e5d';
+            ctx.beginPath();
+            ctx.arc(-8, -2, 4, 0, Math.PI * 2);
+            ctx.fill();
+            // Barrel (points along +x)
+            ctx.fillStyle = '#3d4d24';
+            ctx.fillRect(2, -5, 30, 10);
+            ctx.strokeRect(2, -5, 30, 10);
+            // Barrel tip
+            ctx.fillStyle = '#111';
+            ctx.fillRect(30, -6, 4, 12);
+
+            ctx.restore();
+        }
+
+        function drawMissileShape(x, y, angle) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            // Body
+            ctx.fillStyle = '#cccccc';
+            ctx.fillRect(-12, -3, 18, 6);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-12, -3, 18, 6);
+            // Nose cone
+            ctx.fillStyle = '#ff4444';
+            ctx.beginPath();
+            ctx.moveTo(6, -3);
+            ctx.lineTo(15, 0);
+            ctx.lineTo(6, 3);
+            ctx.closePath();
+            ctx.fill();
+            // Fins
+            ctx.fillStyle = '#888';
+            ctx.beginPath();
+            ctx.moveTo(-12, -3);
+            ctx.lineTo(-17, -7);
+            ctx.lineTo(-9, -3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-12, 3);
+            ctx.lineTo(-17, 7);
+            ctx.lineTo(-9, 3);
+            ctx.closePath();
+            ctx.fill();
+            // Exhaust flame
+            const flick = 1 + Math.random() * 6;
+            ctx.fillStyle = `rgba(255, 140, 0, 0.85)`;
+            ctx.beginPath();
+            ctx.moveTo(-12, -2.5);
+            ctx.lineTo(-22 - flick, 0);
+            ctx.lineTo(-12, 2.5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = `rgba(255, 230, 80, 0.95)`;
+            ctx.beginPath();
+            ctx.moveTo(-12, -1);
+            ctx.lineTo(-17, 0);
+            ctx.lineTo(-12, 1);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
         }
 
         // Game step with frame timing
@@ -1145,6 +1475,7 @@
 
         // Start game
         function startGame() {
+            cancelEndingAnimation();
             initGame();
             if (gameLoop) cancelAnimationFrame(gameLoop);
             lastTime = 0;

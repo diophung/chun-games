@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Tangram Puzzles</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255,255,255,0.75), transparent 22%),
+        radial-gradient(circle at 82% 12%, rgba(255,255,255,0.55), transparent 20%),
+        linear-gradient(180deg, #dbeafe 0%, #f0f9ff 38%, #fef3c7 100%);
+      color: #1e3a5f;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+    #app {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    header, #status, #stage-wrap {
+      background: rgba(255,255,255,0.78);
+      border: 2px solid rgba(255,255,255,0.9);
+      border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(30,58,95,0.12);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 14px;
+      font-variant-numeric: tabular-nums;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 6vw, 36px);
+      line-height: 1;
+      color: #1d4ed8;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.85);
+    }
+    .stats, nav, #tools {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .stat {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #fff;
+      border: 2px solid #93c5fd;
+      color: #1e40af;
+      font-size: clamp(13px, 3vw, 15px);
+      font-weight: 900;
+    }
+    .stat strong { color: #e11d48; margin-left: 4px; }
+    nav a, button.linky {
+      color: #1d4ed8;
+      font: inherit;
+      font-weight: 900;
+      text-decoration: none;
+      border: none;
+      border-bottom: 2px dashed rgba(29,78,216,0.35);
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
+    #tools {
+      padding: 0 2px;
+    }
+    .tool {
+      min-height: 44px;
+      border: 2px solid #93c5fd;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #1e40af;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      padding: 9px 14px;
+      box-shadow: 0 5px 12px rgba(30,64,175,0.1);
+    }
+    .tool:active { transform: translateY(1px); }
+    #status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      font-size: clamp(15px, 3.5vw, 18px);
+      font-weight: 800;
+    }
+    #status-text { margin: 0; color: #2f4f70; }
+    #stage-wrap {
+      padding: 10px;
+      overflow: hidden;
+    }
+    #stage {
+      width: 100%;
+      display: block;
+      aspect-ratio: 760 / 520;
+      min-height: 360px;
+      border-radius: 16px;
+      background:
+        linear-gradient(90deg, rgba(30,64,175,0.06) 1px, transparent 1px),
+        linear-gradient(rgba(30,64,175,0.06) 1px, transparent 1px),
+        linear-gradient(180deg, #ffffff 0%, #eff6ff 72%, #dbeafe 100%);
+      background-size: 38px 38px, 38px 38px, 100% 100%;
+      touch-action: none;
+      user-select: none;
+    }
+    .tray {
+      fill: rgba(255,255,255,0.82);
+      stroke: #93c5fd;
+      stroke-width: 2;
+      stroke-dasharray: 8 7;
+    }
+    .tray-label, .target-label {
+      fill: #1e40af;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+    .target {
+      fill: rgba(59,130,246,0.1);
+      stroke: rgba(30,64,175,0.45);
+      stroke-width: 4;
+      stroke-linejoin: round;
+      stroke-dasharray: 7 7;
+    }
+    .piece {
+      cursor: grab;
+      touch-action: none;
+      transition: filter 120ms ease, opacity 160ms ease;
+    }
+    .piece polygon {
+      stroke: rgba(15,23,42,0.5);
+      stroke-width: 3;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 7px 7px rgba(30,58,95,0.22));
+    }
+    .piece.selected polygon {
+      stroke: #111827;
+      stroke-width: 5;
+      filter: drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 10px rgba(250,204,21,0.9));
+    }
+    .piece.locked {
+      cursor: default;
+      opacity: 0.92;
+    }
+    .piece.locked polygon {
+      stroke: #16a34a;
+      stroke-width: 4;
+      filter: drop-shadow(0 5px 5px rgba(22,163,74,0.22));
+    }
+    .piece:active { cursor: grabbing; }
+    .piece-label {
+      pointer-events: none;
+      fill: rgba(15,23,42,0.72);
+      font-size: 11px;
+      font-weight: 1000;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(15,23,42,0.86);
+      color: #fff;
+      text-align: center;
+    }
+    #end-screen[hidden] { display: none !important; }
+    .end-card {
+      width: min(520px, 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #eff6ff, #bfdbfe);
+      color: #1e3a8a;
+      box-shadow: 0 18px 42px rgba(0,0,0,0.32);
+    }
+    .end-card h2 {
+      margin: 0;
+      font-size: clamp(30px, 8vw, 48px);
+    }
+    #end-details {
+      margin: 0;
+      font-size: clamp(16px, 4vw, 21px);
+      font-weight: 800;
+      line-height: 1.35;
+    }
+    .primary {
+      min-height: 48px;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 26px;
+      background: #1d4ed8;
+      color: #fff;
+      font: inherit;
+      font-size: clamp(17px, 4vw, 21px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    }
+    @media (max-width: 620px) {
+      body { padding: 8px; }
+      header, #status { justify-content: center; text-align: center; }
+      #tools { justify-content: center; }
+      #stage { min-height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <header>
+      <h1>🔷 Tangram Puzzles</h1>
+      <div class="stats" aria-label="game stats">
+        <div class="stat">Puzzle<strong id="puzzle-count">1 / 3</strong></div>
+        <div class="stat">Placed<strong id="placed-count">0 / 7</strong></div>
+      </div>
+      <nav aria-label="game navigation">
+        <a href="../index.html">Home</a>
+        <button class="linky" id="reset-link" type="button">Reset</button>
+      </nav>
+    </header>
+
+    <section id="tools" aria-label="tangram tools">
+      <button class="tool" id="prev-btn" type="button">Previous Puzzle</button>
+      <button class="tool" id="rotate-btn" type="button">Rotate Selected 45°</button>
+      <button class="tool" id="next-btn" type="button">Next Puzzle</button>
+    </section>
+
+    <section id="status">
+      <p id="status-text">Drag a piece onto its matching outline. Tap a piece, then rotate it if needed.</p>
+    </section>
+
+    <section id="stage-wrap">
+      <svg id="stage" viewBox="0 0 760 520" role="img" aria-label="tangram puzzle board">
+        <rect class="tray" x="28" y="392" width="704" height="104" rx="20"></rect>
+        <text class="tray-label" x="52" y="426">Piece Tray</text>
+        <text class="target-label" id="target-label" x="52" y="48">Puzzle</text>
+        <g id="targets"></g>
+        <g id="pieces"></g>
+      </svg>
+    </section>
+  </main>
+
+  <section id="end-screen" hidden>
+    <div class="end-card">
+      <h2>🎉 Puzzle Complete!</h2>
+      <p id="end-details"></p>
+      <button class="primary" id="continue-btn" type="button">Next Puzzle</button>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const SVG_NS = "http://www.w3.org/2000/svg";
+      const SNAP_DISTANCE = 34;
+      const SNAP_ANGLE = 18;
+
+      const PIECES = [
+        { id: "bigA", label: "Big A", points: "0,-58 58,58 -58,58", color: "#ef4444", start: { x: 108, y: 448, r: 0 } },
+        { id: "bigB", label: "Big B", points: "0,-58 58,58 -58,58", color: "#f97316", start: { x: 220, y: 448, r: 90 } },
+        { id: "medium", label: "Med", points: "0,-44 44,44 -44,44", color: "#eab308", start: { x: 322, y: 448, r: 0 } },
+        { id: "smallA", label: "Small A", points: "0,-31 31,31 -31,31", color: "#22c55e", start: { x: 418, y: 448, r: 0 } },
+        { id: "smallB", label: "Small B", points: "0,-31 31,31 -31,31", color: "#06b6d4", start: { x: 500, y: 448, r: 180 } },
+        { id: "square", label: "Square", points: "-30,-30 30,-30 30,30 -30,30", color: "#3b82f6", start: { x: 584, y: 448, r: 45 } },
+        { id: "para", label: "Slant", points: "-47,-25 15,-25 47,25 -15,25", color: "#a855f7", start: { x: 676, y: 448, r: 0 } },
+      ];
+
+      const PUZZLES = [
+        {
+          name: "Little House",
+          clue: "Make a cozy house. Start with the big roof pieces, then fill the walls.",
+          targets: {
+            bigA: { x: 315, y: 152, r: 45 },
+            bigB: { x: 405, y: 152, r: 315 },
+            medium: { x: 284, y: 290, r: 0 },
+            smallA: { x: 436, y: 290, r: 0 },
+            smallB: { x: 360, y: 340, r: 180 },
+            square: { x: 360, y: 264, r: 0 },
+            para: { x: 360, y: 218, r: 0 },
+          },
+        },
+        {
+          name: "Space Rocket",
+          clue: "Build a rocket. Put the nose at the top and the fins near the bottom.",
+          targets: {
+            bigA: { x: 360, y: 126, r: 0 },
+            bigB: { x: 294, y: 306, r: 45 },
+            medium: { x: 426, y: 306, r: 315 },
+            smallA: { x: 258, y: 342, r: 45 },
+            smallB: { x: 462, y: 342, r: 315 },
+            square: { x: 360, y: 224, r: 45 },
+            para: { x: 360, y: 294, r: 90 },
+          },
+        },
+        {
+          name: "Clever Cat",
+          clue: "Build a cat. Ears go high, body pieces go low, and the slant makes a tail.",
+          targets: {
+            bigA: { x: 330, y: 300, r: 225 },
+            bigB: { x: 420, y: 300, r: 135 },
+            medium: { x: 365, y: 238, r: 180 },
+            smallA: { x: 325, y: 108, r: 0 },
+            smallB: { x: 405, y: 108, r: 0 },
+            square: { x: 365, y: 170, r: 45 },
+            para: { x: 500, y: 265, r: 330 },
+          },
+        },
+      ];
+
+      const state = {
+        puzzleIndex: 0,
+        pieces: [],
+        selectedId: null,
+        activeDrag: null,
+      };
+
+      const els = {
+        stage: document.getElementById("stage"),
+        targets: document.getElementById("targets"),
+        pieces: document.getElementById("pieces"),
+        targetLabel: document.getElementById("target-label"),
+        statusText: document.getElementById("status-text"),
+        puzzleCount: document.getElementById("puzzle-count"),
+        placedCount: document.getElementById("placed-count"),
+        reset: document.getElementById("reset-link"),
+        prev: document.getElementById("prev-btn"),
+        rotate: document.getElementById("rotate-btn"),
+        next: document.getElementById("next-btn"),
+        endScreen: document.getElementById("end-screen"),
+        endDetails: document.getElementById("end-details"),
+        continueBtn: document.getElementById("continue-btn"),
+      };
+
+      function svgEl(name) {
+        return document.createElementNS(SVG_NS, name);
+      }
+
+      function normalizeAngle(angle) {
+        return ((Math.round(angle) % 360) + 360) % 360;
+      }
+
+      function angleDiff(a, b) {
+        const diff = Math.abs(normalizeAngle(a) - normalizeAngle(b));
+        return Math.min(diff, 360 - diff);
+      }
+
+      function placedCount() {
+        return state.pieces.filter(piece => piece.locked).length;
+      }
+
+      function currentPuzzle() {
+        return PUZZLES[state.puzzleIndex];
+      }
+
+      function findPiece(id) {
+        return state.pieces.find(piece => piece.id === id);
+      }
+
+      function getStagePoint(event) {
+        const point = els.stage.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        return point.matrixTransform(els.stage.getScreenCTM().inverse());
+      }
+
+      function pieceTransform(piece) {
+        return "translate(" + piece.x + " " + piece.y + ") rotate(" + piece.r + ")";
+      }
+
+      function renderTargets() {
+        const puzzle = currentPuzzle();
+        els.targetLabel.textContent = puzzle.name;
+        const frag = document.createDocumentFragment();
+
+        for (const piece of PIECES) {
+          const target = puzzle.targets[piece.id];
+          const outline = svgEl("polygon");
+          outline.classList.add("target");
+          outline.setAttribute("points", piece.points);
+          outline.setAttribute("transform", "translate(" + target.x + " " + target.y + ") rotate(" + target.r + ")");
+          frag.appendChild(outline);
+        }
+        els.targets.replaceChildren(frag);
+      }
+
+      function renderPieces() {
+        const frag = document.createDocumentFragment();
+        for (const piece of state.pieces) {
+          const group = svgEl("g");
+          group.classList.add("piece");
+          group.dataset.pieceId = piece.id;
+          if (piece.locked) group.classList.add("locked");
+          if (piece.id === state.selectedId) group.classList.add("selected");
+          group.setAttribute("transform", pieceTransform(piece));
+
+          const poly = svgEl("polygon");
+          poly.setAttribute("points", piece.points);
+          poly.setAttribute("fill", piece.color);
+
+          const label = svgEl("text");
+          label.classList.add("piece-label");
+          label.textContent = piece.label;
+
+          group.appendChild(poly);
+          group.appendChild(label);
+          group.addEventListener("pointerdown", event => beginDrag(event, piece.id));
+          group.addEventListener("pointermove", event => dragPiece(event, piece.id));
+          group.addEventListener("pointerup", event => endDrag(event, piece.id));
+          group.addEventListener("pointercancel", event => endDrag(event, piece.id));
+          group.addEventListener("dblclick", () => rotateSelected(piece.id));
+          frag.appendChild(group);
+        }
+        els.pieces.replaceChildren(frag);
+      }
+
+      function updatePieceElement(piece) {
+        const group = els.pieces.querySelector('[data-piece-id="' + piece.id + '"]');
+        if (!group) return;
+        group.setAttribute("transform", pieceTransform(piece));
+        group.classList.toggle("locked", piece.locked);
+        group.classList.toggle("selected", piece.id === state.selectedId);
+      }
+
+      function updateSelection() {
+        for (const piece of state.pieces) updatePieceElement(piece);
+      }
+
+      function renderStats() {
+        els.puzzleCount.textContent = (state.puzzleIndex + 1) + " / " + PUZZLES.length;
+        els.placedCount.textContent = placedCount() + " / " + PIECES.length;
+      }
+
+      function startPuzzle(index) {
+        state.puzzleIndex = (index + PUZZLES.length) % PUZZLES.length;
+        state.selectedId = null;
+        state.activeDrag = null;
+        state.pieces = PIECES.map(piece => ({
+          id: piece.id,
+          label: piece.label,
+          points: piece.points,
+          color: piece.color,
+          x: piece.start.x,
+          y: piece.start.y,
+          r: piece.start.r,
+          locked: false,
+        }));
+        els.endScreen.hidden = true;
+        els.statusText.textContent = currentPuzzle().clue;
+        renderTargets();
+        renderPieces();
+        renderStats();
+      }
+
+      function beginDrag(event, pieceId) {
+        const piece = findPiece(pieceId);
+        if (!piece || piece.locked) return;
+        event.preventDefault();
+        const point = getStagePoint(event);
+        state.selectedId = pieceId;
+        state.activeDrag = {
+          id: pieceId,
+          pointerId: event.pointerId,
+          dx: point.x - piece.x,
+          dy: point.y - piece.y,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+        els.statusText.textContent = "Move " + piece.label + " near the matching dotted outline.";
+        updateSelection();
+      }
+
+      function dragPiece(event, pieceId) {
+        if (!state.activeDrag || state.activeDrag.id !== pieceId) return;
+        const piece = findPiece(pieceId);
+        if (!piece || piece.locked) return;
+        event.preventDefault();
+        const point = getStagePoint(event);
+        piece.x = point.x - state.activeDrag.dx;
+        piece.y = point.y - state.activeDrag.dy;
+        updatePieceElement(piece);
+      }
+
+      function endDrag(event, pieceId) {
+        if (!state.activeDrag || state.activeDrag.id !== pieceId) return;
+        const piece = findPiece(pieceId);
+        state.activeDrag = null;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+        if (piece) trySnap(piece);
+      }
+
+      function rotateSelected(forcedId) {
+        const id = forcedId || state.selectedId;
+        const piece = id ? findPiece(id) : null;
+        if (!piece) {
+          els.statusText.textContent = "Tap or drag a piece first, then rotate it.";
+          return;
+        }
+        if (piece.locked) {
+          els.statusText.textContent = piece.label + " is already placed.";
+          return;
+        }
+        state.selectedId = piece.id;
+        piece.r = normalizeAngle(piece.r + 45);
+        els.statusText.textContent = "Rotated " + piece.label + ". Drag it close to its outline to snap.";
+        updateSelection();
+        trySnap(piece);
+      }
+
+      function trySnap(piece) {
+        const target = currentPuzzle().targets[piece.id];
+        const distance = Math.hypot(piece.x - target.x, piece.y - target.y);
+        const rotationDistance = angleDiff(piece.r, target.r);
+
+        if (distance <= SNAP_DISTANCE && rotationDistance <= SNAP_ANGLE) {
+          piece.x = target.x;
+          piece.y = target.y;
+          piece.r = normalizeAngle(target.r);
+          piece.locked = true;
+          state.selectedId = null;
+          els.statusText.textContent = "Nice! " + piece.label + " snapped into place.";
+          updatePieceElement(piece);
+          renderStats();
+          if (placedCount() === PIECES.length) completePuzzle();
+        } else {
+          els.statusText.textContent = "Close! Match both the place and the rotation.";
+          updatePieceElement(piece);
+        }
+      }
+
+      function completePuzzle() {
+        const puzzle = currentPuzzle();
+        els.endDetails.textContent = "You finished " + puzzle.name + ". Tangram brains use shape, space, memory, and patience.";
+        els.endScreen.hidden = false;
+        els.continueBtn.focus();
+      }
+
+      els.reset.addEventListener("click", () => startPuzzle(state.puzzleIndex));
+      els.prev.addEventListener("click", () => startPuzzle(state.puzzleIndex - 1));
+      els.next.addEventListener("click", () => startPuzzle(state.puzzleIndex + 1));
+      els.rotate.addEventListener("click", () => rotateSelected());
+      els.continueBtn.addEventListener("click", () => startPuzzle(state.puzzleIndex + 1));
+
+      startPuzzle(0);
+    })();
+  </script>
+</body>
+</html>
