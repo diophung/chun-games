@@ -88,6 +88,21 @@
     color:#fff; cursor:pointer;
   }
   #start .play:active { transform: translateY(6px); box-shadow: 0 4px 0 #1b5e20; }
+  #race-results {
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    z-index:12; width:min(520px, calc(100vw - 28px)); padding:24px;
+    border-radius:28px; background:rgba(255,255,255,0.94); color:#1f2937;
+    text-align:center; box-shadow:0 18px 45px rgba(0,0,0,0.35); pointer-events:auto;
+    font-family:'Comic Sans MS','Chalkboard SE','Marker Felt',sans-serif;
+  }
+  #race-results h2 { font-size:clamp(30px,7vw,52px); margin-bottom:10px; color:#d32f2f; }
+  #race-score { font-size:clamp(17px,4vw,24px); font-weight:800; margin-bottom:10px; }
+  #race-again {
+    margin-top:14px; padding:13px 28px; border:none; border-radius:999px;
+    background:#4caf50; color:#fff; font:inherit; font-weight:900; font-size:20px;
+    box-shadow:0 6px 0 #1b5e20; cursor:pointer;
+  }
+  #race-again:active { transform:translateY(4px); box-shadow:0 2px 0 #1b5e20; }
   .hide { display:none !important; }
 
   @media (hover: hover) and (pointer: fine) {
@@ -129,6 +144,12 @@
   </div>
 </div>
 
+<div id="race-results" class="hide">
+  <h2>🏆 Race Complete!</h2>
+  <p id="race-score"></p>
+  <button id="race-again" type="button">Race Again</button>
+</div>
+
 <script type="importmap">
 {
   "imports": {
@@ -137,6 +158,7 @@
 }
 </script>
 
+<script src="high-scores.js"></script>
 <script type="module">
 import * as THREE from 'three';
 
@@ -740,6 +762,7 @@ function nearestSampleIdx(pos){
 let gameStarted = false;
 let gameWon = false;
 let raceStartTime = 0;
+let raceScoreRecorded = false;
 let camShake = 0;
 const tmpV = new THREE.Vector3();
 const clock = new THREE.Clock();
@@ -820,10 +843,12 @@ function update(dt){
       playerState.passedHalf = false;
       if (playerState.lap > 3 && !gameWon){
         gameWon = true;
-        const elapsed = ((performance.now() - raceStartTime)/1000).toFixed(1);
+        const elapsedValue = (performance.now() - raceStartTime)/1000;
+        const elapsed = elapsedValue.toFixed(1);
         setMessage(`🏆 YOU WIN! ${elapsed}s 🏆`, 99999);
         fanfare();
         spawnConfetti();
+        finishRace(elapsedValue);
       } else {
         const cheers = ['GREAT!', 'WOOHOO!', 'SUPER!'];
         setMessage(`LAP ${Math.min(playerState.lap, 3)} — ${cheers[(playerState.lap-2)%cheers.length]}`);
@@ -1089,9 +1114,31 @@ function animate(){
 }
 animate();
 
+function finishRace(elapsedValue){
+  if (raceScoreRecorded) return;
+  raceScoreRecorded = true;
+  const score = Math.max(1, Math.round(100000 - elapsedValue * 250 + coinCount * 300 + playerState.hp * 1000));
+  const elapsed = elapsedValue.toFixed(1);
+  const panel = document.getElementById('race-results');
+  const again = document.getElementById('race-again');
+  document.getElementById('race-score').textContent = `Score: ${score} pts · Time: ${elapsed}s · Coins: ${coinCount} · HP: ${playerState.hp}`;
+  if (window.ChunHighScores) {
+    window.ChunHighScores.record({
+      gameId: 'zoomy-car',
+      gameName: 'Zoomy Cars',
+      score,
+      scoreLabel: 'pts',
+      detail: elapsed + 's · ' + coinCount + ' coins · ' + playerState.hp + ' HP',
+    });
+    window.ChunHighScores.render(panel, 'zoomy-car', { scoreLabel: 'pts' }, again);
+  }
+  panel.classList.remove('hide');
+}
+
 // ---------- START ----------
 const startEl = document.getElementById('start');
 document.getElementById('playBtn').addEventListener('click', startGame);
+document.getElementById('race-again').addEventListener('click', () => window.location.reload());
 startEl.addEventListener('click', startGame);
 function startGame(){
   initAudio();

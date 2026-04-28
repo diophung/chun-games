@@ -311,6 +311,7 @@
     </div>
   </section>
 
+  <script src="high-scores.js"></script>
   <script>
     (function () {
       "use strict";
@@ -508,7 +509,18 @@
 
       function endGame() {
         state.phase = "ended";
-        els.endDetails.textContent = "The mystery friend was " + state.secret.name + ". You solved it with " + state.questionsAsked + " questions and " + state.guesses + " guesses.";
+        const score = Math.max(1, 10000 - state.questionsAsked * 700 - Math.max(0, state.guesses - 1) * 1500);
+        els.endDetails.textContent = "The mystery friend was " + state.secret.name + ". You solved it with " + state.questionsAsked + " questions and " + state.guesses + " guesses. Score: " + score + " pts.";
+        if (window.ChunHighScores) {
+          window.ChunHighScores.record({
+            gameId: "guess-who",
+            gameName: "Guess Who Detective",
+            score,
+            scoreLabel: "pts",
+            detail: state.questionsAsked + " questions · " + state.guesses + " guesses",
+          });
+          window.ChunHighScores.render(els.playAgain.parentNode, "guess-who", { scoreLabel: "pts" }, els.playAgain);
+        }
         els.endScreen.hidden = false;
         els.playAgain.focus();
       }

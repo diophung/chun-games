@@ -549,6 +549,7 @@
     <button id="sleep-btn"><span class="emoji">😴</span><span>Sleep</span></button>
     <section id="end-screen" hidden></section>
   </main>
+  <script src="high-scores.js"></script>
   <script>
     (function () {
       "use strict";
@@ -642,6 +643,7 @@
       function reset() {
         state = clone(INITIAL_STATE);
         state.character = randomCharacter();
+        state.highScoreRecorded = false;
       }
 
       // ---------- DOM lookups ----------
@@ -859,6 +861,17 @@
         subtitle.textContent = "You raised them from 1 to 18!";
         $endScreen.appendChild(subtitle);
 
+        const score = Math.max(1, Math.round(
+          state.stats.stamina * 4 +
+          state.stats.strength * 5 +
+          state.stats.happiness * 4 +
+          state.history.healthyMeals * 20 +
+          state.history.activities * 30 -
+          state.history.junkMeals * 15 -
+          state.history.sleeps * 10 -
+          state.history.cryEpisodes * 50
+        ));
+
         const ul = document.createElement("ul");
         const lines = [
           `Final stamina: ${state.stats.stamina}`,
@@ -868,6 +881,7 @@
           `Activities: ${state.history.activities}`,
           `Sleeps: ${state.history.sleeps}`,
           `Cry episodes: ${state.history.cryEpisodes}`,
+          `Score: ${score} pts`,
         ];
         for (const line of lines) {
           const li = document.createElement("li");
@@ -875,6 +889,20 @@
           ul.appendChild(li);
         }
         $endScreen.appendChild(ul);
+
+        if (window.ChunHighScores) {
+          if (!state.highScoreRecorded) {
+            state.highScoreRecorded = true;
+            window.ChunHighScores.record({
+              gameId: "child-feeder",
+              gameName: "Child Feeder",
+              score,
+              scoreLabel: "pts",
+              detail: "stamina " + state.stats.stamina + " · strength " + state.stats.strength + " · happy " + state.stats.happiness,
+            });
+          }
+          window.ChunHighScores.render($endScreen, "child-feeder", { scoreLabel: "pts" });
+        }
 
         const btn = document.createElement("button");
         btn.id = "play-again";

@@ -279,6 +279,7 @@
     </div>
   </section>
 
+  <script src="high-scores.js"></script>
   <script>
     (function () {
       "use strict";
@@ -344,6 +345,8 @@
         pieces: [],
         selectedId: null,
         activeDrag: null,
+        moves: 0,
+        startTime: 0,
       };
 
       const els = {
@@ -466,6 +469,8 @@
         state.puzzleIndex = (index + PUZZLES.length) % PUZZLES.length;
         state.selectedId = null;
         state.activeDrag = null;
+        state.moves = 0;
+        state.startTime = performance.now();
         state.pieces = PIECES.map(piece => ({
           id: piece.id,
           label: piece.label,
@@ -518,7 +523,10 @@
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId);
         }
-        if (piece) trySnap(piece);
+        if (piece) {
+          state.moves += 1;
+          trySnap(piece);
+        }
       }
 
       function rotateSelected(forcedId) {
@@ -533,6 +541,7 @@
           return;
         }
         state.selectedId = piece.id;
+        state.moves += 1;
         piece.r = normalizeAngle(piece.r + 45);
         els.statusText.textContent = "Rotated " + piece.label + ". Drag it close to its outline to snap.";
         updateSelection();
@@ -562,7 +571,19 @@
 
       function completePuzzle() {
         const puzzle = currentPuzzle();
-        els.endDetails.textContent = "You finished " + puzzle.name + ". Tangram brains use shape, space, memory, and patience.";
+        const elapsed = Math.max(1, Math.round((performance.now() - state.startTime) / 1000));
+        const score = Math.max(1, Math.round(10000 - elapsed * 20 - state.moves * 100));
+        els.endDetails.textContent = "You finished " + puzzle.name + " in " + elapsed + "s with " + state.moves + " moves. Score: " + score + " pts.";
+        if (window.ChunHighScores) {
+          window.ChunHighScores.record({
+            gameId: "tangram-puzzles",
+            gameName: "Tangram Puzzles",
+            score,
+            scoreLabel: "pts",
+            detail: puzzle.name + " · " + elapsed + "s · " + state.moves + " moves",
+          });
+          window.ChunHighScores.render(els.continueBtn.parentNode, "tangram-puzzles", { scoreLabel: "pts" }, els.continueBtn);
+        }
         els.endScreen.hidden = false;
         els.continueBtn.focus();
       }

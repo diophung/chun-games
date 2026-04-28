@@ -2,7 +2,7 @@
 
 A small playground of browser games built **to learn coding and have fun — using AI coding agents** (Claude Code + the Superpowers plugin) as collaborators.
 
-Every game is a single self-contained HTML file: zero build step, no dependencies to install. Open in any modern browser and play.
+Every game is static HTML with a shared local high-score helper: zero build step, no dependencies to install. Open in any modern browser and play.
 
 The home page ([`index.html`](./index.html)) is a catalog with thumbnails linking to each game:
 
@@ -15,6 +15,7 @@ The home page ([`index.html`](./index.html)) is a catalog with thumbnails linkin
 | [Type2Build](#type2build) | <img src="docs/screenshots/type2build.png" width="240" alt="Type2Build preview" /> | [`games/type2build.html`](./games/type2build.html) | 2D · SVG |
 | [Zoomy Cars](#zoomy-cars) | <img src="docs/screenshots/zoomy-car.png" width="240" alt="Zoomy Cars preview" /> | [`games/zoomy-car.html`](./games/zoomy-car.html) | 3D · Three.js |
 | [Child Feeder](#child-feeder) | <img src="docs/screenshots/child-feeder.png" width="240" alt="Child Feeder preview" /> | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
+| [Dragon Eating Cheese](#dragon-eating-cheese) | <img src="docs/screenshots/dragon.png" width="240" alt="Dragon Eating Cheese preview" /> | [`games/dragon.html`](./games/dragon.html) | 2D · Canvas |
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
 | [Memory Match Cards](#memory-match-cards) | Catalog card | [`games/memory-match.html`](./games/memory-match.html) | 2D · CSS |
 | [Guess Who Detective](#guess-who-detective) | Catalog card | [`games/guess-who.html`](./games/guess-who.html) | 2D · CSS |
@@ -85,6 +86,22 @@ Raise a cartoon child from age 1 to 18. Pick foods (healthy or junk), pick activ
 
 ---
 
+### Dragon Eating Cheese
+
+Steer a hungry dragon snake around the arena to gobble cheese wedges, collect bonus stars, level up, and avoid crashing into walls or yourself.
+
+**Controls:** arrow keys / WASD on desktop, on-screen controls on touch devices.
+
+**Highlights**
+- Speed and cheese-size settings
+- Score and level progression
+- Bonus star food and glow effects
+- Game-over animation and local high scores
+
+▶ [Open `games/dragon.html`](./games/dragon.html)
+
+---
+
 ### Car Memory
 
 ![Car Memory — 16 face-down cards in a 4×4 grid](docs/screenshots/car-memory.png)
@@ -151,6 +168,12 @@ Drag, rotate, and snap seven geometric pieces onto dotted outlines to complete k
 
 ---
 
+## Local High Scores
+
+All games save their top local scores with `localStorage` through [`games/high-scores.js`](./games/high-scores.js). When a run qualifies for the top 5, the browser asks for the player name and stores the score on that browser/device only. The catalog page shows the best saved score for every game.
+
+---
+
 ## Built With Agents
 
 This repo is written collaboratively with AI coding agents — designs, specs, and implementation plans live under [`docs/superpowers/`](./docs/superpowers/). The goal is twofold: make playable little things, and learn how far agents can take an idea from "make me a typing game" to a finished, testable feature.
@@ -164,6 +187,7 @@ open index.html                # game catalog (start here)
 open games/type2build.html     # typing game
 open games/zoomy-car.html      # racing game
 open games/child-feeder.html   # child-feeder game
+open games/dragon.html         # dragon snake game
 open games/car-memory.html     # memory game
 open games/memory-match.html   # creative memory game
 open games/guess-who.html      # deduction game

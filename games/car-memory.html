@@ -255,6 +255,7 @@
     <button id="play-again" type="button">Play Again</button>
   </section>
 
+  <script src="high-scores.js"></script>
   <script>
     (function () {
       "use strict";
@@ -431,11 +432,14 @@
 
       function endGame() {
         state.phase = "ended";
-        const elapsed = ((performance.now() - state.startTime) / 1000).toFixed(1);
+        const elapsedValue = (performance.now() - state.startTime) / 1000;
+        const elapsed = elapsedValue.toFixed(1);
+        const score = Math.max(1, Math.round(100000 - elapsedValue * 250 - state.moves * 1500));
         const stats = [
           "Time: " + elapsed + "s",
           "Moves: " + state.moves,
           "Pairs: " + state.matchesFound + " / " + PAIR_COUNT,
+          "Score: " + score + " pts",
         ];
         const frag = document.createDocumentFragment();
         for (const line of stats) {
@@ -445,6 +449,16 @@
         }
         els.endStats.replaceChildren(frag);
         els.endHeadline.textContent = "🏆 All matched!";
+        if (window.ChunHighScores) {
+          window.ChunHighScores.record({
+            gameId: "car-memory",
+            gameName: "Car Memory",
+            score,
+            scoreLabel: "pts",
+            detail: elapsed + "s · " + state.moves + " moves",
+          });
+          window.ChunHighScores.render(els.endScreen, "car-memory", { scoreLabel: "pts" }, els.playAgain);
+        }
         els.endScreen.hidden = false;
         els.playAgain.focus();
       }

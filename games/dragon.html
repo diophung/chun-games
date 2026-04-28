@@ -520,6 +520,7 @@
         </div>
     </div>
 
+    <script src="high-scores.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -536,7 +537,14 @@
         let nextDirection = 'right';
         let score = 0;
         let level = 1;
-        let highScore = localStorage.getItem('dragonCheeseHighScore') || 0;
+        function getDragonBestScore() {
+            const saved = window.ChunHighScores && window.ChunHighScores.best('dragon');
+            const oldScore = Number(localStorage.getItem('dragonCheeseHighScore') || 0);
+            return Math.max(saved ? Number(saved.score) : 0, oldScore || 0);
+        }
+
+        let highScore = getDragonBestScore();
+        let scoreRecorded = false;
         let gameLoop = null;
         let isPaused = false;
         let isGameOver = false;
@@ -613,6 +621,8 @@
             nextDirection = 'right';
             score = 0;
             level = 1;
+            scoreRecorded = false;
+            highScore = getDragonBestScore();
             currentSpeed = baseSpeed;
             isPaused = false;
             isGameOver = false;
@@ -1096,13 +1106,6 @@
             isGameOver = true;
             cancelAnimationFrame(gameLoop);
 
-            // Update high score
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('dragonCheeseHighScore', highScore);
-                document.getElementById('highScore').textContent = highScore;
-            }
-
             // Cinematic ending — modal appears once the explosion finishes
             const head = snake[0];
             const targetX = head.x * GRID_SIZE + GRID_SIZE / 2;
@@ -1119,6 +1122,26 @@
         function showGameOverModal() {
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalLevel').textContent = level;
+            const modal = document.getElementById('gameOver');
+            if (!scoreRecorded) {
+                scoreRecorded = true;
+                if (window.ChunHighScores) {
+                    window.ChunHighScores.record({
+                        gameId: 'dragon',
+                        gameName: 'Dragon Eating Cheese',
+                        score,
+                        scoreLabel: 'pts',
+                        detail: 'level ' + level + ' · ' + selectedSpeed + ' speed · ' + selectedCheeseSize + ' cheese',
+                    });
+                } else if (score > highScore) {
+                    localStorage.setItem('dragonCheeseHighScore', score);
+                }
+                highScore = getDragonBestScore();
+                document.getElementById('highScore').textContent = highScore;
+            }
+            if (window.ChunHighScores) {
+                window.ChunHighScores.render(modal, 'dragon', { scoreLabel: 'pts' }, modal.querySelector('button'));
+            }
             document.getElementById('gameOver').classList.remove('hidden');
         }
 
@@ -1571,4 +1594,3 @@
     </script>
 </body>
 </html>
-

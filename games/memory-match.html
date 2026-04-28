@@ -292,6 +292,7 @@
     <button class="primary" id="play-again" type="button">Play Again</button>
   </section>
 
+  <script src="high-scores.js"></script>
   <script>
     (function () {
       "use strict";
@@ -554,10 +555,13 @@
       function endGame() {
         state.phase = "ended";
         clearInterval(state.timerId);
+        const elapsed = elapsedSeconds();
+        const score = Math.max(1, Math.round(100000 - elapsed * 250 - state.moves * 1500));
         const stats = [
-          "Time: " + elapsedSeconds() + "s",
+          "Time: " + elapsed + "s",
           "Moves: " + state.moves,
           "Pairs: " + state.matchesFound + " / " + PAIR_COUNT,
+          "Score: " + score + " pts",
         ];
         const frag = document.createDocumentFragment();
         for (const line of stats) {
@@ -566,6 +570,16 @@
           frag.appendChild(li);
         }
         els.endStats.replaceChildren(frag);
+        if (window.ChunHighScores) {
+          window.ChunHighScores.record({
+            gameId: "memory-match",
+            gameName: "Memory Match Cards",
+            score,
+            scoreLabel: "pts",
+            detail: elapsed + "s · " + state.moves + " moves",
+          });
+          window.ChunHighScores.render(els.endScreen, "memory-match", { scoreLabel: "pts" }, els.playAgain);
+        }
         els.endScreen.hidden = false;
         els.playAgain.focus();
       }
