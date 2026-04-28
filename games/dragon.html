@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+ __   __   ___      ___  ___  __      __                                       
+/  ` |__) |__   /\   |  |__  |  \    |__) \ /    |  | | |    |    |  /\   |\/| 
+\__, |  \ |___ /~~\  |  |___ |__/    |__)  |     |/\| | |___ |___ | /~~\  |  | 
+
+2025-11-16                                                                               
+
+!-->
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Dragon Eating Cheese - Level Up Edition</title>
+    <style>
+        /* Embed playful font - Fredoka One */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .stat span {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .level-up-animation {
+            position: absolute;
+            font-size: 52px;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            color: #ffd700;
+            text-shadow: 0 0 30px #ffd700, 0 0 60px rgba(255, 215, 0, 0.5);
+            animation: levelUp 1.5s ease-out forwards;
+            pointer-events: none;
+            letter-spacing: 2px;
+        }
+
+        @keyframes levelUp {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) translateY(-50px);
+                opacity: 0;
+            }
+        }
+
+        canvas {
+            border: 3px solid #00d4ff;
+            border-radius: 10px;
+            background: #0f0f23;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .game-info {
+            margin-top: 15px;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 500;
+            font-family: 'Fredoka', sans-serif;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .settings {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 212, 255, 0.05);
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 3px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        .setting-group label {
+            font-size: 16px;
+            color: #00d4ff;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .option-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 70px;
+        }
+
+        .option-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.selected {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .option-btn .emoji {
+            font-size: 24px;
+        }
+
+        .option-btn .text {
+            font-size: 12px;
+            color: #aaa;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .option-btn.selected .text {
+            color: #fff;
+        }
+
+        .game-info {
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid #ff4444;
+            box-shadow: 0 0 50px rgba(255, 68, 68, 0.5);
+        }
+
+        .game-over h2 {
+            color: #ff4444;
+            font-size: 42px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+        }
+
+        .game-over p {
+            font-size: 20px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .speed-indicator {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .speed-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #ffdd00, #ff4444);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .mobile-controls {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .joystick-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .joystick-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 50%;
+            border: 2px solid rgba(0, 212, 255, 0.5);
+        }
+
+        .joystick-btn {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.3) 0%, rgba(0, 150, 200, 0.4) 100%);
+            border: 2px solid rgba(0, 212, 255, 0.6);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .joystick-btn:active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.6) 0%, rgba(0, 150, 200, 0.7) 100%);
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .joystick-up {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .joystick-down {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .joystick-left {
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .joystick-right {
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .mobile-action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .mobile-action-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.3) 0%, rgba(0, 150, 200, 0.4) 100%);
+            border: 2px solid rgba(0, 212, 255, 0.6);
+            border-radius: 25px;
+            color: #fff;
+            font-weight: 500;
+            font-family: 'Fredoka', sans-serif;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            letter-spacing: 0.5px;
+        }
+
+        .mobile-action-btn:active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.6) 0%, rgba(0, 150, 200, 0.7) 100%);
+        }
+
+        @media (max-width: 900px), (pointer: coarse) {
+            .mobile-controls {
+                display: block;
+            }
+
+            .game-container {
+                padding: 15px;
+                max-width: 95vw;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .settings {
+                gap: 10px;
+            }
+
+            .option-btn {
+                padding: 6px 10px;
+                min-width: 55px;
+            }
+
+            .option-btn .emoji {
+                font-size: 20px;
+            }
+
+            .option-btn .text {
+                font-size: 10px;
+            }
+
+            .game-header {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .stat {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+
+            .controls {
+                display: none;
+            }
+
+            .game-info {
+                display: none;
+            }
+
+            h1 {
+                font-size: 24px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 style="text-align: center; margin-bottom: 20px; color: #00d4ff; font-size: 36px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 30px rgba(0, 212, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);">🐉 Dragon Eating Cheese 🧀</h1>
+
+        <div class="settings">
+            <div class="setting-group">
+                <label>Game Speed</label>
+                <div class="option-buttons" id="speedOptions">
+                    <div class="option-btn" data-value="slowest" onclick="selectSpeed('slowest')">
+                        <span class="emoji">🐢</span>
+                        <span class="text">Slowest</span>
+                    </div>
+                    <div class="option-btn" data-value="slow" onclick="selectSpeed('slow')">
+                        <span class="emoji">🚶</span>
+                        <span class="text">Slow</span>
+                    </div>
+                    <div class="option-btn selected" data-value="normal" onclick="selectSpeed('normal')">
+                        <span class="emoji">🏃</span>
+                        <span class="text">Normal</span>
+                    </div>
+                    <div class="option-btn" data-value="fast" onclick="selectSpeed('fast')">
+                        <span class="emoji">🚀</span>
+                        <span class="text">Fast</span>
+                    </div>
+                    <div class="option-btn" data-value="fastest" onclick="selectSpeed('fastest')">
+                        <span class="emoji">⚡</span>
+                        <span class="text">Fastest</span>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label>Cheese Size</label>
+                <div class="option-buttons" id="cheeseOptions">
+                    <div class="option-btn" data-value="small" onclick="selectCheese('small')">
+                        <span class="emoji">🧀</span>
+                        <span class="text">Small</span>
+                    </div>
+                    <div class="option-btn" data-value="medium" onclick="selectCheese('medium')">
+                        <span class="emoji">🧀🧀</span>
+                        <span class="text">Medium</span>
+                    </div>
+                    <div class="option-btn selected" data-value="big" onclick="selectCheese('big')">
+                        <span class="emoji">🧀🧀🧀</span>
+                        <span class="text">Big</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-header">
+            <div class="stat">Score: <span id="score">0</span></div>
+            <div class="stat">Level: <span id="level">1</span></div>
+            <div class="stat">High Score: <span id="highScore">0</span></div>
+        </div>
+
+        <div style="position: relative;">
+            <canvas id="gameCanvas" width="512" height="512"></canvas>
+            <div id="gameOver" class="game-over hidden">
+                <h2>Game Over!</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Level Reached: <span id="finalLevel">1</span></p>
+                <button onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+
+        <div class="speed-indicator">
+            <div class="speed-bar" id="speedBar" style="width: 10%;"></div>
+        </div>
+
+        <div class="game-info">
+            Use Arrow Keys or WASD to move | Space to restart
+        </div>
+
+        <div class="controls">
+            <button onclick="restartGame()">Restart</button>
+            <button onclick="togglePause()">Pause</button>
+        </div>
+
+        <div class="mobile-controls">
+            <div class="joystick-container">
+                <div class="joystick-center"></div>
+                <div class="joystick-btn joystick-up" ontouchstart="handleTouch('up', event)" onmousedown="changeDirection('up')">▲</div>
+                <div class="joystick-btn joystick-down" ontouchstart="handleTouch('down', event)" onmousedown="changeDirection('down')">▼</div>
+                <div class="joystick-btn joystick-left" ontouchstart="handleTouch('left', event)" onmousedown="changeDirection('left')">◀</div>
+                <div class="joystick-btn joystick-right" ontouchstart="handleTouch('right', event)" onmousedown="changeDirection('right')">▶</div>
+            </div>
+            <div class="mobile-action-buttons">
+                <div class="mobile-action-btn" ontouchstart="restartGame()" onmousedown="restartGame()">🔄 Restart</div>
+                <div class="mobile-action-btn" ontouchstart="togglePause()" onmousedown="togglePause()">⏸️ Pause</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game constants
+        const GRID_SIZE = 20;
+        const CELL_COUNT = canvas.width / GRID_SIZE;
+
+        // Game state
+        let snake = [];
+        let food = {};
+        let specialFood = null;
+        let direction = 'right';
+        let nextDirection = 'right';
+        let score = 0;
+        let level = 1;
+        let highScore = localStorage.getItem('dragonCheeseHighScore') || 0;
+        let gameLoop = null;
+        let isPaused = false;
+        let isGameOver = false;
+        let baseSpeed = 250;  // Faster base for smoother movement
+        let currentSpeed = baseSpeed;
+        let glowEffect = 0;  // Glow timer for eating effect
+        let lastTime = 0;
+        const TARGET_FPS = 24;
+        const FRAME_TIME = 1000 / TARGET_FPS;  // ~41.67ms per frame
+
+        // Level configuration
+        const POINTS_PER_LEVEL = 50;
+        const SPEED_DECREASE_PER_LEVEL = 10;
+        const MIN_SPEED = 50;
+
+        // Speed settings (lower = faster)
+        const SPEED_SETTINGS = {
+            slowest: 250,
+            slow: 200,
+            normal: 150,
+            fast: 100,
+            fastest: 70
+        };
+
+        // Cheese size settings
+        const CHEESE_SIZES = {
+            small: 1,
+            medium: 2,
+            big: 4
+        };
+
+        let cheeseSize = 4;  // Default to big (4x4)
+        let selectedSpeed = 'normal';
+        let selectedCheeseSize = 'big';
+
+        // Select speed option and restart game
+        function selectSpeed(speed) {
+            selectedSpeed = speed;
+            // Update visual selection
+            document.querySelectorAll('#speedOptions .option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.value === speed) {
+                    btn.classList.add('selected');
+                }
+            });
+            restartGame();
+        }
+
+        // Select cheese size option and restart game
+        function selectCheese(size) {
+            selectedCheeseSize = size;
+            // Update visual selection
+            document.querySelectorAll('#cheeseOptions .option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.value === size) {
+                    btn.classList.add('selected');
+                }
+            });
+            restartGame();
+        }
+
+        // Initialize game
+        function initGame() {
+            // Apply selected settings
+            baseSpeed = SPEED_SETTINGS[selectedSpeed];
+            cheeseSize = CHEESE_SIZES[selectedCheeseSize];
+
+            snake = [
+                { x: 10, y: 10 },
+                { x: 9, y: 10 },
+                { x: 8, y: 10 }
+            ];
+            direction = 'right';
+            nextDirection = 'right';
+            score = 0;
+            level = 1;
+            currentSpeed = baseSpeed;
+            isPaused = false;
+            isGameOver = false;
+            specialFood = null;
+            glowEffect = 0;
+
+            spawnFood();
+            updateDisplay();
+            document.getElementById('highScore').textContent = highScore;
+            document.getElementById('gameOver').classList.add('hidden');
+        }
+
+        // Spawn regular food (cheese block based on size setting)
+        function spawnFood() {
+            let newFood;
+            do {
+                newFood = {
+                    x: Math.floor(Math.random() * (CELL_COUNT - (cheeseSize - 1))),
+                    y: Math.floor(Math.random() * (CELL_COUNT - (cheeseSize - 1)))
+                };
+            } while (isFoodPositionOccupied(newFood));
+            food = newFood;
+        }
+
+        // Check if cheese block area is occupied
+        function isFoodPositionOccupied(pos) {
+            for (let dx = 0; dx < cheeseSize; dx++) {
+                for (let dy = 0; dy < cheeseSize; dy++) {
+                    const checkPos = { x: pos.x + dx, y: pos.y + dy };
+                    if (snake.some(segment => segment.x === checkPos.x && segment.y === checkPos.y)) {
+                        return true;
+                    }
+                    if (specialFood && specialFood.x === checkPos.x && specialFood.y === checkPos.y) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Spawn special food (bonus points)
+        function spawnSpecialFood() {
+            if (specialFood) return;
+
+            let newFood;
+            do {
+                newFood = {
+                    x: Math.floor(Math.random() * CELL_COUNT),
+                    y: Math.floor(Math.random() * CELL_COUNT),
+                    timer: 100  // Disappears after 100 frames
+                };
+            } while (isPositionOccupied(newFood));
+            specialFood = newFood;
+        }
+
+        // Check if position is occupied by snake or food
+        function isPositionOccupied(pos) {
+            if (snake.some(segment => segment.x === pos.x && segment.y === pos.y)) {
+                return true;
+            }
+            // Check cheese block (variable size)
+            if (pos.x >= food.x && pos.x < food.x + cheeseSize && pos.y >= food.y && pos.y < food.y + cheeseSize) {
+                return true;
+            }
+            if (specialFood && specialFood.x === pos.x && specialFood.y === pos.y) {
+                return true;
+            }
+            return false;
+        }
+
+        // Check if dragon head hits the cheese
+        function checkCheeseCollision(head) {
+            return head.x >= food.x && head.x < food.x + cheeseSize && head.y >= food.y && head.y < food.y + cheeseSize;
+        }
+
+        // Update game state
+        function update() {
+            if (isPaused || isGameOver) return;
+
+            direction = nextDirection;
+
+            // Calculate new head position
+            const head = { ...snake[0] };
+            switch (direction) {
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+                case 'left': head.x--; break;
+                case 'right': head.x++; break;
+            }
+
+            // Check wall collision
+            if (head.x < 0 || head.x >= CELL_COUNT || head.y < 0 || head.y >= CELL_COUNT) {
+                gameOver();
+                return;
+            }
+
+            // Check self collision
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                gameOver();
+                return;
+            }
+
+            // Add new head
+            snake.unshift(head);
+
+            // Check food collision
+            let ateFood = false;
+            if (checkCheeseCollision(head)) {
+                score += 10 * level;
+                ateFood = true;
+                glowEffect = 15;  // Trigger glow effect for 15 frames
+                spawnFood();
+
+                // Chance to spawn special food
+                if (Math.random() < 0.3) {
+                    spawnSpecialFood();
+                }
+            } else if (specialFood && head.x === specialFood.x && head.y === specialFood.y) {
+                score += 50 * level;
+                ateFood = true;
+                glowEffect = 20;  // Stronger glow for special food
+                specialFood = null;
+            }
+
+            if (!ateFood) {
+                snake.pop();
+            }
+
+            // Decay glow effect
+            if (glowEffect > 0) {
+                glowEffect--;
+            }
+
+            // Update special food timer
+            if (specialFood) {
+                specialFood.timer--;
+                if (specialFood.timer <= 0) {
+                    specialFood = null;
+                }
+            }
+
+            // Check for level up
+            const newLevel = Math.floor(score / POINTS_PER_LEVEL) + 1;
+            if (newLevel > level) {
+                levelUp(newLevel);
+            }
+
+            updateDisplay();
+        }
+
+        // Level up
+        function levelUp(newLevel) {
+            level = newLevel;
+
+            // Increase speed
+            currentSpeed = Math.max(MIN_SPEED, baseSpeed - (level - 1) * SPEED_DECREASE_PER_LEVEL);
+
+            // Show level up animation
+            showLevelUpAnimation();
+
+            // Spawn special food as bonus
+            spawnSpecialFood();
+        }
+
+        // Show level up animation
+        function showLevelUpAnimation() {
+            const anim = document.createElement('div');
+            anim.className = 'level-up-animation';
+            anim.textContent = `Level ${level}!`;
+            anim.style.left = '50%';
+            anim.style.top = '50%';
+            anim.style.transform = 'translate(-50%, -50%)';
+
+            const container = canvas.parentElement;
+            container.appendChild(anim);
+
+            setTimeout(() => anim.remove(), 1500);
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+
+            // Update speed bar (visual indicator)
+            const speedPercentage = ((baseSpeed - currentSpeed) / (baseSpeed - MIN_SPEED)) * 100;
+            document.getElementById('speedBar').style.width = Math.min(100, 10 + speedPercentage * 0.9) + '%';
+        }
+
+        // Draw game
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#0f0f23';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid (subtle)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= CELL_COUNT; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * GRID_SIZE, 0);
+                ctx.lineTo(i * GRID_SIZE, canvas.height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * GRID_SIZE);
+                ctx.lineTo(canvas.width, i * GRID_SIZE);
+                ctx.stroke();
+            }
+
+            // Draw mouse
+            snake.forEach((segment, index) => {
+                const isHead = index === 0;
+                const cx = segment.x * GRID_SIZE + GRID_SIZE / 2;
+                const cy = segment.y * GRID_SIZE + GRID_SIZE / 2;
+
+                if (isHead) {
+                    // Draw dragon head (vectorized)
+                    ctx.save();
+                    ctx.translate(cx, cy);
+
+                    // Rotate based on direction
+                    let rotation = 0;
+                    switch (direction) {
+                        case 'up': rotation = -Math.PI / 2; break;
+                        case 'down': rotation = Math.PI / 2; break;
+                        case 'left': rotation = Math.PI; break;
+                        case 'right': rotation = 0; break;
+                    }
+                    ctx.rotate(rotation);
+
+                    // Dramatic glow effect when eating
+                    if (glowEffect > 0) {
+                        const glowIntensity = glowEffect / 15;
+                        const glowRadius = GRID_SIZE * (1.5 + glowIntensity * 0.8);
+
+                        // Outer glow
+                        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowRadius);
+                        gradient.addColorStop(0, `rgba(255, 200, 0, ${glowIntensity * 0.9})`);
+                        gradient.addColorStop(0.4, `rgba(255, 150, 0, ${glowIntensity * 0.6})`);
+                        gradient.addColorStop(0.7, `rgba(255, 100, 0, ${glowIntensity * 0.3})`);
+                        gradient.addColorStop(1, 'rgba(255, 50, 0, 0)');
+
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, glowRadius, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Inner bright core
+                        ctx.fillStyle = `rgba(255, 255, 200, ${glowIntensity * 0.5})`;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, GRID_SIZE * 0.6, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Dragon head (angular shape)
+                    ctx.fillStyle = '#2e7d32';
+                    ctx.beginPath();
+                    ctx.moveTo(-GRID_SIZE * 0.4, 0);
+                    ctx.lineTo(-GRID_SIZE * 0.2, -GRID_SIZE * 0.35);
+                    ctx.lineTo(GRID_SIZE * 0.3, -GRID_SIZE * 0.25);
+                    ctx.lineTo(GRID_SIZE * 0.5, 0);
+                    ctx.lineTo(GRID_SIZE * 0.3, GRID_SIZE * 0.25);
+                    ctx.lineTo(-GRID_SIZE * 0.2, GRID_SIZE * 0.35);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Dragon horns
+                    ctx.fillStyle = '#1b5e20';
+                    ctx.beginPath();
+                    ctx.moveTo(-GRID_SIZE * 0.15, -GRID_SIZE * 0.3);
+                    ctx.lineTo(-GRID_SIZE * 0.35, -GRID_SIZE * 0.55);
+                    ctx.lineTo(-GRID_SIZE * 0.05, -GRID_SIZE * 0.35);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(-GRID_SIZE * 0.15, GRID_SIZE * 0.3);
+                    ctx.lineTo(-GRID_SIZE * 0.35, GRID_SIZE * 0.55);
+                    ctx.lineTo(-GRID_SIZE * 0.05, GRID_SIZE * 0.35);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Dragon snout
+                    ctx.fillStyle = '#388e3c';
+                    ctx.beginPath();
+                    ctx.moveTo(GRID_SIZE * 0.3, -GRID_SIZE * 0.15);
+                    ctx.lineTo(GRID_SIZE * 0.6, -GRID_SIZE * 0.1);
+                    ctx.lineTo(GRID_SIZE * 0.6, GRID_SIZE * 0.1);
+                    ctx.lineTo(GRID_SIZE * 0.3, GRID_SIZE * 0.15);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Nostrils
+                    ctx.fillStyle = '#1b5e20';
+                    ctx.beginPath();
+                    ctx.ellipse(GRID_SIZE * 0.55, -GRID_SIZE * 0.05, GRID_SIZE * 0.04, GRID_SIZE * 0.03, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(GRID_SIZE * 0.55, GRID_SIZE * 0.05, GRID_SIZE * 0.04, GRID_SIZE * 0.03, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Dragon eyes (fierce)
+                    ctx.fillStyle = '#ffeb3b';
+                    ctx.beginPath();
+                    ctx.ellipse(GRID_SIZE * 0.1, -GRID_SIZE * 0.18, GRID_SIZE * 0.12, GRID_SIZE * 0.08, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(GRID_SIZE * 0.1, GRID_SIZE * 0.18, GRID_SIZE * 0.12, GRID_SIZE * 0.08, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Dragon pupils (slit)
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.ellipse(GRID_SIZE * 0.12, -GRID_SIZE * 0.18, GRID_SIZE * 0.03, GRID_SIZE * 0.07, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(GRID_SIZE * 0.12, GRID_SIZE * 0.18, GRID_SIZE * 0.03, GRID_SIZE * 0.07, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Scales/spikes on head
+                    ctx.fillStyle = '#1b5e20';
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(-GRID_SIZE * 0.3 + i * GRID_SIZE * 0.15, -GRID_SIZE * 0.32);
+                        ctx.lineTo(-GRID_SIZE * 0.25 + i * GRID_SIZE * 0.15, -GRID_SIZE * 0.42);
+                        ctx.lineTo(-GRID_SIZE * 0.2 + i * GRID_SIZE * 0.15, -GRID_SIZE * 0.32);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+
+                    // Fire breath effect (subtle)
+                    const fireAlpha = Math.sin(Date.now() / 150) * 0.3 + 0.4;
+                    ctx.fillStyle = `rgba(255, 100, 0, ${fireAlpha})`;
+                    ctx.beginPath();
+                    ctx.moveTo(GRID_SIZE * 0.6, 0);
+                    ctx.lineTo(GRID_SIZE * 0.75, -GRID_SIZE * 0.08);
+                    ctx.lineTo(GRID_SIZE * 0.7, 0);
+                    ctx.lineTo(GRID_SIZE * 0.75, GRID_SIZE * 0.08);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.restore();
+                } else {
+                    // Draw tail segments (gets longer when eating)
+                    const alpha = 1 - (index / snake.length) * 0.6;
+                    const thickness = GRID_SIZE * 0.3 * (1 - index / snake.length * 0.5);
+
+                    ctx.fillStyle = `rgba(160, 160, 160, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, Math.max(thickness, GRID_SIZE * 0.1), 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Add subtle highlight
+                    ctx.fillStyle = `rgba(200, 200, 200, ${alpha * 0.3})`;
+                    ctx.beginPath();
+                    ctx.arc(cx - thickness * 0.2, cy - thickness * 0.2, thickness * 0.4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Draw cheese block (variable size)
+            const cheeseCx = food.x * GRID_SIZE + GRID_SIZE * cheeseSize / 2;
+            const cheeseCy = food.y * GRID_SIZE + GRID_SIZE * cheeseSize / 2;
+            const cheeseSizePixels = GRID_SIZE * cheeseSize * 0.8;
+
+            ctx.save();
+            ctx.translate(cheeseCx, cheeseCy);
+
+            // Main cheese wedge (triangle/wedge shape)
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.moveTo(-cheeseSizePixels * 0.4, cheeseSizePixels * 0.3);
+            ctx.lineTo(cheeseSizePixels * 0.4, cheeseSizePixels * 0.3);
+            ctx.lineTo(cheeseSizePixels * 0.4, -cheeseSizePixels * 0.1);
+            ctx.lineTo(-cheeseSizePixels * 0.2, -cheeseSizePixels * 0.4);
+            ctx.lineTo(-cheeseSizePixels * 0.4, -cheeseSizePixels * 0.2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Top surface (lighter)
+            ctx.fillStyle = '#ffeb3b';
+            ctx.beginPath();
+            ctx.moveTo(-cheeseSizePixels * 0.2, -cheeseSizePixels * 0.4);
+            ctx.lineTo(cheeseSizePixels * 0.4, -cheeseSizePixels * 0.1);
+            ctx.lineTo(cheeseSizePixels * 0.5, -cheeseSizePixels * 0.2);
+            ctx.lineTo(-cheeseSizePixels * 0.1, -cheeseSizePixels * 0.5);
+            ctx.closePath();
+            ctx.fill();
+
+            // Side surface (darker)
+            ctx.fillStyle = '#ffc107';
+            ctx.beginPath();
+            ctx.moveTo(cheeseSizePixels * 0.4, -cheeseSizePixels * 0.1);
+            ctx.lineTo(cheeseSizePixels * 0.4, cheeseSizePixels * 0.3);
+            ctx.lineTo(cheeseSizePixels * 0.5, cheeseSizePixels * 0.2);
+            ctx.lineTo(cheeseSizePixels * 0.5, -cheeseSizePixels * 0.2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Cheese holes (scale based on size)
+            ctx.fillStyle = '#f9a825';
+            if (cheeseSize >= 2) {
+                ctx.beginPath();
+                ctx.ellipse(-cheeseSizePixels * 0.15, cheeseSizePixels * 0.1, cheeseSizePixels * 0.12, cheeseSizePixels * 0.1, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cheeseSizePixels * 0.2, 0, cheeseSizePixels * 0.1, cheeseSizePixels * 0.08, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (cheeseSize >= 4) {
+                ctx.beginPath();
+                ctx.ellipse(cheeseSizePixels * 0.05, -cheeseSizePixels * 0.2, cheeseSizePixels * 0.08, cheeseSizePixels * 0.06, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(-cheeseSizePixels * 0.25, -cheeseSizePixels * 0.1, cheeseSizePixels * 0.06, cheeseSizePixels * 0.05, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cheeseSizePixels * 0.1, cheeseSizePixels * 0.18, cheeseSizePixels * 0.07, cheeseSizePixels * 0.06, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            // Small cheese gets one small hole
+            if (cheeseSize === 1) {
+                ctx.beginPath();
+                ctx.ellipse(0, 0, cheeseSizePixels * 0.15, cheeseSizePixels * 0.12, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+
+            // Add glow to cheese
+            ctx.shadowColor = '#ffd700';
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = 'transparent';
+            ctx.fillRect(food.x * GRID_SIZE, food.y * GRID_SIZE, GRID_SIZE * cheeseSize, GRID_SIZE * cheeseSize);
+            ctx.shadowBlur = 0;
+
+            // Draw special food
+            if (specialFood) {
+                const pulse = Math.sin(Date.now() / 100) * 0.3 + 0.7;
+                ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
+                ctx.beginPath();
+
+                // Draw star shape
+                const cx = specialFood.x * GRID_SIZE + GRID_SIZE / 2;
+                const cy = specialFood.y * GRID_SIZE + GRID_SIZE / 2;
+                const spikes = 5;
+                const outerRadius = GRID_SIZE / 2 - 2;
+                const innerRadius = outerRadius / 2;
+
+                ctx.beginPath();
+                for (let i = 0; i < spikes * 2; i++) {
+                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                    const angle = (i * Math.PI) / spikes - Math.PI / 2;
+                    const x = cx + Math.cos(angle) * radius;
+                    const y = cy + Math.sin(angle) * radius;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+
+                // Glow effect
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            // Draw pause overlay
+            if (isPaused && !isGameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '48px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText('⏸️ PAUSED', canvas.width / 2, canvas.height / 2);
+            }
+        }
+
+        // Game over
+        function gameOver() {
+            isGameOver = true;
+            cancelAnimationFrame(gameLoop);
+
+            // Update high score
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('dragonCheeseHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+            }
+
+            // Show game over screen
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalLevel').textContent = level;
+            document.getElementById('gameOver').classList.remove('hidden');
+        }
+
+        // Game step with frame timing
+        let accumulator = 0;
+        let moveAccumulator = 0;
+
+        function gameStep(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            accumulator += deltaTime;
+            moveAccumulator += deltaTime;
+
+            // Update at target FPS for smooth rendering
+            while (accumulator >= FRAME_TIME) {
+                // Decay glow effect each frame
+                if (glowEffect > 0 && !isPaused && !isGameOver) {
+                    glowEffect = Math.max(0, glowEffect - 0.5);
+                }
+                accumulator -= FRAME_TIME;
+            }
+
+            // Move snake at current speed
+            while (moveAccumulator >= currentSpeed) {
+                update();
+                moveAccumulator -= currentSpeed;
+            }
+
+            draw();
+
+            if (!isGameOver) {
+                gameLoop = requestAnimationFrame(gameStep);
+            }
+        }
+
+        // Start game
+        function startGame() {
+            initGame();
+            if (gameLoop) cancelAnimationFrame(gameLoop);
+            lastTime = 0;
+            accumulator = 0;
+            moveAccumulator = 0;
+            gameLoop = requestAnimationFrame(gameStep);
+        }
+
+        // Restart game
+        function restartGame() {
+            startGame();
+        }
+
+        // Toggle pause
+        function togglePause() {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            if (!isPaused) {
+                // Reset timing to avoid jumps when resuming
+                lastTime = 0;
+            }
+            draw();
+        }
+
+        // Change direction (for mobile controls)
+        function changeDirection(newDir) {
+            const opposites = {
+                'up': 'down',
+                'down': 'up',
+                'left': 'right',
+                'right': 'left'
+            };
+
+            if (newDir !== opposites[direction]) {
+                nextDirection = newDir;
+            }
+        }
+
+        // Handle touch events for mobile
+        function handleTouch(dir, event) {
+            event.preventDefault();
+            changeDirection(dir);
+        }
+
+        // Prevent scrolling on touch devices when playing
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('.joystick-container') || e.target.closest('.mobile-action-buttons')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            // Space key for hot restart (works anytime)
+            if (e.key === ' ') {
+                e.preventDefault();
+                restartGame();
+                return;
+            }
+
+            if (isGameOver) return;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    e.preventDefault();
+                    changeDirection('up');
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    e.preventDefault();
+                    changeDirection('down');
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    e.preventDefault();
+                    changeDirection('left');
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    e.preventDefault();
+                    changeDirection('right');
+                    break;
+            }
+        });
+
+        // Start the game
+        startGame();
+    </script>
+</body>
+</html>
+
