@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Car Memory</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+      color: #f1f5f9;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+
+    header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-variant-numeric: tabular-nums;
+    }
+    header h1 {
+      margin: 0;
+      font-size: clamp(20px, 5vw, 26px);
+      letter-spacing: 0.04em;
+    }
+    .stats {
+      display: flex;
+      gap: 8px;
+      font-size: clamp(13px, 3.2vw, 15px);
+    }
+    .stat {
+      background: rgba(0,0,0,0.35);
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .stat strong { color: #fbbf24; margin-left: 4px; }
+    nav { display: flex; gap: 12px; }
+    nav a {
+      color: #f1f5f9;
+      text-decoration: none;
+      opacity: 0.8;
+      font-size: 14px;
+      border-bottom: 1px dashed rgba(255,255,255,0.4);
+    }
+    nav a:hover { opacity: 1; }
+
+    main {
+      flex: 1 1 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 480px;
+      perspective: 1000px;
+    }
+
+    .card {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 480ms cubic-bezier(.4,.2,.2,1);
+    }
+    .card.revealed .card-inner,
+    .card.matched .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card.matched { cursor: default; }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .face.back {
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), transparent 60%),
+        linear-gradient(135deg, #475569 0%, #1e293b 100%);
+      border: 2px solid #64748b;
+      color: #cbd5e1;
+    }
+    .back-mark {
+      font-size: clamp(28px, 9vw, 44px);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+    .face.front {
+      transform: rotateY(180deg);
+      color: #fff;
+      text-align: center;
+      gap: 2px;
+    }
+    .face.front[data-dark="1"] { color: #1f2937; }
+
+    .logo {
+      font-size: clamp(22px, 6.5vw, 32px);
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .brand {
+      font-size: clamp(13px, 3.4vw, 17px);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+    }
+    .features {
+      font-size: clamp(9px, 2.4vw, 12px);
+      line-height: 1.25;
+      opacity: 0.95;
+      margin-top: 2px;
+    }
+    .features div { white-space: nowrap; }
+
+    .check {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #16a34a;
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0);
+      transition: opacity 200ms ease, transform 220ms cubic-bezier(.5,1.7,.5,.9);
+      z-index: 5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+    .card.matched .check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .card.matched .face.front {
+      box-shadow: 0 0 0 3px #16a34a, 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    .card.shake .card-inner { animation: shake 380ms ease; }
+    @keyframes shake {
+      0%, 100% { transform: rotateY(180deg) translateX(0); }
+      25%      { transform: rotateY(180deg) translateX(-5px); }
+      75%      { transform: rotateY(180deg) translateX(5px); }
+    }
+
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      z-index: 100;
+    }
+    #end-screen[hidden] { display: none !important; }
+    #end-headline {
+      font-size: clamp(28px, 8vw, 44px);
+      margin: 0;
+      text-align: center;
+    }
+    #end-stats {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: clamp(16px, 4vw, 20px);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 4px 0; }
+    #play-again {
+      font-size: clamp(18px, 5vw, 22px);
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 48px;
+    }
+    #play-again:active { transform: translateY(1px); }
+
+    @media (max-width: 480px) {
+      header { padding: 4px 2px 10px; }
+      #board { gap: 6px; }
+      .check { width: 20px; height: 20px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧠 Car Memory</h1>
+    <div class="stats">
+      <div class="stat">Moves<strong id="moves-count">0</strong></div>
+      <div class="stat">Pairs<strong id="pairs-count">0 / 8</strong></div>
+    </div>
+    <nav aria-label="other games">
+      <a href="../index.html">Home</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="board" aria-label="memory game board"></div>
+  </main>
+
+  <section id="end-screen" hidden>
+    <h2 id="end-headline">🏆 All matched!</h2>
+    <ul id="end-stats"></ul>
+    <button id="play-again" type="button">Play Again</button>
+  </section>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const CARS = [
+        { brand: "Ferrari",     logo: "🐎", color: "#dc2626", features: ["Italian", "V12", "Maranello"] },
+        { brand: "Tesla",       logo: "⚡", color: "#0f172a", features: ["Electric", "Autopilot", "USA"] },
+        { brand: "Porsche",     logo: "🏁", color: "#92400e", features: ["911", "German", "Boxer"] },
+        { brand: "Lamborghini", logo: "🐂", color: "#facc15", dark: true, features: ["V12", "Italian", "Wedge"] },
+        { brand: "BMW",         logo: "⚙️", color: "#1d4ed8", features: ["Inline-6", "M-Power", "Munich"] },
+        { brand: "Mercedes",    logo: "⭐", color: "#52525b", features: ["V8", "S-Class", "Stuttgart"] },
+        { brand: "Toyota",      logo: "🌸", color: "#be123c", features: ["Hybrid", "Reliable", "Japan"] },
+        { brand: "Ford",        logo: "🦅", color: "#0c4a6e", features: ["Mustang", "V8", "Detroit"] },
+      ];
+
+      const FLIP_BACK_DELAY = 900;
+      const PAIR_COUNT = CARS.length;
+
+      const state = {
+        phase: "playing",     // "playing" | "ended"
+        cards: [],
+        revealed: [],
+        matchesFound: 0,
+        moves: 0,
+        locked: false,
+        startTime: 0,
+      };
+
+      const els = {
+        board:       document.getElementById("board"),
+        moves:       document.getElementById("moves-count"),
+        pairs:       document.getElementById("pairs-count"),
+        endScreen:   document.getElementById("end-screen"),
+        endHeadline: document.getElementById("end-headline"),
+        endStats:    document.getElementById("end-stats"),
+        playAgain:   document.getElementById("play-again"),
+      };
+
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function buildCardEl(car, pairId) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.pairId = String(pairId);
+
+        const inner = document.createElement("div");
+        inner.className = "card-inner";
+
+        const back = document.createElement("div");
+        back.className = "face back";
+        const backMark = document.createElement("div");
+        backMark.className = "back-mark";
+        backMark.textContent = "🚗";
+        back.appendChild(backMark);
+
+        const front = document.createElement("div");
+        front.className = "face front";
+        front.style.background = car.color;
+        if (car.dark) front.dataset.dark = "1";
+
+        const logo = document.createElement("div");
+        logo.className = "logo";
+        logo.textContent = car.logo;
+
+        const brand = document.createElement("div");
+        brand.className = "brand";
+        brand.textContent = car.brand;
+
+        const features = document.createElement("div");
+        features.className = "features";
+        for (const f of car.features) {
+          const line = document.createElement("div");
+          line.textContent = f;
+          features.appendChild(line);
+        }
+
+        front.appendChild(logo);
+        front.appendChild(brand);
+        front.appendChild(features);
+
+        const check = document.createElement("div");
+        check.className = "check";
+        check.textContent = "✓";
+
+        inner.appendChild(back);
+        inner.appendChild(front);
+        card.appendChild(inner);
+        card.appendChild(check);
+
+        return card;
+      }
+
+      function renderStats() {
+        els.moves.textContent = String(state.moves);
+        els.pairs.textContent = state.matchesFound + " / " + PAIR_COUNT;
+      }
+
+      function startGame() {
+        state.phase = "playing";
+        state.matchesFound = 0;
+        state.moves = 0;
+        state.revealed = [];
+        state.locked = false;
+        state.startTime = performance.now();
+        state.cards = [];
+
+        const deck = shuffle(
+          CARS.flatMap((car, idx) => [
+            { car, pairId: idx },
+            { car, pairId: idx },
+          ])
+        );
+
+        els.board.replaceChildren();
+        for (const item of deck) {
+          const cardEl = buildCardEl(item.car, item.pairId);
+          cardEl.addEventListener("click", () => onCardClick(cardEl));
+          els.board.appendChild(cardEl);
+          state.cards.push({ pairId: item.pairId, el: cardEl });
+        }
+
+        els.endScreen.hidden = true;
+        renderStats();
+      }
+
+      function onCardClick(cardEl) {
+        if (state.phase !== "playing") return;
+        if (state.locked) return;
+        if (cardEl.classList.contains("revealed")) return;
+        if (cardEl.classList.contains("matched")) return;
+
+        cardEl.classList.add("revealed");
+        state.revealed.push(cardEl);
+
+        if (state.revealed.length === 2) {
+          state.moves += 1;
+          renderStats();
+          checkPair();
+        }
+      }
+
+      function checkPair() {
+        const [a, b] = state.revealed;
+        const matched = a.dataset.pairId === b.dataset.pairId;
+
+        if (matched) {
+          a.classList.add("matched");
+          b.classList.add("matched");
+          state.revealed = [];
+          state.matchesFound += 1;
+          renderStats();
+          if (state.matchesFound === PAIR_COUNT) {
+            endGame();
+          }
+        } else {
+          state.locked = true;
+          a.classList.add("shake");
+          b.classList.add("shake");
+          setTimeout(() => {
+            a.classList.remove("revealed", "shake");
+            b.classList.remove("revealed", "shake");
+            state.revealed = [];
+            state.locked = false;
+          }, FLIP_BACK_DELAY);
+        }
+      }
+
+      function endGame() {
+        state.phase = "ended";
+        const elapsed = ((performance.now() - state.startTime) / 1000).toFixed(1);
+        const stats = [
+          "Time: " + elapsed + "s",
+          "Moves: " + state.moves,
+          "Pairs: " + state.matchesFound + " / " + PAIR_COUNT,
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+        els.endHeadline.textContent = "🏆 All matched!";
+        els.endScreen.hidden = false;
+        els.playAgain.focus();
+      }
+
+      els.playAgain.addEventListener("click", startGame);
+
+      startGame();
+    })();
+  </script>
+</body>
+</html>

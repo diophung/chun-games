@@ -4,17 +4,20 @@ A small playground of browser games built **to learn coding and have fun — usi
 
 Every game is a single self-contained HTML file: zero build step, no dependencies to install. Open in any modern browser and play.
 
+The home page ([`index.html`](./index.html)) is a catalog with thumbnails linking to each game.
+
 ## Games
 
 | Game | File | Style |
 | --- | --- | --- |
-| [Chun-Ga Typing Game](#chun-ga-typing-game) | [`index.html`](./index.html) | 2D · SVG |
-| [Zoomy Cars](#zoomy-cars) | [`zoomy-car.html`](./zoomy-car.html) | 3D · Three.js |
-| [Child Feeder](#child-feeder) | [`child-feeder.html`](./child-feeder.html) | 2D · SVG |
+| [Type2Build](#type2build) | [`games/type2build.html`](./games/type2build.html) | 2D · SVG |
+| [Zoomy Cars](#zoomy-cars) | [`games/zoomy-car.html`](./games/zoomy-car.html) | 3D · Three.js |
+| [Child Feeder](#child-feeder) | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
+| [Car Memory](#car-memory) | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
 
 ---
 
-### Chun-Ga Typing Game
+### Type2Build
 
 Type car-themed words to color in a grey city skyline. Each word you finish lights up a random section in a random color. Race the 90-second clock to fill all 13 sections of the city — but watch out: every typo costs 2 seconds and rolls your input back to the last correct letter.
 
@@ -27,7 +30,7 @@ Type car-themed words to color in a grey city skyline. Each word you finish ligh
 - End screen with stats — time used, words completed, typos, accuracy
 - "Play Again" resets the round
 
-▶ [Open `index.html`](./index.html)
+▶ [Open `games/type2build.html`](./games/type2build.html)
 
 ---
 
@@ -48,7 +51,7 @@ A cartoon 3D racing game. Drive a googly-eyed car around a looped track, grab sp
 - **Repair shop**: 1 ⭐ = 1 ❤️ (press R or tap REPAIR)
 - At 0 HP the car limps along at half speed until you repair it
 
-▶ [Open `zoomy-car.html`](./zoomy-car.html)
+▶ [Open `games/zoomy-car.html`](./games/zoomy-car.html)
 
 ---
 
@@ -65,7 +68,23 @@ Raise a cartoon child from age 3 to 18. Pick foods (healthy or junk), pick activ
 - Crying state: only Sleep is available until happiness recovers
 - 4 ending variants based on the child's dominant final stat
 
-▶ [Open `child-feeder.html`](./child-feeder.html)
+▶ [Open `games/child-feeder.html`](./games/child-feeder.html)
+
+---
+
+### Car Memory
+
+A classic memory match game with 8 unique car-brand pairs (16 cards). Tap a card to flip it; flip a second card and if the brands match, both lock with a green ✓ in the top-right corner. If not, they flip back. Find all 8 pairs to win.
+
+**Controls:** mouse / touch — tap any face-down card to reveal.
+
+**Highlights**
+- 8 themed pairs: Ferrari, Tesla, Porsche, Lamborghini, BMW, Mercedes, Toyota, Ford
+- Each card shows brand, logo, and 3 features on a brand-colored face
+- 3D card-flip animation, shake on a wrong pair
+- Tracks moves and time; end screen with stats + "Play Again"
+
+▶ [Open `games/car-memory.html`](./games/car-memory.html)
 
 ---
 
@@ -78,9 +97,11 @@ This repo is written collaboratively with AI coding agents — designs, specs, a
 No build step — just open the HTML files:
 
 ```sh
-open index.html         # typing game
-open zoomy-car.html     # racing game
-open child-feeder.html  # child-feeder game
+open index.html                # game catalog (start here)
+open games/type2build.html     # typing game
+open games/zoomy-car.html      # racing game
+open games/child-feeder.html   # child-feeder game
+open games/car-memory.html     # memory game
 ```
 
 Or serve the directory with any static file server, e.g.:
