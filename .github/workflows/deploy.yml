@@ -1,0 +1,28 @@
+name: Deploy to diophung.com
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-chun-games
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy site files via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: diophung.com
+          username: dio
+          port: 22
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "index.html,games/**,docs/screenshots/**,README.md"
+          target: /var/www/html/html_misc/chun-games
+          overwrite: true
