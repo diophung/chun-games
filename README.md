@@ -17,9 +17,9 @@ The home page ([`index.html`](./index.html)) is a catalog with thumbnails linkin
 | [Child Feeder](#child-feeder) | <img src="docs/screenshots/child-feeder.png" width="240" alt="Child Feeder preview" /> | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
 | [Dragon Eating Cheese](#dragon-eating-cheese) | <img src="docs/screenshots/dragon.png" width="240" alt="Dragon Eating Cheese preview" /> | [`games/dragon.html`](./games/dragon.html) | 2D · Canvas |
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
-| [Memory Match Cards](#memory-match-cards) | Catalog card | [`games/memory-match.html`](./games/memory-match.html) | 2D · CSS |
-| [Guess Who Detective](#guess-who-detective) | Catalog card | [`games/guess-who.html`](./games/guess-who.html) | 2D · CSS |
-| [Tangram Puzzles](#tangram-puzzles) | Catalog card | [`games/tangram-puzzles.html`](./games/tangram-puzzles.html) | 2D · SVG |
+| [Memory Match Cards](#memory-match-cards) | <img src="docs/screenshots/memory-match.png" width="240" alt="Memory Match preview" /> | [`games/memory-match.html`](./games/memory-match.html) | 2D · CSS |
+| [Guess Who Detective](#guess-who-detective) | <img src="docs/screenshots/guess-who.png" width="240" alt="Guess Who Detective preview" /> | [`games/guess-who.html`](./games/guess-who.html) | 2D · CSS |
+| [Tangram Puzzles](#tangram-puzzles) | <img src="docs/screenshots/tangram-puzzles.png" width="240" alt="Tangram Puzzles preview" /> | [`games/tangram-puzzles.html`](./games/tangram-puzzles.html) | 2D · SVG |
 
 ---
 
@@ -88,14 +88,16 @@ Raise a cartoon child from age 1 to 18. Pick foods (healthy or junk), pick activ
 
 ### Dragon Eating Cheese
 
+![Dragon Eating Cheese — snake-style dragon hunting cheese on the play arena](docs/screenshots/dragon.png)
+
 Steer a hungry dragon snake around the arena to gobble cheese wedges, collect bonus stars, level up, and avoid crashing into walls or yourself.
 
 **Controls:** arrow keys / WASD on desktop, on-screen controls on touch devices.
 
 **Highlights**
-- Speed and cheese-size settings
-- Score and level progression
-- Bonus star food and glow effects
+- 5 speed presets (slowest → fastest) and 3 cheese sizes (small / medium / big)
+- Level up every 50 points; each level shaves 10ms off the tick speed (down to a 50ms floor)
+- Bonus star food appears with a timed glow — grab it for extra points
 - Game-over animation and local high scores
 
 ▶ [Open `games/dragon.html`](./games/dragon.html)
@@ -104,23 +106,27 @@ Steer a hungry dragon snake around the arena to gobble cheese wedges, collect bo
 
 ### Car Memory
 
-![Car Memory — 16 face-down cards in a 4×4 grid](docs/screenshots/car-memory.png)
+![Car Memory — header showing live Time, Moves, Pairs, and Best score above a 4×4 grid](docs/screenshots/car-memory.png)
 
-A classic memory match game with 8 unique car-brand pairs (16 cards). Tap a card to flip it; flip a second card and if the brands match, both lock with a green ✓ in the top-right corner. If not, they flip back. Find all 8 pairs to win.
+Memorize first, then match. Every round opens with a 3-second peek that reveals all 16 cards before flipping them face-down. Tap two cards: if the brands match, both lock with a green ✓ — if not, they shake and flip back. Find all 8 pairs to win.
 
-**Controls:** mouse / touch — tap any face-down card to reveal.
+**Controls:** mouse / touch — tap any face-down card to reveal. Tap anywhere during the peek to skip the countdown and start immediately.
 
 **Highlights**
 - 8 themed pairs: Ferrari, Tesla, Porsche, Lamborghini, BMW, Mercedes, Toyota, Ford
 - Each card shows brand, logo, and 3 features on a brand-colored face
-- 3D card-flip animation, shake on a wrong pair
-- Tracks moves and time; end screen with stats + "Play Again"
+- 3-second peek countdown at the start of every round
+- Live header stats: **Time**, **Moves**, **Pairs**, and **Best** score (with player name)
+- Snappy 3D card-flip animation; cards shake on a wrong pair
+- End screen with time, moves, score, and "Play Again"
 
 ▶ [Open `games/car-memory.html`](./games/car-memory.html)
 
 ---
 
 ### Memory Match Cards
+
+![Memory Match — 4×4 grid of face-down cards with imaginative themes](docs/screenshots/memory-match.png)
 
 A playful 4x4 memory game with 8 creative idea pairs. Flip two cards, remember where each one hides, and match dragons, rockets, robots, castles, music, puzzles, paint, and stars.
 
@@ -138,14 +144,17 @@ A playful 4x4 memory game with 8 creative idea pairs. Flip two cards, remember w
 
 ### Guess Who Detective
 
-A single-player deduction game inspired by yes/no mystery guessing. The game secretly picks one friend; ask questions about hats, glasses, pets, hair, shirts, and badges to eliminate suspects before making a final guess.
+![Guess Who Detective — 12 cartoon suspects beside a yes/no question list](docs/screenshots/guess-who.png)
+
+A single-player deduction game inspired by yes/no mystery guessing. The game secretly picks one friend; ask yes/no questions about hats, glasses, capes, stripes, scarves, star badges, pets, hair color, and shirt color to narrow down the suspects before making your final guess.
 
 **Controls:** mouse / touch — tap question buttons, then tap a remaining suspect to guess.
 
 **Highlights**
 - 12 cartoon suspects with visible traits
-- Yes/no question buttons automatically cross out impossible suspects
-- Tracks questions, guesses, and remaining possibilities
+- 12 yes/no questions covering accessories, clothing, hair, and pets
+- Each "yes" or "no" automatically crosses out impossible suspects
+- Tracks questions asked, guesses made, and remaining possibilities
 - Encourages logic, observation, and careful elimination
 
 ▶ [Open `games/guess-who.html`](./games/guess-who.html)
@@ -153,6 +162,8 @@ A single-player deduction game inspired by yes/no mystery guessing. The game sec
 ---
 
 ### Tangram Puzzles
+
+![Tangram Puzzles — Little House outline with seven colored pieces](docs/screenshots/tangram-puzzles.png)
 
 Drag, rotate, and snap seven geometric pieces onto dotted outlines to complete kid-friendly tangram puzzles.
 
