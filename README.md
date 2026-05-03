@@ -110,14 +110,14 @@ Steer a hungry dragon snake around the arena to gobble cheese wedges, collect bo
 
 ![Car Memory — header showing live Time, Moves, Pairs, and Best score above a 4×4 grid](docs/screenshots/car-memory.png)
 
-Memorize first, then match. Every round opens with a 3-second peek that reveals all 16 cards before flipping them face-down. Tap two cards: if the brands match, both lock with a green ✓ — if not, they shake and flip back. Find all 8 pairs to win.
+Memorize first, then match. Every round opens with a 5-second peek that reveals all 16 cards before flipping them face-down. Tap two cards: if the brands match, both lock with a green ✓ — if not, they shake and flip back. Find all 8 pairs to win.
 
 **Controls:** mouse / touch — tap any face-down card to reveal. Tap anywhere during the peek to skip the countdown and start immediately.
 
 **Highlights**
 - 8 themed pairs: Ferrari, Tesla, Porsche, Lamborghini, BMW, Mercedes, Toyota, Ford
 - Each card shows brand, logo, and 3 features on a brand-colored face
-- 3-second peek countdown at the start of every round
+- 5-second peek countdown at the start of every round
 - Live header stats: **Time**, **Moves**, **Pairs**, and **Best** score (with player name)
 - Snappy 3D card-flip animation; cards shake on a wrong pair
 - End screen with time, moves, score, and "Play Again"
