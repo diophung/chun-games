@@ -854,14 +854,16 @@
     (function () {
       "use strict";
       const games = [
-        { id: "type2build", name: "Type2Build" },
-        { id: "zoomy-car", name: "Zoomy Cars" },
-        { id: "child-feeder", name: "Child Feeder" },
-        { id: "dragon", name: "Dragon Eating Cheese" },
-        { id: "car-memory", name: "Car Memory" },
-        { id: "memory-match", name: "Memory Match Cards" },
-        { id: "guess-who", name: "Guess Who Detective" },
-        { id: "tangram-puzzles", name: "Tangram Puzzles" },
+        { id: "type2build",      name: "Type2Build",          scoreLabel: "pts" },
+        { id: "zoomy-car",       name: "Zoomy Cars",          scoreLabel: "pts" },
+        { id: "child-feeder",    name: "Child Feeder",        scoreLabel: "pts" },
+        { id: "dragon",          name: "Dragon Eating Cheese",scoreLabel: "pts" },
+        { id: "car-memory",      name: "Car Memory",          scoreLabel: "pts" },
+        { id: "engine-memory",   name: "Engine Memory",       scoreLabel: "pts" },
+        { id: "pit-stop-crew",   name: "Pit Stop Crew",       scoreLabel: "rounds" },
+        { id: "memory-match",    name: "Memory Match Cards",  scoreLabel: "pts" },
+        { id: "guess-who",       name: "Guess Who Detective", scoreLabel: "pts" },
+        { id: "tangram-puzzles", name: "Tangram Puzzles",     scoreLabel: "pts" },
       ];
       const wrap = document.getElementById("catalog-high-scores");
       const frag = document.createDocumentFragment();
@@ -872,7 +874,9 @@
         title.textContent = game.name;
         const line = document.createElement("span");
         const best = window.ChunHighScores && window.ChunHighScores.best(game.id);
-        line.textContent = best ? best.name + ": " + best.score.toLocaleString() + " pts" : "No score yet";
+        line.textContent = best
+          ? best.name + ": " + best.score.toLocaleString() + " " + game.scoreLabel
+          : "No score yet";
         tile.appendChild(title);
         tile.appendChild(line);
         frag.appendChild(tile);
