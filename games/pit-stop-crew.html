@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Pit Stop Crew</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+      color: #f1f5f9;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+
+    header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-variant-numeric: tabular-nums;
+    }
+    header h1 {
+      margin: 0;
+      font-size: clamp(20px, 5vw, 26px);
+      letter-spacing: 0.04em;
+    }
+    .stats {
+      display: flex;
+      gap: 8px;
+      font-size: clamp(13px, 3.2vw, 15px);
+    }
+    .stat {
+      background: rgba(0,0,0,0.35);
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .stat strong { color: #fbbf24; margin-left: 4px; }
+    nav { display: flex; gap: 12px; }
+    nav a {
+      color: #f1f5f9;
+      text-decoration: none;
+      opacity: 0.8;
+      font-size: 14px;
+      border-bottom: 1px dashed rgba(255,255,255,0.4);
+    }
+    nav a:hover { opacity: 1; }
+
+    main {
+      flex: 1 1 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 12px 0;
+    }
+
+    #message {
+      font-size: clamp(15px, 4vw, 20px);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-align: center;
+      padding: 8px 18px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 999px;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #message[data-mood="watch"]   { color: #fbbf24; }
+    #message[data-mood="play"]    { color: #4ade80; }
+    #message[data-mood="error"]   { color: #f87171; background: rgba(127,29,29,0.55); }
+
+    #pad {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 460px;
+      aspect-ratio: 1 / 1;
+    }
+
+    .crew-btn {
+      position: relative;
+      border: 4px solid rgba(255,255,255,0.18);
+      border-radius: 22px;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      transition: transform 80ms ease, filter 120ms ease, box-shadow 120ms ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+      filter: brightness(0.78) saturate(0.85);
+      color: #fff;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    }
+    .crew-btn:disabled { cursor: default; }
+    .crew-btn .icon {
+      font-size: clamp(40px, 12vw, 76px);
+      line-height: 1;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
+    }
+    .crew-btn .label {
+      font-size: clamp(13px, 3.4vw, 18px);
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .crew-btn[data-id="tire"]  { background: radial-gradient(circle at 30% 30%, #fb923c 0%, #c2410c 100%); }
+    .crew-btn[data-id="fuel"]  { background: radial-gradient(circle at 30% 30%, #facc15 0%, #a16207 100%); color: #1f2937; text-shadow: none; }
+    .crew-btn[data-id="wash"]  { background: radial-gradient(circle at 30% 30%, #38bdf8 0%, #075985 100%); }
+    .crew-btn[data-id="go"]    { background: radial-gradient(circle at 30% 30%, #4ade80 0%, #166534 100%); }
+
+    .crew-btn.lit {
+      filter: brightness(1.4) saturate(1.2);
+      box-shadow: 0 0 24px 8px rgba(255,255,255,0.55), 0 6px 14px rgba(0,0,0,0.4);
+      transform: scale(1.04);
+      border-color: rgba(255,255,255,0.85);
+    }
+    .crew-btn.tap-press {
+      transform: scale(0.96);
+    }
+
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      z-index: 100;
+    }
+    #end-screen[hidden] { display: none !important; }
+    #end-headline {
+      font-size: clamp(28px, 8vw, 44px);
+      margin: 0;
+      text-align: center;
+    }
+    #end-stats {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: clamp(16px, 4vw, 20px);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 4px 0; }
+    #play-again {
+      font-size: clamp(18px, 5vw, 22px);
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 48px;
+    }
+    #play-again:active { transform: translateY(1px); }
+
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      z-index: 50;
+      background: rgba(15,23,42,0.85);
+      padding: 24px;
+      text-align: center;
+    }
+    #start-overlay[hidden] { display: none !important; }
+    #start-overlay h2 {
+      font-size: clamp(24px, 6.5vw, 38px);
+      margin: 0;
+    }
+    #start-overlay p {
+      font-size: clamp(14px, 3.6vw, 17px);
+      max-width: 480px;
+      line-height: 1.45;
+      margin: 0;
+      opacity: 0.92;
+    }
+    #start-btn {
+      font-size: clamp(18px, 5vw, 24px);
+      padding: 14px 32px;
+      border: none;
+      border-radius: 999px;
+      background: #16a34a;
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      min-height: 52px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    }
+    #start-btn:active { transform: translateY(2px); }
+
+    @media (max-width: 480px) {
+      header { padding: 4px 2px 10px; }
+      #pad { gap: 10px; max-width: 380px; }
+      .crew-btn { border-radius: 18px; border-width: 3px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏁 Pit Stop Crew</h1>
+    <div class="stats">
+      <div class="stat">Round<strong id="round-count">0</strong></div>
+      <div class="stat">Best<strong id="best-score">—</strong></div>
+    </div>
+    <nav aria-label="other games">
+      <a href="../index.html">Home</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="message" data-mood="watch" aria-live="polite">Tap Start Race to begin</div>
+    <div id="pad" aria-label="pit crew action buttons">
+      <button class="crew-btn" data-id="tire" type="button" aria-label="Tire">
+        <div class="icon">🔧</div>
+        <div class="label">Tire</div>
+      </button>
+      <button class="crew-btn" data-id="fuel" type="button" aria-label="Fuel">
+        <div class="icon">⛽</div>
+        <div class="label">Fuel</div>
+      </button>
+      <button class="crew-btn" data-id="wash" type="button" aria-label="Wash">
+        <div class="icon">🚿</div>
+        <div class="label">Wash</div>
+      </button>
+      <button class="crew-btn" data-id="go" type="button" aria-label="Go">
+        <div class="icon">🏁</div>
+        <div class="label">Go</div>
+      </button>
+    </div>
+  </main>
+
+  <div id="start-overlay">
+    <h2>🏁 Pit Stop Crew</h2>
+    <p>The chief calls out a sequence of pit-stop jobs. Watch carefully, then tap them back in the right order. Each round adds one more job.</p>
+    <button id="start-btn" type="button">Start Race →</button>
+  </div>
+
+  <section id="end-screen" hidden>
+    <h2 id="end-headline">💥 Crash!</h2>
+    <ul id="end-stats"></ul>
+    <button id="play-again" type="button">Play Again</button>
+  </section>
+
+  <script src="high-scores.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      // Each button maps to a frequency in C major (C4, E4, G4, C5).
+      // Ascending pitches give the buttons a natural top-down feel and the
+      // sequence reads as a pleasant arpeggio when played in order.
+      const ACTIONS = [
+        { id: "tire", freq: 261.63 },   // C4
+        { id: "fuel", freq: 329.63 },   // E4
+        { id: "wash", freq: 392.00 },   // G4
+        { id: "go",   freq: 523.25 },   // C5
+      ];
+      const ID_TO_ACTION = Object.fromEntries(ACTIONS.map(a => [a.id, a]));
+
+      const FLASH_BASE_MS = 600;
+      const FLASH_MIN_MS = 320;
+      const GAP_BASE_MS = 240;
+      const GAP_MIN_MS = 110;
+
+      const state = {
+        phase: "idle",     // "idle" | "showing" | "awaiting" | "over"
+        sequence: [],
+        playerStep: 0,
+        round: 0,
+      };
+
+      const els = {
+        round:       document.getElementById("round-count"),
+        best:        document.getElementById("best-score"),
+        message:     document.getElementById("message"),
+        pad:         document.getElementById("pad"),
+        buttons:     Array.from(document.querySelectorAll(".crew-btn")),
+        startOverlay:document.getElementById("start-overlay"),
+        startBtn:    document.getElementById("start-btn"),
+        endScreen:   document.getElementById("end-screen"),
+        endHeadline: document.getElementById("end-headline"),
+        endStats:    document.getElementById("end-stats"),
+        playAgain:   document.getElementById("play-again"),
+      };
+
+      const buttonsById = Object.fromEntries(
+        els.buttons.map(b => [b.dataset.id, b])
+      );
+
+      // ---------- Audio ----------
+
+      let audioCtx = null;
+      function ensureAudio() {
+        if (!audioCtx) {
+          const Ctor = window.AudioContext || window.webkitAudioContext;
+          if (!Ctor) return null;
+          try { audioCtx = new Ctor(); } catch (err) { return null; }
+        }
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        return audioCtx;
+      }
+
+      function playTone(freq, duration, opts) {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const o = opts || {};
+        const wave = o.wave || "triangle";
+        const peak = o.peak == null ? 0.22 : o.peak;
+
+        const osc = ctx.createOscillator();
+        osc.type = wave;
+        osc.frequency.setValueAtTime(freq, now);
+        if (o.endFreq != null) {
+          osc.frequency.exponentialRampToValueAtTime(o.endFreq, now + duration);
+        }
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(peak, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.05);
+      }
+
+      function playAction(id) {
+        const action = ID_TO_ACTION[id];
+        if (!action) return;
+        playTone(action.freq, 0.36, { wave: "triangle", peak: 0.22 });
+      }
+
+      function playError() {
+        // Two-step descending bleat
+        playTone(220, 0.18, { wave: "sawtooth", peak: 0.18 });
+        setTimeout(() => playTone(110, 0.36, { wave: "sawtooth", peak: 0.18, endFreq: 60 }), 160);
+      }
+
+      function playFanfare() {
+        // C major arpeggio up
+        const notes = ACTIONS.map(a => a.freq);
+        notes.forEach((f, i) => {
+          setTimeout(() => playTone(f, 0.28, { wave: "triangle", peak: 0.24 }), i * 110);
+        });
+      }
+
+      // ---------- UI helpers ----------
+
+      function setMessage(text, mood) {
+        els.message.textContent = text;
+        els.message.dataset.mood = mood || "watch";
+      }
+
+      function setButtonsEnabled(enabled) {
+        for (const b of els.buttons) b.disabled = !enabled;
+      }
+
+      function flashButton(id, durationMs) {
+        const btn = buttonsById[id];
+        if (!btn) return;
+        btn.classList.add("lit");
+        playAction(id);
+        setTimeout(() => btn.classList.remove("lit"), durationMs);
+      }
+
+      function truncateName(name) {
+        const max = 12;
+        return name.length <= max ? name : name.slice(0, max - 1) + "…";
+      }
+
+      function renderBest() {
+        const top = window.ChunHighScores ? window.ChunHighScores.best("pit-stop-crew") : null;
+        if (!top) {
+          els.best.textContent = "—";
+          return;
+        }
+        els.best.textContent = "Round " + top.score + " (" + truncateName(top.name) + ")";
+      }
+
+      function renderRound() {
+        els.round.textContent = String(state.round);
+      }
+
+      // ---------- Round flow ----------
+
+      function flashTimingFor(round) {
+        // Ramp flash + gap durations down as the player progresses, but cap at
+        // a floor so the game never becomes unfair.
+        const t = Math.min(1, (round - 1) / 14);
+        const flash = Math.round(FLASH_BASE_MS - (FLASH_BASE_MS - FLASH_MIN_MS) * t);
+        const gap = Math.round(GAP_BASE_MS - (GAP_BASE_MS - GAP_MIN_MS) * t);
+        return { flash, gap };
+      }
+
+      function startGame() {
+        els.endScreen.hidden = true;
+        els.startOverlay.hidden = true;
+        state.sequence = [];
+        state.round = 0;
+        renderRound();
+        renderBest();
+        setMessage("Get ready…", "watch");
+        setButtonsEnabled(false);
+        setTimeout(nextRound, 700);
+      }
+
+      function nextRound() {
+        state.round += 1;
+        renderRound();
+        // Append one new step to the existing sequence so the player can rely
+        // on what they already memorized rather than starting from scratch.
+        const nextId = ACTIONS[Math.floor(Math.random() * ACTIONS.length)].id;
+        state.sequence.push(nextId);
+        state.playerStep = 0;
+        showSequence();
+      }
+
+      function showSequence() {
+        state.phase = "showing";
+        setButtonsEnabled(false);
+        setMessage("Watch the pit chief…", "watch");
+        const { flash, gap } = flashTimingFor(state.round);
+        const seq = state.sequence;
+
+        let idx = 0;
+        function step() {
+          if (idx >= seq.length) {
+            // Sequence finished; turn over to the player.
+            state.phase = "awaiting";
+            setMessage("Your turn — tap the sequence!", "play");
+            setButtonsEnabled(true);
+            return;
+          }
+          flashButton(seq[idx], flash);
+          idx += 1;
+          setTimeout(step, flash + gap);
+        }
+        // Small pause before the first flash so the player can notice the start.
+        setTimeout(step, 350);
+      }
+
+      function handleTap(id) {
+        if (state.phase !== "awaiting") return;
+        ensureAudio();
+        const expected = state.sequence[state.playerStep];
+        const btn = buttonsById[id];
+
+        // Brief tap-press feedback.
+        if (btn) {
+          btn.classList.add("tap-press", "lit");
+          playAction(id);
+          setTimeout(() => btn.classList.remove("tap-press", "lit"), 180);
+        }
+
+        if (id !== expected) {
+          gameOver();
+          return;
+        }
+
+        state.playerStep += 1;
+        if (state.playerStep >= state.sequence.length) {
+          // Round complete — celebrate briefly, then advance.
+          state.phase = "showing";
+          setButtonsEnabled(false);
+          setMessage("Nice! Next round…", "play");
+          setTimeout(nextRound, 700);
+        }
+      }
+
+      function gameOver() {
+        state.phase = "over";
+        setButtonsEnabled(false);
+        setMessage("Crash! Wrong button.", "error");
+        playError();
+
+        const score = Math.max(0, state.round - 1); // rounds fully completed
+        const stats = [
+          "Rounds completed: " + score,
+          "You reached round: " + state.round,
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+        els.endHeadline.textContent = score >= 8 ? "🏆 Pit Crew Pro!" : "💥 Crash!";
+
+        if (window.ChunHighScores && score > 0) {
+          window.ChunHighScores.record({
+            gameId: "pit-stop-crew",
+            gameName: "Pit Stop Crew",
+            score,
+            scoreLabel: "rounds",
+            detail: state.sequence.length + " steps memorized",
+          });
+          window.ChunHighScores.render(els.endScreen, "pit-stop-crew", { scoreLabel: "rounds" }, els.playAgain);
+        }
+        renderBest();
+
+        setTimeout(() => {
+          els.endScreen.hidden = false;
+          els.playAgain.focus();
+        }, 600);
+      }
+
+      // ---------- Wiring ----------
+
+      els.buttons.forEach(btn => {
+        btn.addEventListener("click", () => handleTap(btn.dataset.id));
+      });
+
+      els.startBtn.addEventListener("click", () => {
+        ensureAudio();
+        startGame();
+      });
+
+      els.playAgain.addEventListener("click", () => {
+        startGame();
+      });
+
+      renderBest();
+      setButtonsEnabled(false);
+    })();
+  </script>
+</body>
+</html>

@@ -18,6 +18,7 @@ The home page ([`index.html`](./index.html)) is a catalog with thumbnails linkin
 | [Dragon Eating Cheese](#dragon-eating-cheese) | <img src="docs/screenshots/dragon.png" width="240" alt="Dragon Eating Cheese preview" /> | [`games/dragon.html`](./games/dragon.html) | 2D · Canvas |
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
 | [Engine Memory](#engine-memory) | <img src="docs/screenshots/engine-memory.png" width="240" alt="Engine Memory preview" /> | [`games/engine-memory.html`](./games/engine-memory.html) | 2D · CSS · Web Audio |
+| [Pit Stop Crew](#pit-stop-crew) | <img src="docs/screenshots/pit-stop-crew.png" width="240" alt="Pit Stop Crew preview" /> | [`games/pit-stop-crew.html`](./games/pit-stop-crew.html) | 2D · CSS · Web Audio |
 | [Memory Match Cards](#memory-match-cards) | <img src="docs/screenshots/memory-match.png" width="240" alt="Memory Match preview" /> | [`games/memory-match.html`](./games/memory-match.html) | 2D · CSS |
 | [Guess Who Detective](#guess-who-detective) | <img src="docs/screenshots/guess-who.png" width="240" alt="Guess Who Detective preview" /> | [`games/guess-who.html`](./games/guess-who.html) | 2D · CSS |
 | [Tangram Puzzles](#tangram-puzzles) | <img src="docs/screenshots/tangram-puzzles.png" width="240" alt="Tangram Puzzles preview" /> | [`games/tangram-puzzles.html`](./games/tangram-puzzles.html) | 2D · SVG |
@@ -148,6 +149,28 @@ The engine sounds are **synthesized live in your browser via the Web Audio API**
 
 ---
 
+### Pit Stop Crew
+
+![Pit Stop Crew — four colored pit-crew buttons (Tire, Fuel, Wash, Go)](docs/screenshots/pit-stop-crew.png)
+
+A car-themed **sequence-memory** game (Simon-style) aimed at younger players (about 7+). The pit chief flashes a sequence of pit-stop jobs on four colored buttons — 🔧 Tire, ⛽ Fuel, 🚿 Wash, 🏁 Go — and you tap them back in the same order. Each round adds one more step. How long can you remember?
+
+A different brain workout from the spatial memory games on this page: instead of *where* the matching card is, you have to recall the *order* the chief called the jobs. Speed ramps up as you progress, but never past a fair floor.
+
+**Controls:** mouse / touch — tap the colored buttons in the same order the chief flashes them.
+
+**Highlights**
+- 4 chunky pit-crew buttons with distinct gradient colors and unique tones (a C major arpeggio: C4, E4, G4, C5)
+- Sequence length grows by one every round; flash speed gradually accelerates from 600ms down to 320ms over 14 rounds
+- Tones synthesized live via Web Audio API — works fully offline, zero asset files
+- Visual + audio feedback on every tap (button glows, plays its tone), descending error bleat on a wrong tap
+- Live header stats: **Round** (current attempt) and **Best** (top round saved with player name)
+- Reach round 8 → "Pit Crew Pro!" headline on the end screen
+
+▶ [Open `games/pit-stop-crew.html`](./games/pit-stop-crew.html)
+
+---
+
 ### Memory Match Cards
 
 ![Memory Match — 4×4 grid of face-down cards with imaginative themes](docs/screenshots/memory-match.png)
@@ -225,6 +248,7 @@ open games/child-feeder.html   # child-feeder game
 open games/dragon.html         # dragon snake game
 open games/car-memory.html     # memory game
 open games/engine-memory.html  # engine-sound memory game
+open games/pit-stop-crew.html  # pit-crew sequence memory game
 open games/memory-match.html   # creative memory game
 open games/guess-who.html      # deduction game
 open games/tangram-puzzles.html # tangram puzzle game

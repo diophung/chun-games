@@ -598,6 +598,71 @@
         </div>
       </article>
 
+      <!-- ========== Pit Stop Crew ========== -->
+      <article class="card">
+        <a class="thumb-link" href="games/pit-stop-crew.html" aria-label="Play Pit Stop Crew">
+          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="pit stop crew buttons">
+            <defs>
+              <radialGradient id="psc-tire" cx="30%" cy="30%" r="80%">
+                <stop offset="0%" stop-color="#fb923c"/>
+                <stop offset="100%" stop-color="#c2410c"/>
+              </radialGradient>
+              <radialGradient id="psc-fuel" cx="30%" cy="30%" r="80%">
+                <stop offset="0%" stop-color="#facc15"/>
+                <stop offset="100%" stop-color="#a16207"/>
+              </radialGradient>
+              <radialGradient id="psc-wash" cx="30%" cy="30%" r="80%">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="100%" stop-color="#075985"/>
+              </radialGradient>
+              <radialGradient id="psc-go" cx="30%" cy="30%" r="80%">
+                <stop offset="0%" stop-color="#4ade80"/>
+                <stop offset="100%" stop-color="#166534"/>
+              </radialGradient>
+              <linearGradient id="psc-bg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1e293b"/>
+                <stop offset="100%" stop-color="#334155"/>
+              </linearGradient>
+            </defs>
+            <rect width="320" height="180" fill="url(#psc-bg)"/>
+
+            <!-- 2x2 button grid, with the tire button "lit" -->
+            <g transform="translate(64, 14)">
+              <rect width="90" height="74" rx="14" fill="url(#psc-tire)" stroke="#fff" stroke-width="3" filter="brightness(1.3)"/>
+              <text x="45" y="44" text-anchor="middle" font-size="30">🔧</text>
+              <text x="45" y="64" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" letter-spacing="1">TIRE</text>
+              <!-- glow -->
+              <rect width="90" height="74" rx="14" fill="none" stroke="#fff" stroke-width="2" stroke-opacity="0.9"/>
+            </g>
+            <g transform="translate(166, 14)">
+              <rect width="90" height="74" rx="14" fill="url(#psc-fuel)" stroke="rgba(255,255,255,0.18)" stroke-width="2" opacity="0.78"/>
+              <text x="45" y="44" text-anchor="middle" font-size="30">⛽</text>
+              <text x="45" y="64" text-anchor="middle" font-size="9" font-weight="800" fill="#1f2937" letter-spacing="1">FUEL</text>
+            </g>
+            <g transform="translate(64, 96)">
+              <rect width="90" height="74" rx="14" fill="url(#psc-wash)" stroke="rgba(255,255,255,0.18)" stroke-width="2" opacity="0.78"/>
+              <text x="45" y="44" text-anchor="middle" font-size="30">🚿</text>
+              <text x="45" y="64" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" letter-spacing="1">WASH</text>
+            </g>
+            <g transform="translate(166, 96)">
+              <rect width="90" height="74" rx="14" fill="url(#psc-go)" stroke="rgba(255,255,255,0.18)" stroke-width="2" opacity="0.78"/>
+              <text x="45" y="44" text-anchor="middle" font-size="30">🏁</text>
+              <text x="45" y="64" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" letter-spacing="1">GO</text>
+            </g>
+          </svg>
+        </a>
+        <div class="body">
+          <h2>Pit Stop Crew</h2>
+          <p class="desc">The pit chief flashes a sequence of jobs (🔧 ⛽ 🚿 🏁) — repeat it back. Each round adds one more step. How long can you remember?</p>
+          <div class="tags">
+            <span class="tag">Memory</span>
+            <span class="tag">Sequence</span>
+            <span class="tag">2D · Web Audio</span>
+          </div>
+          <a class="play" href="games/pit-stop-crew.html">Play →</a>
+        </div>
+      </article>
+
       <!-- ========== Memory Match Cards ========== -->
       <article class="card">
         <a class="thumb-link" href="games/memory-match.html" aria-label="Play Memory Match Cards">
