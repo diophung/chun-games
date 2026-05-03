@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Engine Memory</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+      color: #f1f5f9;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+
+    header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-variant-numeric: tabular-nums;
+    }
+    header h1 {
+      margin: 0;
+      font-size: clamp(20px, 5vw, 26px);
+      letter-spacing: 0.04em;
+    }
+    .stats {
+      display: flex;
+      gap: 8px;
+      font-size: clamp(13px, 3.2vw, 15px);
+    }
+    .stat {
+      background: rgba(0,0,0,0.35);
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .stat strong { color: #fbbf24; margin-left: 4px; }
+    nav { display: flex; gap: 12px; }
+    nav a {
+      color: #f1f5f9;
+      text-decoration: none;
+      opacity: 0.8;
+      font-size: 14px;
+      border-bottom: 1px dashed rgba(255,255,255,0.4);
+    }
+    nav a:hover { opacity: 1; }
+
+    main {
+      flex: 1 1 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 480px;
+      perspective: 1000px;
+    }
+
+    .card {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 240ms cubic-bezier(.4,.2,.2,1);
+    }
+    .card.revealed .card-inner,
+    .card.matched .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card.matched { cursor: default; }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .face.back {
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), transparent 60%),
+        linear-gradient(135deg, #475569 0%, #1e293b 100%);
+      border: 2px solid #64748b;
+      color: #cbd5e1;
+    }
+    .card[data-type="sound"] .face.back {
+      background:
+        radial-gradient(circle at 30% 30%, rgba(252,211,77,0.18), transparent 60%),
+        linear-gradient(135deg, #6b21a8 0%, #1e1b4b 100%);
+      border-color: #a855f7;
+      color: #fde68a;
+    }
+    .back-mark {
+      font-size: clamp(28px, 9vw, 44px);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+    .face.front {
+      transform: rotateY(180deg);
+      color: #fff;
+      text-align: center;
+      gap: 2px;
+    }
+    .face.front[data-dark="1"] { color: #1f2937; }
+
+    .logo {
+      font-size: clamp(22px, 6.5vw, 32px);
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .brand {
+      font-size: clamp(13px, 3.4vw, 17px);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+    }
+    .features {
+      font-size: clamp(9px, 2.4vw, 12px);
+      line-height: 1.25;
+      opacity: 0.95;
+      margin-top: 2px;
+    }
+    .features div { white-space: nowrap; }
+
+    .speaker {
+      font-size: clamp(28px, 8vw, 40px);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .card.playing .speaker {
+      animation: speaker-pulse 600ms ease-in-out 2;
+    }
+    @keyframes speaker-pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.18); }
+    }
+    .sound-hint {
+      font-size: clamp(8px, 2.2vw, 11px);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .check {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #16a34a;
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0);
+      transition: opacity 200ms ease, transform 220ms cubic-bezier(.5,1.7,.5,.9);
+      z-index: 5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+    .card.matched .check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .card.matched .face.front {
+      box-shadow: 0 0 0 3px #16a34a, 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    .card.shake { animation: shake 190ms ease; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25%      { transform: translateX(-5px); }
+      75%      { transform: translateX(5px); }
+    }
+
+    #preview-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      z-index: 50;
+      pointer-events: none;
+    }
+    #preview-overlay[hidden] { display: none !important; }
+    #preview-counter {
+      font-size: clamp(96px, 24vw, 200px);
+      font-weight: 900;
+      color: #fbbf24;
+      text-shadow: 0 6px 24px rgba(0,0,0,0.7), 0 0 40px rgba(251,191,36,0.55);
+      font-variant-numeric: tabular-nums;
+      background: rgba(15,23,42,0.55);
+      border-radius: 28px;
+      padding: 6px 36px;
+      border: 3px solid rgba(251,191,36,0.55);
+      line-height: 1.05;
+      animation: preview-pulse 1s ease-in-out infinite;
+    }
+    #preview-hint {
+      font-size: clamp(13px, 3.6vw, 18px);
+      font-weight: 700;
+      color: #f1f5f9;
+      background: rgba(15,23,42,0.7);
+      padding: 8px 18px;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    @keyframes preview-pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
+    }
+
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      z-index: 100;
+    }
+    #end-screen[hidden] { display: none !important; }
+    #end-headline {
+      font-size: clamp(28px, 8vw, 44px);
+      margin: 0;
+      text-align: center;
+    }
+    #end-stats {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: clamp(16px, 4vw, 20px);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 4px 0; }
+    #play-again {
+      font-size: clamp(18px, 5vw, 22px);
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 48px;
+    }
+    #play-again:active { transform: translateY(1px); }
+
+    @media (max-width: 480px) {
+      header { padding: 4px 2px 10px; }
+      #board { gap: 6px; }
+      .check { width: 20px; height: 20px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎵 Engine Memory</h1>
+    <div class="stats">
+      <div class="stat">Time<strong id="time-count">0.0s</strong></div>
+      <div class="stat">Moves<strong id="moves-count">0</strong></div>
+      <div class="stat">Pairs<strong id="pairs-count">0 / 8</strong></div>
+      <div class="stat">Best<strong id="best-score">—</strong></div>
+    </div>
+    <nav aria-label="other games">
+      <a href="../index.html">Home</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="board" aria-label="engine memory game board"></div>
+  </main>
+
+  <div id="preview-overlay" hidden aria-live="polite">
+    <div id="preview-counter">3</div>
+    <div id="preview-hint">Memorize the cards · 🚗 cars + 🔊 sounds · click anywhere to start</div>
+  </div>
+
+  <section id="end-screen" hidden>
+    <h2 id="end-headline">🏆 All matched!</h2>
+    <ul id="end-stats"></ul>
+    <button id="play-again" type="button">Play Again</button>
+  </section>
+
+  <script src="high-scores.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const CARS = [
+        { brand: "Ferrari",     logo: "🐎", color: "#dc2626", features: ["Italian", "V12", "Maranello"], engine: "ferrari-v12" },
+        { brand: "Tesla",       logo: "⚡", color: "#0f172a", features: ["Electric", "Autopilot", "USA"], engine: "tesla" },
+        { brand: "Porsche",     logo: "🏁", color: "#92400e", features: ["911", "German", "Boxer"],     engine: "porsche-flat6" },
+        { brand: "Lamborghini", logo: "🐂", color: "#facc15", dark: true, features: ["V12", "Italian", "Wedge"], engine: "lambo-v12" },
+        { brand: "BMW",         logo: "⚙️", color: "#1d4ed8", features: ["Inline-6", "M-Power", "Munich"], engine: "bmw-i6" },
+        { brand: "Mercedes",    logo: "⭐", color: "#52525b", features: ["V8", "S-Class", "Stuttgart"], engine: "merc-v8" },
+        { brand: "Toyota",      logo: "🌸", color: "#be123c", features: ["Hybrid", "Reliable", "Japan"], engine: "toyota" },
+        { brand: "Ford",        logo: "🦅", color: "#0c4a6e", features: ["Mustang", "V8", "Detroit"],   engine: "mustang-v8" },
+      ];
+
+      // Each engine profile defines a unique "voice" via Web Audio synthesis.
+      // base/peak/end set the rev-up curve of the fundamental tone (Hz).
+      // harmonics is the relative amplitude of each integer-multiple overtone
+      // (1× = fundamental, 2×, 3×, 4×). More overtones = grittier, brassier
+      // engine character. wave selects the timbre at the source.
+      const ENGINE_PROFILES = {
+        "ferrari-v12":   { base: 220, peak: 480, end: 200, dur: 1.20, wave: "sawtooth", harmonics: [1.0, 0.65, 0.45, 0.28], filter: 2400 },
+        "tesla":         { base: 90,  peak: 320, end: 130, dur: 1.10, wave: "sine",     harmonics: [1.0, 0.10, 0.04, 0.00], filter: 1500, electric: true },
+        "porsche-flat6": { base: 170, peak: 360, end: 160, dur: 1.20, wave: "sawtooth", harmonics: [1.0, 0.55, 0.32, 0.18], filter: 2000 },
+        "lambo-v12":     { base: 150, peak: 340, end: 140, dur: 1.40, wave: "sawtooth", harmonics: [1.0, 0.75, 0.55, 0.32], filter: 1700 },
+        "bmw-i6":        { base: 140, peak: 280, end: 130, dur: 1.10, wave: "square",   harmonics: [1.0, 0.40, 0.18, 0.08], filter: 1500 },
+        "merc-v8":       { base: 100, peak: 220, end: 110, dur: 1.30, wave: "sawtooth", harmonics: [1.0, 0.62, 0.38, 0.20], filter: 1300 },
+        "toyota":        { base: 130, peak: 220, end: 140, dur: 1.00, wave: "triangle", harmonics: [1.0, 0.30, 0.12, 0.00], filter: 1200 },
+        "mustang-v8":    { base: 80,  peak: 180, end: 100, dur: 1.40, wave: "sawtooth", harmonics: [1.0, 0.72, 0.42, 0.26], filter: 1100 },
+      };
+
+      const FLIP_BACK_DELAY = 450;
+      const PAIR_COUNT = CARS.length;
+      const PREVIEW_SECONDS = 3;
+      const FLIP_TRANSITION_MS = 250;
+
+      const state = {
+        phase: "preview",     // "preview" | "playing" | "ended"
+        cards: [],
+        revealed: [],
+        matchesFound: 0,
+        moves: 0,
+        locked: false,
+        startTime: 0,
+        timerInterval: null,
+        previewInterval: null,
+        previewClickHandler: null,
+      };
+
+      const els = {
+        board:          document.getElementById("board"),
+        moves:          document.getElementById("moves-count"),
+        pairs:          document.getElementById("pairs-count"),
+        time:           document.getElementById("time-count"),
+        best:           document.getElementById("best-score"),
+        endScreen:      document.getElementById("end-screen"),
+        endHeadline:    document.getElementById("end-headline"),
+        endStats:       document.getElementById("end-stats"),
+        playAgain:      document.getElementById("play-again"),
+        previewOverlay: document.getElementById("preview-overlay"),
+        previewCounter: document.getElementById("preview-counter"),
+      };
+
+      // ---------- Audio ----------
+
+      let audioCtx = null;
+      function ensureAudio() {
+        if (!audioCtx) {
+          const Ctor = window.AudioContext || window.webkitAudioContext;
+          if (!Ctor) return null;
+          try { audioCtx = new Ctor(); } catch (err) { return null; }
+        }
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playEngine(profileId) {
+        const p = ENGINE_PROFILES[profileId];
+        if (!p) return;
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const dur = p.dur;
+
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(0.0001, now);
+        master.gain.exponentialRampToValueAtTime(0.22, now + 0.05);
+        master.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+        master.connect(ctx.destination);
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(p.filter * 0.7, now);
+        filter.frequency.linearRampToValueAtTime(p.filter, now + dur * 0.35);
+        filter.frequency.linearRampToValueAtTime(p.filter * 0.7, now + dur);
+        filter.Q.value = 4;
+        filter.connect(master);
+
+        for (let h = 0; h < p.harmonics.length; h++) {
+          const amp = p.harmonics[h];
+          if (amp <= 0) continue;
+          const osc = ctx.createOscillator();
+          osc.type = p.wave;
+          const mult = h + 1;
+          // Slight detune per overtone keeps procedural engines from sounding
+          // synthetic — real combustion never resonates on perfect integers.
+          const detune = (h * 4) - 2 + (Math.random() - 0.5) * 6;
+          osc.detune.value = detune;
+          osc.frequency.setValueAtTime(p.base * mult, now);
+          osc.frequency.exponentialRampToValueAtTime(p.peak * mult, now + dur * 0.35);
+          osc.frequency.exponentialRampToValueAtTime(p.end * mult, now + dur);
+          const hGain = ctx.createGain();
+          hGain.gain.value = amp * (h === 0 ? 1.0 : 0.85);
+          osc.connect(hGain).connect(filter);
+          osc.start(now);
+          osc.stop(now + dur + 0.05);
+        }
+
+        // For combustion engines, layer faint noise to suggest exhaust roar.
+        if (!p.electric) {
+          const noiseDur = Math.max(0.4, dur * 0.6);
+          const buffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * noiseDur), ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1);
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const noiseFilter = ctx.createBiquadFilter();
+          noiseFilter.type = "bandpass";
+          noiseFilter.frequency.value = p.base * 4;
+          noiseFilter.Q.value = 0.8;
+          const noiseGain = ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.0001, now);
+          noiseGain.gain.exponentialRampToValueAtTime(0.06, now + 0.08);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + noiseDur);
+          noise.connect(noiseFilter).connect(noiseGain).connect(master);
+          noise.start(now);
+          noise.stop(now + noiseDur);
+        }
+      }
+
+      // ---------- Game ----------
+
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function buildCardEl(item) {
+        const { car, pairId, type } = item;
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.pairId = String(pairId);
+        card.dataset.type = type;
+
+        const inner = document.createElement("div");
+        inner.className = "card-inner";
+
+        const back = document.createElement("div");
+        back.className = "face back";
+        const backMark = document.createElement("div");
+        backMark.className = "back-mark";
+        backMark.textContent = type === "visual" ? "🚗" : "🔊";
+        back.appendChild(backMark);
+
+        const front = document.createElement("div");
+        front.className = "face front";
+        front.style.background = car.color;
+        if (car.dark) front.dataset.dark = "1";
+
+        if (type === "visual") {
+          const logo = document.createElement("div");
+          logo.className = "logo";
+          logo.textContent = car.logo;
+
+          const brand = document.createElement("div");
+          brand.className = "brand";
+          brand.textContent = car.brand;
+
+          const features = document.createElement("div");
+          features.className = "features";
+          for (const f of car.features) {
+            const line = document.createElement("div");
+            line.textContent = f;
+            features.appendChild(line);
+          }
+
+          front.appendChild(logo);
+          front.appendChild(brand);
+          front.appendChild(features);
+        } else {
+          const speaker = document.createElement("div");
+          speaker.className = "speaker";
+          speaker.textContent = "🔊";
+
+          const brand = document.createElement("div");
+          brand.className = "brand";
+          brand.textContent = car.brand;
+
+          const hint = document.createElement("div");
+          hint.className = "sound-hint";
+          hint.textContent = "Listen!";
+
+          front.appendChild(speaker);
+          front.appendChild(brand);
+          front.appendChild(hint);
+        }
+
+        const check = document.createElement("div");
+        check.className = "check";
+        check.textContent = "✓";
+
+        inner.appendChild(back);
+        inner.appendChild(front);
+        card.appendChild(inner);
+        card.appendChild(check);
+
+        return card;
+      }
+
+      function renderStats() {
+        els.moves.textContent = String(state.moves);
+        els.pairs.textContent = state.matchesFound + " / " + PAIR_COUNT;
+      }
+
+      function truncateName(name) {
+        const max = 12;
+        return name.length <= max ? name : name.slice(0, max - 1) + "…";
+      }
+
+      function renderBest() {
+        const top = window.ChunHighScores ? window.ChunHighScores.best("engine-memory") : null;
+        if (!top) {
+          els.best.textContent = "—";
+          return;
+        }
+        els.best.textContent = top.score.toLocaleString() + " (" + truncateName(top.name) + ")";
+      }
+
+      function tickTimer() {
+        if (!state.startTime) return;
+        const elapsed = (performance.now() - state.startTime) / 1000;
+        els.time.textContent = elapsed.toFixed(1) + "s";
+      }
+
+      function stopTimer() {
+        if (state.timerInterval) {
+          clearInterval(state.timerInterval);
+          state.timerInterval = null;
+        }
+      }
+
+      function startGame() {
+        cancelPreview();
+        stopTimer();
+        state.matchesFound = 0;
+        state.moves = 0;
+        state.revealed = [];
+        state.locked = true;
+        state.startTime = 0;
+        state.cards = [];
+
+        const deck = shuffle(
+          CARS.flatMap((car, idx) => [
+            { car, pairId: idx, type: "visual" },
+            { car, pairId: idx, type: "sound" },
+          ])
+        );
+
+        els.board.replaceChildren();
+        for (const item of deck) {
+          const cardEl = buildCardEl(item);
+          cardEl.addEventListener("click", () => onCardClick(cardEl));
+          cardEl.classList.add("revealed");
+          els.board.appendChild(cardEl);
+          state.cards.push({ pairId: item.pairId, type: item.type, el: cardEl });
+        }
+
+        els.endScreen.hidden = true;
+        els.time.textContent = "0.0s";
+        renderStats();
+        renderBest();
+        startPreview();
+      }
+
+      function startPreview() {
+        state.phase = "preview";
+        let secondsLeft = PREVIEW_SECONDS;
+        els.previewCounter.textContent = String(secondsLeft);
+        els.previewOverlay.hidden = false;
+
+        state.previewInterval = setInterval(() => {
+          secondsLeft -= 1;
+          els.previewCounter.textContent = String(Math.max(0, secondsLeft));
+          if (secondsLeft <= 0) endPreview();
+        }, 1000);
+
+        state.previewClickHandler = () => endPreview();
+        // Defer attaching so the click that triggered Play Again does not
+        // immediately bubble up and end the preview.
+        setTimeout(() => {
+          if (state.phase === "preview" && state.previewClickHandler) {
+            document.addEventListener("click", state.previewClickHandler);
+          }
+        }, 150);
+      }
+
+      function cancelPreview() {
+        if (state.previewInterval) {
+          clearInterval(state.previewInterval);
+          state.previewInterval = null;
+        }
+        if (state.previewClickHandler) {
+          document.removeEventListener("click", state.previewClickHandler);
+          state.previewClickHandler = null;
+        }
+        els.previewOverlay.hidden = true;
+      }
+
+      function endPreview() {
+        if (state.phase !== "preview") return;
+        cancelPreview();
+
+        for (const item of state.cards) {
+          item.el.classList.remove("revealed");
+        }
+
+        state.phase = "playing";
+        // Hold input during the flip-back animation, then start the clock so
+        // the preview itself doesn't count against the player's time.
+        setTimeout(() => {
+          state.locked = false;
+          state.startTime = performance.now();
+          state.timerInterval = setInterval(tickTimer, 100);
+        }, FLIP_TRANSITION_MS);
+      }
+
+      function onCardClick(cardEl) {
+        if (state.phase !== "playing") return;
+        if (state.locked) return;
+        if (cardEl.classList.contains("revealed")) return;
+        if (cardEl.classList.contains("matched")) return;
+
+        // First user gesture is the right moment to unlock audio playback.
+        ensureAudio();
+
+        cardEl.classList.add("revealed");
+        state.revealed.push(cardEl);
+
+        if (cardEl.dataset.type === "sound") {
+          const carIdx = Number(cardEl.dataset.pairId);
+          const car = CARS[carIdx];
+          if (car) {
+            playEngine(car.engine);
+            cardEl.classList.add("playing");
+            setTimeout(() => cardEl.classList.remove("playing"), 1200);
+          }
+        }
+
+        if (state.revealed.length === 2) {
+          state.moves += 1;
+          renderStats();
+          checkPair();
+        }
+      }
+
+      function checkPair() {
+        const [a, b] = state.revealed;
+        const samePair = a.dataset.pairId === b.dataset.pairId;
+        const differentTypes = a.dataset.type !== b.dataset.type;
+        const matched = samePair && differentTypes;
+
+        if (matched) {
+          a.classList.add("matched");
+          b.classList.add("matched");
+          state.revealed = [];
+          state.matchesFound += 1;
+          renderStats();
+          if (state.matchesFound === PAIR_COUNT) {
+            endGame();
+          }
+        } else {
+          state.locked = true;
+          a.classList.add("shake");
+          b.classList.add("shake");
+          setTimeout(() => {
+            a.classList.remove("revealed", "shake");
+            b.classList.remove("revealed", "shake");
+            state.revealed = [];
+            state.locked = false;
+          }, FLIP_BACK_DELAY);
+        }
+      }
+
+      function endGame() {
+        state.phase = "ended";
+        stopTimer();
+        const elapsedValue = (performance.now() - state.startTime) / 1000;
+        const elapsed = elapsedValue.toFixed(1);
+        els.time.textContent = elapsed + "s";
+        const score = Math.max(1, Math.round(100000 - elapsedValue * 250 - state.moves * 1500));
+        const stats = [
+          "Time: " + elapsed + "s",
+          "Moves: " + state.moves,
+          "Pairs: " + state.matchesFound + " / " + PAIR_COUNT,
+          "Score: " + score + " pts",
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+        els.endHeadline.textContent = "🏆 All matched!";
+        if (window.ChunHighScores) {
+          window.ChunHighScores.record({
+            gameId: "engine-memory",
+            gameName: "Engine Memory",
+            score,
+            scoreLabel: "pts",
+            detail: elapsed + "s · " + state.moves + " moves",
+          });
+          window.ChunHighScores.render(els.endScreen, "engine-memory", { scoreLabel: "pts" }, els.playAgain);
+        }
+        renderBest();
+        els.endScreen.hidden = false;
+        els.playAgain.focus();
+      }
+
+      els.playAgain.addEventListener("click", startGame);
+
+      startGame();
+    })();
+  </script>
+</body>
+</html>

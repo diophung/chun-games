@@ -17,6 +17,7 @@ The home page ([`index.html`](./index.html)) is a catalog with thumbnails linkin
 | [Child Feeder](#child-feeder) | <img src="docs/screenshots/child-feeder.png" width="240" alt="Child Feeder preview" /> | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
 | [Dragon Eating Cheese](#dragon-eating-cheese) | <img src="docs/screenshots/dragon.png" width="240" alt="Dragon Eating Cheese preview" /> | [`games/dragon.html`](./games/dragon.html) | 2D · Canvas |
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
+| [Engine Memory](#engine-memory) | <img src="docs/screenshots/engine-memory.png" width="240" alt="Engine Memory preview" /> | [`games/engine-memory.html`](./games/engine-memory.html) | 2D · CSS · Web Audio |
 | [Memory Match Cards](#memory-match-cards) | <img src="docs/screenshots/memory-match.png" width="240" alt="Memory Match preview" /> | [`games/memory-match.html`](./games/memory-match.html) | 2D · CSS |
 | [Guess Who Detective](#guess-who-detective) | <img src="docs/screenshots/guess-who.png" width="240" alt="Guess Who Detective preview" /> | [`games/guess-who.html`](./games/guess-who.html) | 2D · CSS |
 | [Tangram Puzzles](#tangram-puzzles) | <img src="docs/screenshots/tangram-puzzles.png" width="240" alt="Tangram Puzzles preview" /> | [`games/tangram-puzzles.html`](./games/tangram-puzzles.html) | 2D · SVG |
@@ -124,6 +125,29 @@ Memorize first, then match. Every round opens with a 3-second peek that reveals 
 
 ---
 
+### Engine Memory
+
+![Engine Memory — 4×4 grid mixing slate 🚗 cards and purple 🔊 cards](docs/screenshots/engine-memory.png)
+
+A car-themed memory match aimed at younger players (about 7+) where every pair is **one visual card + one sound card** of the same brand. Tap a 🚗 to see a car, tap a 🔊 to hear its engine — match both for the same brand to lock the pair.
+
+The engine sounds are **synthesized live in your browser via the Web Audio API** — no audio files, no downloads. Each brand gets its own voice: a screaming Ferrari V12, a whirring Tesla, a rumbling Mustang, a snarling Lamborghini, and so on. Sounds work fully offline.
+
+**Controls:** mouse / touch — tap any face-down card to reveal. Tap anywhere during the peek to skip the countdown.
+
+**Highlights**
+- 16 cards in a 4×4 grid: 8 visual cards (🚗 back) + 8 sound cards (🔊 back) — distinct backs let kids plan
+- 8 unique procedural engine sounds built from oscillator stacks + filtered noise, with rev-up / rev-down envelopes
+- Match rule: a 🚗 and a 🔊 of the *same brand* — two of the same kind can never match
+- 3-second peek countdown shows every brand on every card before play begins
+- Live header stats: **Time**, **Moves**, **Pairs**, and **Best** score (with player name)
+- Speaker icon pulses while a sound is playing, snappy 3D card flip, shake on a wrong pair
+- End screen with time, moves, score, and "Play Again"
+
+▶ [Open `games/engine-memory.html`](./games/engine-memory.html)
+
+---
+
 ### Memory Match Cards
 
 ![Memory Match — 4×4 grid of face-down cards with imaginative themes](docs/screenshots/memory-match.png)
@@ -200,6 +224,7 @@ open games/zoomy-car.html      # racing game
 open games/child-feeder.html   # child-feeder game
 open games/dragon.html         # dragon snake game
 open games/car-memory.html     # memory game
+open games/engine-memory.html  # engine-sound memory game
 open games/memory-match.html   # creative memory game
 open games/guess-who.html      # deduction game
 open games/tangram-puzzles.html # tangram puzzle game
