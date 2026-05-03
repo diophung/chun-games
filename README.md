@@ -175,12 +175,13 @@ A different brain workout from the spatial memory games on this page: instead of
 
 ![Memory Match — 4×4 grid of face-down cards with imaginative themes](docs/screenshots/memory-match.png)
 
-A playful 4x4 memory game with 8 creative idea pairs. Flip two cards, remember where each one hides, and match dragons, rockets, robots, castles, music, puzzles, paint, and stars.
+A playful 4x4 memory game with 8 creative idea pairs. Every round opens with a 3-second peek that reveals all 16 cards face-up so you can map out the pairs. Then the deck flips face-down and the matching begins — find dragons, rockets, robots, castles, music, puzzles, paint, and stars.
 
-**Controls:** mouse / touch — tap any face-down card to reveal.
+**Controls:** mouse / touch — tap any face-down card to reveal. Tap anywhere during the peek to skip the countdown and start immediately.
 
 **Highlights**
 - 8 idea pairs focused on imagination and memory
+- 3-second peek countdown at the start of every round
 - Moves, pair count, and live timer
 - Matched pairs reveal a tiny creative story prompt
 - 3D card-flip animation, shake on wrong pairs, end screen with stats

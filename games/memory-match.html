@@ -257,6 +257,46 @@
       box-shadow: 0 8px 18px rgba(0,0,0,0.22);
     }
     .primary:active { transform: translateY(1px); }
+    #preview-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 50;
+      pointer-events: none;
+    }
+    #preview-overlay[hidden] { display: none !important; }
+    #preview-counter {
+      font-size: clamp(96px, 24vw, 200px);
+      font-weight: 900;
+      color: #ef476f;
+      background: rgba(255,255,255,0.92);
+      border-radius: 28px;
+      padding: 6px 38px;
+      border: 4px solid rgba(239,71,111,0.55);
+      line-height: 1.05;
+      font-variant-numeric: tabular-nums;
+      box-shadow: 0 8px 28px rgba(31,41,55,0.22);
+      animation: preview-pulse 1s ease-in-out infinite;
+    }
+    #preview-hint {
+      font-size: clamp(13px, 3.6vw, 17px);
+      font-weight: 800;
+      color: #17324d;
+      background: rgba(255,255,255,0.94);
+      padding: 9px 22px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 6px 18px rgba(31,41,55,0.18);
+    }
+    @keyframes preview-pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
+    }
     @media (max-width: 520px) {
       body { padding: 8px; }
       header { justify-content: center; text-align: center; }
@@ -286,6 +326,11 @@
     <section id="board" aria-label="memory match board"></section>
   </main>
 
+  <div id="preview-overlay" hidden aria-live="polite">
+    <div id="preview-counter">3</div>
+    <div id="preview-hint">Memorize the cards · click anywhere to start</div>
+  </div>
+
   <section id="end-screen" hidden>
     <h2>🌟 You matched them all!</h2>
     <ul id="end-stats"></ul>
@@ -310,15 +355,19 @@
 
       const FLIP_BACK_DELAY = 850;
       const PAIR_COUNT = ITEMS.length;
+      const PREVIEW_SECONDS = 3;
+      const FLIP_TRANSITION_MS = 460;
 
       const state = {
-        phase: "playing",
+        phase: "preview",
         revealed: [],
         matchesFound: 0,
         moves: 0,
         startTime: 0,
         timerId: 0,
         locked: false,
+        previewInterval: null,
+        previewClickHandler: null,
       };
 
       const els = {
@@ -331,6 +380,8 @@
         endScreen: document.getElementById("end-screen"),
         endStats: document.getElementById("end-stats"),
         playAgain: document.getElementById("play-again"),
+        previewOverlay: document.getElementById("preview-overlay"),
+        previewCounter: document.getElementById("preview-counter"),
       };
 
       function shuffle(items) {
@@ -479,17 +530,73 @@
         return svg;
       }
 
-      function startGame() {
-        clearInterval(state.timerId);
+      function startPreview() {
+        state.phase = "preview";
+        state.locked = true;
+        let secondsLeft = PREVIEW_SECONDS;
+        els.previewCounter.textContent = String(secondsLeft);
+        els.previewOverlay.hidden = false;
+        els.message.textContent = "Look at the cards — remember where each pair lives!";
+
+        state.previewInterval = setInterval(() => {
+          secondsLeft -= 1;
+          els.previewCounter.textContent = String(Math.max(0, secondsLeft));
+          if (secondsLeft <= 0) endPreview();
+        }, 1000);
+
+        state.previewClickHandler = () => endPreview();
+        // Defer attaching so the click that triggered Restart / Play Again
+        // does not immediately bubble up and end the new preview.
+        setTimeout(() => {
+          if (state.phase === "preview" && state.previewClickHandler) {
+            document.addEventListener("click", state.previewClickHandler);
+          }
+        }, 150);
+      }
+
+      function cancelPreview() {
+        if (state.previewInterval) {
+          clearInterval(state.previewInterval);
+          state.previewInterval = null;
+        }
+        if (state.previewClickHandler) {
+          document.removeEventListener("click", state.previewClickHandler);
+          state.previewClickHandler = null;
+        }
+        els.previewOverlay.hidden = true;
+      }
+
+      function endPreview() {
+        if (state.phase !== "preview") return;
+        cancelPreview();
+
+        const cards = els.board.querySelectorAll(".card.revealed");
+        cards.forEach(c => c.classList.remove("revealed"));
+
         state.phase = "playing";
+        els.message.textContent = "Flip two cards. Match the same ideas and tell a tiny story about each pair.";
+        // Hold input during the flip-back animation, then start the clock so
+        // the peek itself doesn't count against the player's time.
+        setTimeout(() => {
+          state.locked = false;
+          state.startTime = performance.now();
+          state.timerId = setInterval(updateTimer, 500);
+          els.time.textContent = "0s";
+        }, FLIP_TRANSITION_MS);
+      }
+
+      function startGame() {
+        cancelPreview();
+        clearInterval(state.timerId);
+        state.timerId = 0;
+        state.phase = "preview";
         state.revealed = [];
         state.matchesFound = 0;
         state.moves = 0;
-        state.locked = false;
-        state.startTime = performance.now();
-        state.timerId = setInterval(updateTimer, 500);
-        els.message.textContent = "Flip two cards. Match the same ideas and tell a tiny story about each pair.";
+        state.locked = true;
+        state.startTime = 0;
         els.endScreen.hidden = true;
+        els.time.textContent = "0s";
 
         const deck = shuffle(
           ITEMS.flatMap((item, idx) => [
@@ -500,10 +607,15 @@
 
         const frag = document.createDocumentFragment();
         for (const cardData of deck) {
-          frag.appendChild(buildCard(cardData.item, cardData.pairId));
+          const cardEl = buildCard(cardData.item, cardData.pairId);
+          // Pre-reveal every card so the peek shows the full deck face-up.
+          cardEl.classList.add("revealed");
+          frag.appendChild(cardEl);
         }
         els.board.replaceChildren(frag);
         renderStats();
+
+        startPreview();
       }
 
       function revealCard(card, item) {
