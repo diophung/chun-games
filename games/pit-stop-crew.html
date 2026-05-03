@@ -293,10 +293,10 @@
       ];
       const ID_TO_ACTION = Object.fromEntries(ACTIONS.map(a => [a.id, a]));
 
-      const FLASH_BASE_MS = 600;
-      const FLASH_MIN_MS = 320;
-      const GAP_BASE_MS = 240;
-      const GAP_MIN_MS = 110;
+      const FLASH_BASE_MS = 300;
+      const FLASH_MIN_MS = 160;
+      const GAP_BASE_MS = 120;
+      const GAP_MIN_MS = 55;
 
       const state = {
         phase: "idle",     // "idle" | "showing" | "awaiting" | "over"
@@ -364,7 +364,7 @@
       function playAction(id) {
         const action = ID_TO_ACTION[id];
         if (!action) return;
-        playTone(action.freq, 0.36, { wave: "triangle", peak: 0.22 });
+        playTone(action.freq, 0.18, { wave: "triangle", peak: 0.22 });
       }
 
       function playError() {
@@ -438,7 +438,7 @@
         renderBest();
         setMessage("Get ready…", "watch");
         setButtonsEnabled(false);
-        setTimeout(nextRound, 700);
+        setTimeout(nextRound, 350);
       }
 
       function nextRound() {
@@ -473,7 +473,7 @@
           setTimeout(step, flash + gap);
         }
         // Small pause before the first flash so the player can notice the start.
-        setTimeout(step, 350);
+        setTimeout(step, 175);
       }
 
       function handleTap(id) {
@@ -500,7 +500,7 @@
           state.phase = "showing";
           setButtonsEnabled(false);
           setMessage("Nice! Next round…", "play");
-          setTimeout(nextRound, 700);
+          setTimeout(nextRound, 350);
         }
       }
 
