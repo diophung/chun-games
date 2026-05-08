@@ -3,226 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>William learning to code with games</title>
+  <title>WiGa · William's Games</title>
+  <link rel="stylesheet" href="assets/site.css" />
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      color: #1f2937;
-      background: linear-gradient(180deg, #87ceeb 0%, #c5e9fb 30%, #fff 100%);
-      min-height: 100vh;
-    }
-    @supports (height: 100dvh) {
-      html, body { min-height: 100dvh; }
-    }
-    body { padding: 16px 14px 48px; }
-
-    .container {
-      max-width: 1040px;
-      margin: 0 auto;
-    }
-
-    header.hero {
-      text-align: center;
-      padding: 18px 12px 22px;
-    }
-    header.hero h1 {
-      margin: 0 0 6px;
-      font-size: clamp(34px, 8vw, 56px);
-      letter-spacing: 0.02em;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.6);
-    }
-    header.hero p {
-      margin: 0;
-      font-size: clamp(14px, 3.5vw, 18px);
-      color: #475569;
-    }
-
-    main.grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 18px;
-      margin-top: 12px;
-    }
-
-    article.card {
-      background: #fff;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(15,23,42,0.12);
-      display: flex;
-      flex-direction: column;
-      transition: transform 200ms ease, box-shadow 200ms ease;
-    }
-    article.card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 26px rgba(15,23,42,0.18);
-    }
-
-    a.thumb-link {
-      display: block;
-      line-height: 0;
-    }
-    .thumb {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      display: block;
-    }
-
-    .body {
-      padding: 14px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-    }
-    .body h2 {
-      margin: 0;
-      font-size: clamp(18px, 4.2vw, 22px);
-    }
-    .body .desc {
-      color: #475569;
-      font-size: clamp(13px, 3vw, 15px);
-      line-height: 1.45;
-      flex: 1;
-      margin: 0;
-    }
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      font-size: 11px;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .tag {
-      background: #f1f5f9;
-      padding: 3px 8px;
-      border-radius: 999px;
-    }
-    a.play {
-      align-self: flex-start;
-      margin-top: 4px;
-      padding: 9px 18px;
-      border-radius: 999px;
-      background: #2563eb;
-      color: #fff;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 120ms ease, transform 120ms ease;
-    }
-    a.play:hover { background: #1d4ed8; }
-    a.play:active { transform: translateY(1px); }
-
-    aside.scoreboard {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      width: 220px;
-      max-height: calc(100vh - 32px);
-      overflow-y: auto;
-      background: rgba(255,255,255,0.92);
-      border: 2px solid rgba(255,255,255,0.95);
-      border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 8px 24px rgba(15,23,42,0.14);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      z-index: 50;
-    }
-    aside.scoreboard h2 {
-      margin: 0 0 10px;
-      font-size: 15px;
-      text-align: center;
-      color: #1d4ed8;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-    .scoreboard-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .score-tile {
-      background: #fff;
-      border-radius: 10px;
-      padding: 8px 10px;
-      border: 1px solid #e2e8f0;
-      font-size: 12px;
-      line-height: 1.3;
-    }
-    .score-tile strong {
-      display: block;
-      color: #1f2937;
-      font-size: 12.5px;
-      margin-bottom: 1px;
-    }
-    .score-tile span { color: #64748b; font-size: 11.5px; }
-    aside.scoreboard summary {
-      cursor: pointer;
-      list-style: none;
-      font-weight: 700;
-      color: #1d4ed8;
-      font-size: 13px;
-      padding: 4px 2px;
-    }
-    aside.scoreboard summary::-webkit-details-marker { display: none; }
-
-    @media (max-width: 1320px) {
-      aside.scoreboard {
-        width: 200px;
-        font-size: 12px;
-      }
-    }
-    @media (max-width: 1100px) {
-      aside.scoreboard {
-        position: static;
-        width: auto;
-        max-width: 1040px;
-        margin: 24px auto 0;
-        max-height: none;
-      }
-      .scoreboard-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 8px;
-      }
-    }
-
-    footer {
-      margin-top: 32px;
-      text-align: center;
-      color: #475569;
-      font-size: 13px;
-    }
-    footer a { color: #2563eb; text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-
-    @media (max-width: 480px) {
-      header.hero { padding: 8px 4px 14px; }
-      .body { padding: 12px 14px 14px; }
-    }
+    /* Page-specific tweak: tighten the gap above the games grid since
+       the hero already provides generous breathing room. */
+    .home-grid { margin-top: 4px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header class="hero">
-      <h1>William learning to code with games 🎮</h1>
-      <p>A playground of small, self-contained browser games created by William P, with Claude Code.</p>
-    </header>
 
-    <main class="grid">
+<header class="site-header"><div class="site-header__inner">
+  <a class="site-logo" href="index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="site-nav__link" href="index.html">Single Player</a>
+    <a class="site-nav__link" href="multiplayer.html">Multi-Player</a>
+    <a class="site-nav__link" href="high-scores.html">High Scores</a>
+    <a class="site-nav__link" href="donate.html">Donate</a>
+  </nav>
+</div></header>
+
+<main class="site-main">
+  <section class="hero" aria-labelledby="hero-title">
+    <div>
+      <span class="hero__eyebrow">William's Games</span>
+      <h1 class="hero__title" id="hero-title">WiGa 🎮</h1>
+      <p class="hero__tagline">Tiny browser games for kids and families.</p>
+      <div class="hero__ctas">
+        <a class="btn btn--mint btn--lg" href="#games">Play Single-Player ▶</a>
+        <a class="btn btn--peach btn--lg" href="multiplayer.html">Try Multi-Player 👬</a>
+      </div>
+    </div>
+    <svg class="hero__art" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartoon scene with kids, a cat, a tiny car, and a tiny dragon">
+      <!-- sky background -->
+      <rect width="360" height="280" fill="#fff8f0"/>
+      <!-- clouds -->
+      <ellipse cx="60"  cy="40" rx="28" ry="10" fill="#a4d8f5" opacity="0.55"/>
+      <ellipse cx="280" cy="56" rx="34" ry="11" fill="#a4d8f5" opacity="0.45"/>
+      <!-- sun -->
+      <circle cx="320" cy="40" r="22" fill="#fff2a6" stroke="#2a2a3a" stroke-width="3"/>
+      <!-- ground -->
+      <path d="M0 218 C 90 198, 270 240, 360 210 L 360 280 L 0 280 Z" fill="#b8e8d4" stroke="#2f6b54" stroke-width="3"/>
+      <!-- tiny dragon (left) -->
+      <g transform="translate(34 180)">
+        <ellipse cx="22" cy="22" rx="22" ry="14" fill="#b8e8d4" stroke="#2f6b54" stroke-width="3"/>
+        <path d="M10 14 L4 4 L18 12 Z" fill="#fff2a6" stroke="#2f6b54" stroke-width="2.5"/>
+        <circle cx="30" cy="18" r="3" fill="#2a2a3a"/>
+        <path d="M44 24 C 56 22, 56 32, 44 30" fill="#ffb3c1" stroke="#b13a55" stroke-width="2"/>
+      </g>
+      <!-- cat (center-left) -->
+      <g transform="translate(110 168)">
+        <circle cx="20" cy="22" r="20" fill="#ffd6b3" stroke="#8a4f1d" stroke-width="3"/>
+        <path d="M5 8 L10 18 L18 14 Z M35 8 L30 18 L22 14 Z" fill="#ffd6b3" stroke="#8a4f1d" stroke-width="2.5"/>
+        <circle cx="14" cy="22" r="2.5" fill="#2a2a3a"/>
+        <circle cx="26" cy="22" r="2.5" fill="#2a2a3a"/>
+        <path d="M16 30 Q20 33 24 30" stroke="#2a2a3a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M9 26 L4 25 M9 28 L4 30 M31 26 L36 25 M31 28 L36 30" stroke="#2a2a3a" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <!-- two kids (center) -->
+      <g transform="translate(170 130)">
+        <!-- kid 1 -->
+        <circle cx="22" cy="22" r="16" fill="#ffd6b3" stroke="#8a4f1d" stroke-width="3"/>
+        <path d="M8 22 C 8 8, 36 8, 36 22 L 30 14 L 14 14 Z" fill="#2a2a3a"/>
+        <circle cx="17" cy="24" r="2" fill="#2a2a3a"/>
+        <circle cx="27" cy="24" r="2" fill="#2a2a3a"/>
+        <path d="M18 30 Q22 33 26 30" stroke="#2a2a3a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="6" y="38" width="32" height="38" rx="8" fill="#ffb3c1" stroke="#b13a55" stroke-width="3"/>
+      </g>
+      <g transform="translate(230 138)">
+        <!-- kid 2 -->
+        <circle cx="22" cy="22" r="16" fill="#ffd6b3" stroke="#8a4f1d" stroke-width="3"/>
+        <path d="M8 18 C 10 4, 34 4, 36 18 L 32 14 Q 22 6, 12 14 Z" fill="#a05a2c"/>
+        <circle cx="17" cy="24" r="2" fill="#2a2a3a"/>
+        <circle cx="27" cy="24" r="2" fill="#2a2a3a"/>
+        <path d="M18 30 Q22 33 26 30" stroke="#2a2a3a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="6" y="38" width="32" height="34" rx="8" fill="#a4d8f5" stroke="#3a6e90" stroke-width="3"/>
+      </g>
+      <!-- tiny car (right) -->
+      <g transform="translate(290 196)">
+        <rect x="0" y="6" width="48" height="20" rx="6" fill="#ffb3c1" stroke="#b13a55" stroke-width="3"/>
+        <path d="M8 6 L14 -4 L34 -4 L40 6 Z" fill="#ffd6b3" stroke="#8a4f1d" stroke-width="3"/>
+        <circle cx="12" cy="28" r="6" fill="#2a2a3a"/>
+        <circle cx="12" cy="28" r="2" fill="#fff8f0"/>
+        <circle cx="36" cy="28" r="6" fill="#2a2a3a"/>
+        <circle cx="36" cy="28" r="2" fill="#fff8f0"/>
+      </g>
+    </svg>
+  </section>
+
+  <h2 class="section-heading" id="games">All Games</h2>
+  <section class="card-grid home-grid" aria-label="Single-player games">
 
       <!-- ========== Type2Build ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/type2build.html" aria-label="Play Type2Build">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="city skyline thumbnail">
+        <a class="card__thumb-link" href="games/type2build.html" aria-label="Play Type2Build">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="city skyline thumbnail">
             <rect width="320" height="180" fill="#87ceeb"/>
             <!-- buildings -->
             <rect x="10"  y="100" width="32" height="50"  fill="#aaaaaa" stroke="#333" stroke-width="1.2"/>
@@ -247,21 +122,21 @@
             </text>
           </svg>
         </a>
-        <div class="body">
-          <h2>Type2Build</h2>
-          <p class="desc">Type car-themed words to color in a grey city skyline. Race the 90-second clock — but watch your typos!</p>
-          <div class="tags">
-            <span class="tag">Typing</span>
-            <span class="tag">2D · SVG</span>
+        <div class="card__body">
+          <h2 class="card__title">Type2Build</h2>
+          <p class="card__desc">Type car-themed words to color in a grey city skyline. Race the 90-second clock — but watch your typos!</p>
+          <div class="card__tags">
+            <span class="card__tag">Typing</span>
+            <span class="card__tag">2D · SVG</span>
           </div>
-          <a class="play" href="games/type2build.html">Play →</a>
+          <a class="card__play" href="games/type2build.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Zoomy Cars ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/zoomy-car.html" aria-label="Play Zoomy Cars">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="cartoon car on a track">
+        <a class="card__thumb-link" href="games/zoomy-car.html" aria-label="Play Zoomy Cars">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="cartoon car on a track">
             <!-- sky -->
             <rect width="320" height="180" fill="#9be0ff"/>
             <!-- ground -->
@@ -302,21 +177,21 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Zoomy Cars</h2>
-          <p class="desc">Cartoon 3D racing — drive 3 laps, grab spinning ⭐ coins, hit boost pads, dodge cones &amp; trees.</p>
-          <div class="tags">
-            <span class="tag">Racing</span>
-            <span class="tag">3D · Three.js</span>
+        <div class="card__body">
+          <h2 class="card__title">Zoomy Cars</h2>
+          <p class="card__desc">Cartoon 3D racing — drive 3 laps, grab spinning ⭐ coins, hit boost pads, dodge cones &amp; trees.</p>
+          <div class="card__tags">
+            <span class="card__tag">Racing</span>
+            <span class="card__tag">3D · Three.js</span>
           </div>
-          <a class="play" href="games/zoomy-car.html">Play →</a>
+          <a class="card__play" href="games/zoomy-car.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Child Feeder ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/child-feeder.html" aria-label="Play Child Feeder">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="cartoon child with food icons">
+        <a class="card__thumb-link" href="games/child-feeder.html" aria-label="Play Child Feeder">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="cartoon child with food icons">
             <defs>
               <linearGradient id="cf-bg" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#ffe7f0"/>
@@ -356,21 +231,21 @@
             <text x="252" y="148" font-size="26">⭐</text>
           </svg>
         </a>
-        <div class="body">
-          <h2>Child Feeder</h2>
-          <p class="desc">Raise a cartoon child from age 3 to 18 with food &amp; activities. Healthy choices grow them up faster — junk wears them down.</p>
-          <div class="tags">
-            <span class="tag">Sim</span>
-            <span class="tag">2D · SVG</span>
+        <div class="card__body">
+          <h2 class="card__title">Child Feeder</h2>
+          <p class="card__desc">Raise a cartoon child from age 3 to 18 with food &amp; activities. Healthy choices grow them up faster — junk wears them down.</p>
+          <div class="card__tags">
+            <span class="card__tag">Sim</span>
+            <span class="card__tag">2D · SVG</span>
           </div>
-          <a class="play" href="games/child-feeder.html">Play →</a>
+          <a class="card__play" href="games/child-feeder.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Dragon Eating Cheese ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/dragon.html" aria-label="Play Dragon Eating Cheese">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="dragon chasing a cheese wedge on a grid">
+        <a class="card__thumb-link" href="games/dragon.html" aria-label="Play Dragon Eating Cheese">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="dragon chasing a cheese wedge on a grid">
             <defs>
               <linearGradient id="dr-bg" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#1a1a2e"/>
@@ -430,21 +305,21 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Dragon Eating Cheese</h2>
-          <p class="desc">Steer a hungry dragon snake to gobble cheese wedges. Pick game speed and cheese size — every bite levels you up.</p>
-          <div class="tags">
-            <span class="tag">Snake</span>
-            <span class="tag">2D · Canvas</span>
+        <div class="card__body">
+          <h2 class="card__title">Dragon Eating Cheese</h2>
+          <p class="card__desc">Steer a hungry dragon snake to gobble cheese wedges. Pick game speed and cheese size — every bite levels you up.</p>
+          <div class="card__tags">
+            <span class="card__tag">Snake</span>
+            <span class="card__tag">2D · Canvas</span>
           </div>
-          <a class="play" href="games/dragon.html">Play →</a>
+          <a class="card__play" href="games/dragon.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Car Memory ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/car-memory.html" aria-label="Play Car Memory">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="car memory cards grid">
+        <a class="card__thumb-link" href="games/car-memory.html" aria-label="Play Car Memory">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="car memory cards grid">
             <defs>
               <linearGradient id="cm-bg" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#1e293b"/>
@@ -507,21 +382,21 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Car Memory</h2>
-          <p class="desc">Match 8 unique car-brand pairs. Flip two cards — if they match, they lock with a green ✓; if not, they flip back.</p>
-          <div class="tags">
-            <span class="tag">Memory</span>
-            <span class="tag">2D · CSS</span>
+        <div class="card__body">
+          <h2 class="card__title">Car Memory</h2>
+          <p class="card__desc">Match 8 unique car-brand pairs. Flip two cards — if they match, they lock with a green ✓; if not, they flip back.</p>
+          <div class="card__tags">
+            <span class="card__tag">Memory</span>
+            <span class="card__tag">2D · CSS</span>
           </div>
-          <a class="play" href="games/car-memory.html">Play →</a>
+          <a class="card__play" href="games/car-memory.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Engine Memory ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/engine-memory.html" aria-label="Play Engine Memory">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="engine memory cards grid">
+        <a class="card__thumb-link" href="games/engine-memory.html" aria-label="Play Engine Memory">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="engine memory cards grid">
             <defs>
               <linearGradient id="em-bg" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#1e293b"/>
@@ -587,21 +462,21 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Engine Memory</h2>
-          <p class="desc">Match a car to its engine sound — synthesized in your browser. Flip a 🚗 card to see the brand, flip a 🔊 card to hear it rev. Same brand on both? You've got a pair.</p>
-          <div class="tags">
-            <span class="tag">Memory</span>
-            <span class="tag">2D · CSS · Web Audio</span>
+        <div class="card__body">
+          <h2 class="card__title">Engine Memory</h2>
+          <p class="card__desc">Match a car to its engine sound — synthesized in your browser. Flip a 🚗 card to see the brand, flip a 🔊 card to hear it rev. Same brand on both? You've got a pair.</p>
+          <div class="card__tags">
+            <span class="card__tag">Memory</span>
+            <span class="card__tag">2D · CSS · Web Audio</span>
           </div>
-          <a class="play" href="games/engine-memory.html">Play →</a>
+          <a class="card__play" href="games/engine-memory.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Pit Stop Crew ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/pit-stop-crew.html" aria-label="Play Pit Stop Crew">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="pit stop crew buttons">
+        <a class="card__thumb-link" href="games/pit-stop-crew.html" aria-label="Play Pit Stop Crew">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="pit stop crew buttons">
             <defs>
               <radialGradient id="psc-tire" cx="30%" cy="30%" r="80%">
                 <stop offset="0%" stop-color="#fb923c"/>
@@ -651,22 +526,22 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Pit Stop Crew</h2>
-          <p class="desc">The pit chief flashes a sequence of jobs (🔧 ⛽ 🚿 🏁) — repeat it back. Each round adds one more step. How long can you remember?</p>
-          <div class="tags">
-            <span class="tag">Memory</span>
-            <span class="tag">Sequence</span>
-            <span class="tag">2D · Web Audio</span>
+        <div class="card__body">
+          <h2 class="card__title">Pit Stop Crew</h2>
+          <p class="card__desc">The pit chief flashes a sequence of jobs (🔧 ⛽ 🚿 🏁) — repeat it back. Each round adds one more step. How long can you remember?</p>
+          <div class="card__tags">
+            <span class="card__tag">Memory</span>
+            <span class="card__tag">Sequence</span>
+            <span class="card__tag">2D · Web Audio</span>
           </div>
-          <a class="play" href="games/pit-stop-crew.html">Play →</a>
+          <a class="card__play" href="games/pit-stop-crew.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Memory Match Cards ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/memory-match.html" aria-label="Play Memory Match Cards">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="colorful memory cards grid">
+        <a class="card__thumb-link" href="games/memory-match.html" aria-label="Play Memory Match Cards">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="colorful memory cards grid">
             <defs>
               <linearGradient id="mm-bg" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#8be9fd"/>
@@ -716,21 +591,21 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Memory Match Cards</h2>
-          <p class="desc">Flip colorful idea cards, remember their hiding spots, and match pairs with tiny creative story prompts.</p>
-          <div class="tags">
-            <span class="tag">Memory</span>
-            <span class="tag">2D · CSS</span>
+        <div class="card__body">
+          <h2 class="card__title">Memory Match Cards</h2>
+          <p class="card__desc">Flip colorful idea cards, remember their hiding spots, and match pairs with tiny creative story prompts.</p>
+          <div class="card__tags">
+            <span class="card__tag">Memory</span>
+            <span class="card__tag">2D · CSS</span>
           </div>
-          <a class="play" href="games/memory-match.html">Play →</a>
+          <a class="card__play" href="games/memory-match.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Guess Who Detective ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/guess-who.html" aria-label="Play Guess Who Detective">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="guess who character board">
+        <a class="card__thumb-link" href="games/guess-who.html" aria-label="Play Guess Who Detective">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="guess who character board">
             <defs>
               <linearGradient id="gw-bg" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#fef3c7"/>
@@ -787,21 +662,21 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Guess Who Detective</h2>
-          <p class="desc">Ask yes/no questions, eliminate suspects, and solve the mystery friend using careful deduction.</p>
-          <div class="tags">
-            <span class="tag">Logic</span>
-            <span class="tag">Deduction</span>
+        <div class="card__body">
+          <h2 class="card__title">Guess Who Detective</h2>
+          <p class="card__desc">Ask yes/no questions, eliminate suspects, and solve the mystery friend using careful deduction.</p>
+          <div class="card__tags">
+            <span class="card__tag">Logic</span>
+            <span class="card__tag">Deduction</span>
           </div>
-          <a class="play" href="games/guess-who.html">Play →</a>
+          <a class="card__play" href="games/guess-who.html">Play →</a>
         </div>
       </article>
 
       <!-- ========== Tangram Puzzles ========== -->
       <article class="card">
-        <a class="thumb-link" href="games/tangram-puzzles.html" aria-label="Play Tangram Puzzles">
-          <svg class="thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tangram pieces on a puzzle board">
+        <a class="card__thumb-link" href="games/tangram-puzzles.html" aria-label="Play Tangram Puzzles">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tangram pieces on a puzzle board">
             <defs>
               <linearGradient id="tg-bg" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#dbeafe"/>
@@ -826,63 +701,28 @@
             </g>
           </svg>
         </a>
-        <div class="body">
-          <h2>Tangram Puzzles</h2>
-          <p class="desc">Drag, rotate, and snap seven geometric pieces into house, rocket, and cat puzzle outlines.</p>
-          <div class="tags">
-            <span class="tag">Spatial</span>
-            <span class="tag">SVG · Drag</span>
+        <div class="card__body">
+          <h2 class="card__title">Tangram Puzzles</h2>
+          <p class="card__desc">Drag, rotate, and snap seven geometric pieces into house, rocket, and cat puzzle outlines.</p>
+          <div class="card__tags">
+            <span class="card__tag">Spatial</span>
+            <span class="card__tag">SVG · Drag</span>
           </div>
-          <a class="play" href="games/tangram-puzzles.html">Play →</a>
+          <a class="card__play" href="games/tangram-puzzles.html">Play →</a>
         </div>
       </article>
 
-    </main>
+  </section>
+</main>
 
-    <footer>
-      <p>Built with AI coding agents — see <a href="README.md">README</a> for details.</p>
-    </footer>
-  </div>
+<footer class="site-footer"><div class="site-footer__inner">
+  <span>Made by William with ❤️ and AI coding agents.</span>
+  <span class="site-footer__links">
+    <a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="README.md">README</a>
+  </span>
+</div></footer>
 
-  <aside class="scoreboard" aria-label="local high scores">
-    <h2>High Scores</h2>
-    <div class="scoreboard-list" id="catalog-high-scores"></div>
-  </aside>
-
-  <script src="games/high-scores.js"></script>
-  <script>
-    (function () {
-      "use strict";
-      const games = [
-        { id: "type2build",      name: "Type2Build",          scoreLabel: "pts" },
-        { id: "zoomy-car",       name: "Zoomy Cars",          scoreLabel: "pts" },
-        { id: "child-feeder",    name: "Child Feeder",        scoreLabel: "pts" },
-        { id: "dragon",          name: "Dragon Eating Cheese",scoreLabel: "pts" },
-        { id: "car-memory",      name: "Car Memory",          scoreLabel: "pts" },
-        { id: "engine-memory",   name: "Engine Memory",       scoreLabel: "pts" },
-        { id: "pit-stop-crew",   name: "Pit Stop Crew",       scoreLabel: "rounds" },
-        { id: "memory-match",    name: "Memory Match Cards",  scoreLabel: "pts" },
-        { id: "guess-who",       name: "Guess Who Detective", scoreLabel: "pts" },
-        { id: "tangram-puzzles", name: "Tangram Puzzles",     scoreLabel: "pts" },
-      ];
-      const wrap = document.getElementById("catalog-high-scores");
-      const frag = document.createDocumentFragment();
-      for (const game of games) {
-        const tile = document.createElement("div");
-        tile.className = "score-tile";
-        const title = document.createElement("strong");
-        title.textContent = game.name;
-        const line = document.createElement("span");
-        const best = window.ChunHighScores && window.ChunHighScores.best(game.id);
-        line.textContent = best
-          ? best.name + ": " + best.score.toLocaleString() + " " + game.scoreLabel
-          : "No score yet";
-        tile.appendChild(title);
-        tile.appendChild(line);
-        frag.appendChild(tile);
-      }
-      wrap.replaceChildren(frag);
-    })();
-  </script>
+<script src="assets/site.js"></script>
 </body>
 </html>
