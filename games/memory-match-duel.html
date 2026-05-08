@@ -362,9 +362,71 @@
       50%      { transform: scale(1.06); }
     }
 
-    /* ===== End screen — content lives here, confetti added in Task 7 ===== */
+    /* ===== End screen ===== */
 
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 24px;
+      background: rgba(42, 42, 58, 0.9);
+      color: #fff;
+      text-align: center;
+    }
     #end-screen[hidden] { display: none !important; }
+    #end-screen h2 {
+      margin: 0;
+      font-size: clamp(32px, 9vw, 54px);
+      font-weight: 900;
+    }
+    #end-score {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    #end-score .p1 { color: #b8e8d4; }
+    #end-score .p2 { color: #ffd6b3; }
+    #end-score .em-dash { color: #fff; opacity: 0.6; }
+    #end-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Confetti — 24 colored squares fall + spin */
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 60;
+    }
+    #confetti[hidden] { display: none !important; }
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: 12px;
+      height: 16px;
+      animation-name: confetti-fall;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      will-change: transform, opacity;
+    }
+    @keyframes confetti-fall {
+      0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+      100% { transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(720deg); opacity: 0.9; }
+    }
 
     @media (max-width: 520px) {
       body { padding: 8px; }
@@ -435,9 +497,24 @@
     </div>
   </section>
 
-  <!-- End screen lives in this same #app and is filled in Task 7 -->
-  <section id="end-screen" hidden></section>
+  <!-- End screen -->
+  <section id="end-screen" hidden role="dialog" aria-labelledby="end-headline">
+    <h2 id="end-headline">🎉 Winner!</h2>
+    <p id="end-score" aria-live="polite">
+      <span class="p1" id="end-name-p1">Player 1</span>
+      <strong id="end-pairs-p1">0</strong>
+      <span class="em-dash">—</span>
+      <strong id="end-pairs-p2">0</strong>
+      <span class="p2" id="end-name-p2">Player 2</span>
+    </p>
+    <div id="end-buttons">
+      <button class="btn btn--mint btn--lg" type="button" id="end-play-again">Play Again</button>
+      <button class="btn btn--peach btn--lg" type="button" id="end-new-players">New Players</button>
+    </div>
+  </section>
 </main>
+
+<div id="confetti" hidden aria-hidden="true"></div>
 
 <div id="preview-overlay" hidden aria-live="polite">
   <div id="preview-counter">3</div>
@@ -495,6 +572,14 @@
     restartBtn: document.getElementById("restart-btn"),
     resetBtn: document.getElementById("reset-btn"),
     endScreen: document.getElementById("end-screen"),
+    endHeadline: document.getElementById("end-headline"),
+    endNameP1: document.getElementById("end-name-p1"),
+    endNameP2: document.getElementById("end-name-p2"),
+    endPairsP1: document.getElementById("end-pairs-p1"),
+    endPairsP2: document.getElementById("end-pairs-p2"),
+    endPlayAgain: document.getElementById("end-play-again"),
+    endNewPlayers: document.getElementById("end-new-players"),
+    confetti: document.getElementById("confetti"),
     previewOverlay: document.getElementById("preview-overlay"),
     previewCounter: document.getElementById("preview-counter"),
   };
@@ -762,10 +847,52 @@
     }
   }
 
-  // Stub — full implementation lands in Task 7
+  function launchConfetti() {
+    var palette = ["#b8e8d4", "#ffd6b3", "#a4d8f5", "#fff2a6", "#ffb3c1"];
+    var pieces = 36;
+    els.confetti.replaceChildren();
+    for (var i = 0; i < pieces; i++) {
+      var piece = document.createElement("span");
+      piece.className = "confetti-piece";
+      piece.style.left = (Math.random() * 100) + "vw";
+      piece.style.background = palette[i % palette.length];
+      var drift = (Math.random() * 200 - 100).toFixed(0);
+      piece.style.setProperty("--drift", drift + "px");
+      var duration = (2.4 + Math.random() * 1.6).toFixed(2);
+      var delay = (Math.random() * 0.5).toFixed(2);
+      piece.style.animationDuration = duration + "s";
+      piece.style.animationDelay = delay + "s";
+      piece.style.transform = "rotate(" + (Math.random() * 360).toFixed(0) + "deg)";
+      els.confetti.appendChild(piece);
+    }
+    els.confetti.hidden = false;
+    setTimeout(function () { els.confetti.hidden = true; }, 4500);
+  }
+
   function endGame() {
     state.phase = "ended";
-    renderScores();
+    renderScores(); // clears "Your turn" captions
+
+    var p1 = state.pairs[0];
+    var p2 = state.pairs[1];
+    var winner = -1;
+    if (p1 > p2) winner = 0;
+    else if (p2 > p1) winner = 1;
+
+    els.endNameP1.textContent = state.players[0];
+    els.endNameP2.textContent = state.players[1];
+    els.endPairsP1.textContent = String(p1);
+    els.endPairsP2.textContent = String(p2);
+
+    if (winner === -1) {
+      els.endHeadline.textContent = "🤝 It's a tie!";
+    } else {
+      els.endHeadline.textContent = "🎉 " + state.players[winner] + " wins!";
+      launchConfetti();
+    }
+
+    els.endScreen.hidden = false;
+    els.endPlayAgain.focus();
   }
 
   els.setupForm.addEventListener("submit", function (ev) {
@@ -783,6 +910,20 @@
   els.resetBtn.addEventListener("click", function () {
     state.phase = "setup";
     els.endScreen.hidden = true;
+    els.confetti.hidden = true;
+    els.play.hidden = true;
+    els.setup.hidden = false;
+  });
+
+  els.endPlayAgain.addEventListener("click", function () {
+    els.endScreen.hidden = true;
+    els.confetti.hidden = true;
+    startRound();
+  });
+  els.endNewPlayers.addEventListener("click", function () {
+    state.phase = "setup";
+    els.endScreen.hidden = true;
+    els.confetti.hidden = true;
     els.play.hidden = true;
     els.setup.hidden = false;
   });
