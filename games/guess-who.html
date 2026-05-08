@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>Chun-Ga · Guess Who Detective</title>
+  <link rel="stylesheet" href="../assets/site.css" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -19,7 +20,8 @@
     body {
       min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       padding: 12px;
     }
     @supports (height: 100dvh) {
@@ -33,13 +35,13 @@
       gap: 14px;
       align-items: start;
     }
-    header, .panel, #board-wrap {
+    #app header, .panel, #board-wrap {
       background: rgba(255,255,255,0.78);
       border: 2px solid rgba(255,255,255,0.85);
       border-radius: 20px;
       box-shadow: 0 10px 28px rgba(127,29,29,0.12);
     }
-    header {
+    #app header {
       grid-column: 1 / -1;
       display: flex;
       align-items: center;
@@ -56,7 +58,7 @@
       line-height: 1;
       text-shadow: 0 2px 0 rgba(255,255,255,0.8);
     }
-    .stats, nav {
+    .stats, #app nav {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -72,7 +74,7 @@
       font-weight: 800;
     }
     .stat strong { margin-left: 4px; color: #db2777; }
-    nav a, button.linky {
+    #app nav a, button.linky {
       color: #9a3412;
       font: inherit;
       font-weight: 900;
@@ -268,7 +270,7 @@
     }
     @media (max-width: 540px) {
       body { padding: 8px; }
-      header { justify-content: center; text-align: center; }
+      #app header { justify-content: center; text-align: center; }
       #questions { grid-template-columns: 1fr; }
       #board { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
       .person { min-height: 122px; padding: 7px 4px; border-radius: 14px; }
@@ -278,6 +280,15 @@
   </style>
 </head>
 <body>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
+    <nav class="site-nav" aria-label="Primary">
+      <a class="site-nav__link" href="../index.html">Single Player</a>
+      <a class="site-nav__link" href="../multiplayer.html">Multi-Player</a>
+      <a class="site-nav__link" href="../high-scores.html">High Scores</a>
+      <a class="site-nav__link" href="../donate.html">Donate</a>
+    </nav>
+  </div></header>
   <main id="app">
     <header>
       <h1>🕵️ Guess Who Detective</h1>
@@ -310,6 +321,13 @@
       <button class="primary" id="play-again" type="button">Play Again</button>
     </div>
   </section>
+
+  <footer class="site-footer"><div class="site-footer__inner">
+    <span>Made by William with ❤️ and 🤖</span>
+    <span class="site-footer__links">
+      <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </span>
+  </div></footer>
 
   <script src="high-scores.js"></script>
   <script>
@@ -530,5 +548,6 @@
       startGame();
     })();
   </script>
+  <script src="../assets/site.js"></script>
 </body>
 </html>
