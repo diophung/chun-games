@@ -108,9 +108,55 @@
   @media (hover: hover) and (pointer: fine) {
     #controls { display:none; }
   }
+
+  /* WiGa minimal chrome — small floating back-link + footer
+     so the game canvas stays full-screen. */
+  .wiga-back {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 248, 240, 0.92);
+    color: #2a2a3a;
+    font-family: "SF Pro Rounded", "Avenir Next", system-ui, -apple-system, sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    text-decoration: none;
+    border: 2px solid #b8e8d4;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  }
+  .wiga-back:hover { background: rgba(184, 232, 212, 1); }
+  .wiga-mini-footer {
+    position: fixed;
+    bottom: 8px;
+    right: 12px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 248, 240, 0.85);
+    color: #5b6072;
+    font-family: "SF Pro Rounded", "Avenir Next", system-ui, -apple-system, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .wiga-mini-footer a {
+    color: #5b6072;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(91, 96, 114, 0.4);
+  }
+  .wiga-mini-footer a:hover { color: #b13a55; border-bottom-color: #b13a55; }
 </style>
 </head>
 <body>
+<a class="wiga-back" href="../index.html" aria-label="Back to WiGa home">← WiGa</a>
 
 <div id="start">
   <h1>🚗 ZOOMY CARS! 🏁</h1>
@@ -148,6 +194,11 @@
   <h2>🏆 Race Complete!</h2>
   <p id="race-score"></p>
   <button id="race-again" type="button">Race Again</button>
+</div>
+
+<div class="wiga-mini-footer">
+  Made by William with ❤️ and 🤖 ·
+  <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
 </div>
 
 <script type="importmap">
