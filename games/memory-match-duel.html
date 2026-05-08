@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>WiGa · Memory Match Duel</title>
+  <link rel="stylesheet" href="../assets/site.css" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -18,7 +19,8 @@
     body {
       min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       padding: 12px;
     }
     @supports (height: 100dvh) {
@@ -439,6 +441,16 @@
 </head>
 <body>
 
+<header class="site-header"><div class="site-header__inner">
+  <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="site-nav__link" href="../index.html">Single Player</a>
+    <a class="site-nav__link" href="../multiplayer.html">Multi-Player</a>
+    <a class="site-nav__link" href="../high-scores.html">High Scores</a>
+    <a class="site-nav__link" href="../donate.html">Donate</a>
+  </nav>
+</div></header>
+
 <main id="app">
 
   <!-- ===== Setup screen ===== -->
@@ -515,6 +527,13 @@
 </main>
 
 <div id="confetti" hidden aria-hidden="true"></div>
+
+<footer class="site-footer"><div class="site-footer__inner">
+  <span>Made by William with ❤️ and 🤖</span>
+  <span class="site-footer__links">
+    <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </span>
+</div></footer>
 
 <div id="preview-overlay" hidden aria-live="polite">
   <div id="preview-counter">3</div>
@@ -932,5 +951,6 @@
   // First load — show setup
 })();
 </script>
+<script src="../assets/site.js"></script>
 </body>
 </html>
