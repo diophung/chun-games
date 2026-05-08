@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WiGa · High Scores</title>
+  <link rel="stylesheet" href="assets/site.css" />
+  <style>
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .score-tile {
+      background: var(--card);
+      border: 3px solid var(--sky);
+      border-radius: var(--radius-card);
+      padding: 16px 18px;
+      box-shadow: var(--shadow), var(--inset);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .score-tile h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .score-tile .empty {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+    .score-tile .empty a {
+      color: var(--coral-ink);
+      font-weight: 700;
+    }
+    /* Override the inline styles from high-scores.js render() so its
+       internal box looks at home in our tile. */
+    .score-tile .high-score-box {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .score-tile .high-score-box h3 { display: none !important; }
+    .clear-row {
+      text-align: center;
+      margin: 32px 0 12px;
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+    .clear-row button {
+      background: none;
+      border: none;
+      color: var(--ink-soft);
+      font: inherit;
+      font-weight: 700;
+      text-decoration: underline dashed;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      padding: 0;
+    }
+    .clear-row button:hover { color: var(--coral-ink); }
+  </style>
+</head>
+<body>
+
+<header class="site-header"><div class="site-header__inner">
+  <a class="site-logo" href="index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="site-nav__link" href="index.html">Single Player</a>
+    <a class="site-nav__link" href="multiplayer.html">Multi-Player</a>
+    <a class="site-nav__link" href="high-scores.html">High Scores</a>
+    <a class="site-nav__link" href="donate.html">Donate</a>
+  </nav>
+</div></header>
+
+<main class="site-main">
+  <header class="page-title">
+    <h1 class="page-title__heading">High Scores 🏆</h1>
+    <p class="page-title__sub">Top 5 runs saved on this device.</p>
+  </header>
+
+  <section class="score-grid" id="score-grid" aria-label="Single-player leaderboards"></section>
+
+  <p class="clear-row">
+    <button type="button" id="clear-all">Clear all scores on this device</button>
+  </p>
+</main>
+
+<footer class="site-footer"><div class="site-footer__inner">
+  <span>Made by William with ❤️ and AI coding agents.</span>
+  <span class="site-footer__links">
+    <a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="README.md">README</a>
+  </span>
+</div></footer>
+
+<script src="games/high-scores.js"></script>
+<script src="assets/site.js"></script>
+<script>
+  (function () {
+    "use strict";
+
+    var GAMES = [
+      { id: "type2build",      name: "Type2Build",            scoreLabel: "pts" },
+      { id: "zoomy-car",       name: "Zoomy Cars",            scoreLabel: "pts" },
+      { id: "child-feeder",    name: "Child Feeder",          scoreLabel: "pts" },
+      { id: "dragon",          name: "Dragon Eating Cheese",  scoreLabel: "pts" },
+      { id: "car-memory",      name: "Car Memory",            scoreLabel: "pts" },
+      { id: "engine-memory",   name: "Engine Memory",         scoreLabel: "pts" },
+      { id: "pit-stop-crew",   name: "Pit Stop Crew",         scoreLabel: "rounds" },
+      { id: "memory-match",    name: "Memory Match Cards",    scoreLabel: "pts" },
+      { id: "guess-who",       name: "Guess Who Detective",   scoreLabel: "pts" },
+      { id: "tangram-puzzles", name: "Tangram Puzzles",       scoreLabel: "pts" },
+    ];
+
+    function renderAll() {
+      var grid = document.getElementById("score-grid");
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < GAMES.length; i++) {
+        var g = GAMES[i];
+        var tile = document.createElement("section");
+        tile.className = "score-tile";
+
+        var heading = document.createElement("h2");
+        heading.textContent = g.name;
+        tile.appendChild(heading);
+
+        var scores = (window.ChunHighScores && window.ChunHighScores.load(g.id)) || [];
+        if (scores.length === 0) {
+          var empty = document.createElement("p");
+          empty.className = "empty";
+          empty.appendChild(document.createTextNode("No scores yet — "));
+          var playLink = document.createElement("a");
+          playLink.href = "games/" + g.id + ".html";
+          playLink.textContent = "go play a round!";
+          empty.appendChild(playLink);
+          tile.appendChild(empty);
+        } else if (window.ChunHighScores) {
+          window.ChunHighScores.render(tile, g.id, { scoreLabel: g.scoreLabel });
+        }
+        frag.appendChild(tile);
+      }
+      grid.replaceChildren(frag);
+    }
+
+    function clearAll() {
+      var ok = window.confirm("This will delete every saved high score on this device. Continue?");
+      if (!ok) return;
+      var prefix = "chun-ga.high-scores.";
+      var keysToRemove = [];
+      for (var i = 0; i < window.localStorage.length; i++) {
+        var key = window.localStorage.key(i);
+        if (key && key.indexOf(prefix) === 0) keysToRemove.push(key);
+      }
+      for (var j = 0; j < keysToRemove.length; j++) {
+        window.localStorage.removeItem(keysToRemove[j]);
+      }
+      renderAll();
+    }
+
+    document.getElementById("clear-all").addEventListener("click", clearAll);
+    renderAll();
+  })();
+</script>
+</body>
+</html>
