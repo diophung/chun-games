@@ -1,4 +1,4 @@
-name: Deploy to diophung.com
+name: Deploy to williamphung.com
 
 on:
   push:
@@ -19,10 +19,10 @@ jobs:
       - name: Copy site files via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: diophung.com
+          host: williamphung.com
           username: dio
           port: 22
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "index.html,games/**,docs/screenshots/**,README.md"
-          target: /var/www/html/html_misc/chun-games
+          source: "index.html,multiplayer.html,high-scores.html,donate.html,assets/**,games/**,docs/screenshots/**,README.md"
+          target: /var/www/williamphung.com/
           overwrite: true
