@@ -1,10 +1,15 @@
-# Chun-Ga 🎮
+# WiGa — William's Games 🎮
 
 A small playground of browser games built **to learn coding and have fun — using AI coding agents** (Claude Code + the Superpowers plugin) as collaborators.
 
 Every game is static HTML with a shared local high-score helper: zero build step, no dependencies to install. Open in any modern browser and play.
 
-The home page ([`index.html`](./index.html)) is a catalog with thumbnails linking to each game:
+The site is split into four sections, all reachable from the top nav on every chrome page:
+
+- **[Single Player](./index.html)** — the main games catalog (10 games today)
+- **[Multi-Player](./multiplayer.html)** — pass-and-play games for two on one screen
+- **[High Scores](./high-scores.html)** — best runs saved on this device, one tile per game
+- **[Donate](./donate.html)** — a thank-you page with a coffee-tip link
 
 ![Game catalog home page](docs/screenshots/catalog.png)
 
@@ -227,6 +232,32 @@ Drag, rotate, and snap seven geometric pieces onto dotted outlines to complete k
 
 ---
 
+## Multi-Player Games
+
+| Game | File | Style |
+| --- | --- | --- |
+| [Memory Match Duel](#memory-match-duel) | [`games/memory-match-duel.html`](./games/memory-match-duel.html) | 2D · CSS · Pass-and-Play |
+
+---
+
+### Memory Match Duel
+
+A two-player twist on the Memory Match grid: same 4×4 board, same 8 idea pairs, but you take turns and whoever finds more pairs wins.
+
+**Controls:** mouse / touch — both players share one device. Hand it back and forth on each turn switch.
+
+**Highlights**
+- Two name inputs at the start (defaults: "Player 1", "Player 2"); each player gets a color (mint vs peach)
+- Score bar with a glowing "Your turn" pill shows whose move it is
+- Match → keep the turn and tint the locked cards in your color; miss → flip back and pass the device
+- 3-second peek at the start of every round so both players can plan
+- Confetti shower on a win, special "It's a tie!" message on 4–4
+- No leaderboard — pass-and-play results aren't saved as personal bests
+
+▶ [Open `games/memory-match-duel.html`](./games/memory-match-duel.html)
+
+---
+
 ## Local High Scores
 
 All games save their top local scores with `localStorage` through [`games/high-scores.js`](./games/high-scores.js). When a run qualifies for the top 5, the browser asks for the player name and stores the score on that browser/device only. The catalog page shows the best saved score for every game.
@@ -242,17 +273,22 @@ This repo is written collaboratively with AI coding agents — designs, specs, a
 No build step — just open the HTML files:
 
 ```sh
-open index.html                # game catalog (start here)
-open games/type2build.html     # typing game
-open games/zoomy-car.html      # racing game
-open games/child-feeder.html   # child-feeder game
-open games/dragon.html         # dragon snake game
-open games/car-memory.html     # memory game
-open games/engine-memory.html  # engine-sound memory game
-open games/pit-stop-crew.html  # pit-crew sequence memory game
-open games/memory-match.html   # creative memory game
-open games/guess-who.html      # deduction game
-open games/tangram-puzzles.html # tangram puzzle game
+open index.html                        # game catalog (start here)
+open multiplayer.html                  # 2-player games
+open high-scores.html                  # leaderboards
+open donate.html                       # thank-you page
+
+open games/type2build.html             # typing game
+open games/zoomy-car.html              # racing game
+open games/child-feeder.html           # child-feeder game
+open games/dragon.html                 # dragon snake game
+open games/car-memory.html             # memory game
+open games/engine-memory.html          # engine-sound memory game
+open games/pit-stop-crew.html          # pit-crew sequence memory game
+open games/memory-match.html           # creative memory game
+open games/guess-who.html              # deduction game
+open games/tangram-puzzles.html        # tangram puzzle game
+open games/memory-match-duel.html      # 2-player memory match
 ```
 
 Or serve the directory with any static file server, e.g.:
