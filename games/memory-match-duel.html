@@ -404,7 +404,7 @@
       justify-content: center;
     }
 
-    /* Confetti — 24 colored squares fall + spin */
+    /* Confetti — 36 colored squares fall + spin */
     #confetti {
       position: fixed;
       inset: 0;
@@ -780,6 +780,7 @@
     state.revealed = [];
     state.locked = true;
     els.endScreen.hidden = true;
+    els.confetti.hidden = true;
 
     var deck = shuffle(
       ITEMS.flatMap(function (item, idx) {
