@@ -14,6 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Dragon Eating Cheese - Level Up Edition</title>
+    <link rel="stylesheet" href="../assets/site.css" />
     <style>
         /* Embed playful font - Fredoka One */
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
@@ -30,7 +31,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             font-family: 'Fredoka', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #fff;
             touch-action: manipulation;
@@ -428,6 +428,15 @@
     </style>
 </head>
 <body>
+<header class="site-header"><div class="site-header__inner">
+  <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="site-nav__link" href="../index.html">Single Player</a>
+    <a class="site-nav__link" href="../multiplayer.html">Multi-Player</a>
+    <a class="site-nav__link" href="../high-scores.html">High Scores</a>
+    <a class="site-nav__link" href="../donate.html">Donate</a>
+  </nav>
+</div></header>
     <div class="game-container">
         <h1 style="text-align: center; margin-bottom: 20px; color: #00d4ff; font-size: 36px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 30px rgba(0, 212, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);">🐉 Dragon Eating Cheese 🧀</h1>
 
@@ -520,6 +529,12 @@
         </div>
     </div>
 
+    <footer class="site-footer"><div class="site-footer__inner">
+      <span>Made by William with ❤️ and 🤖</span>
+      <span class="site-footer__links">
+        <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </span>
+    </div></footer>
     <script src="high-scores.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -1592,5 +1607,6 @@
         // Start the game
         startGame();
     </script>
+    <script src="../assets/site.js"></script>
 </body>
 </html>
