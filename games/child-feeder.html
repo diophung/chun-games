@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>Chun-Ga · Child Feeder</title>
+  <link rel="stylesheet" href="../assets/site.css" />
   <style>
     * { box-sizing: border-box; }
     html, body {
@@ -16,7 +17,8 @@
     }
     body {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       padding: 12px;
     }
     #app {
@@ -239,6 +241,15 @@
   </style>
 </head>
 <body>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
+    <nav class="site-nav" aria-label="Primary">
+      <a class="site-nav__link" href="../index.html">Single Player</a>
+      <a class="site-nav__link" href="../multiplayer.html">Multi-Player</a>
+      <a class="site-nav__link" href="../high-scores.html">High Scores</a>
+      <a class="site-nav__link" href="../donate.html">Donate</a>
+    </nav>
+  </div></header>
   <main id="app">
     <header id="age-stage">Age 3 · Stage: Toddler</header>
     <div id="hero">
@@ -549,6 +560,12 @@
     <button id="sleep-btn"><span class="emoji">😴</span><span>Sleep</span></button>
     <section id="end-screen" hidden></section>
   </main>
+  <footer class="site-footer"><div class="site-footer__inner">
+    <span>Made by William with ❤️ and 🤖</span>
+    <span class="site-footer__links">
+      <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </span>
+  </div></footer>
   <script src="high-scores.js"></script>
   <script>
     (function () {
@@ -1058,5 +1075,6 @@
       };
     })();
   </script>
+  <script src="../assets/site.js"></script>
 </body>
 </html>
