@@ -1,0 +1,358 @@
+/* ===== WiGa shared site chrome ===== */
+/* Loaded by index.html, multiplayer.html, high-scores.html, donate.html */
+/* Game pages keep their own self-contained styles. */
+
+:root {
+  --bg: #fff8f0;
+  --bg-end: #d6f0ff;
+  --mint: #b8e8d4;
+  --mint-ink: #2f6b54;
+  --peach: #ffd6b3;
+  --peach-ink: #8a4f1d;
+  --sky: #a4d8f5;
+  --butter: #fff2a6;
+  --coral: #ffb3c1;
+  --coral-ink: #b13a55;
+  --ink: #2a2a3a;
+  --ink-soft: #5b6072;
+  --card: #ffffff;
+  --outline: rgba(42, 42, 58, 0.18);
+  --shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+  --shadow-lg: 0 12px 26px rgba(15, 23, 42, 0.16);
+  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --radius-card: 24px;
+  --radius-btn: 16px;
+  --radius-pill: 999px;
+  --font-rounded: "SF Pro Rounded", "Avenir Next", "Quicksand",
+                  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  font-family: var(--font-rounded);
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-end) 100%);
+  min-height: 100vh;
+}
+@supports (height: 100dvh) {
+  html, body { min-height: 100dvh; }
+}
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: inherit; }
+
+/* ===== Sticky header + nav ===== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--coral);
+  backdrop-filter: saturate(140%) blur(6px);
+}
+.site-header__inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.site-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-weight: 800;
+  font-size: clamp(20px, 4vw, 26px);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+.site-logo__sub {
+  display: none;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+@media (min-width: 768px) {
+  .site-logo__sub { display: inline; }
+}
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  border: 2px solid transparent;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.site-nav__link:hover,
+.site-nav__link:focus-visible {
+  background: var(--peach);
+  outline: none;
+}
+.site-nav__link.is-active {
+  background: var(--mint);
+  border-color: var(--mint-ink);
+  color: var(--mint-ink);
+}
+
+/* ===== Page main + content container ===== */
+
+.site-main {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+/* ===== Hero band (only on index.html) ===== */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: center;
+  background: var(--card);
+  border: 3px solid var(--mint);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  margin: 12px 0 28px;
+  box-shadow: var(--shadow), var(--inset);
+}
+@media (min-width: 768px) {
+  .hero { grid-template-columns: 1.1fr 1fr; padding: 32px; gap: 32px; }
+}
+.hero__eyebrow {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--coral-ink);
+  background: var(--butter);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 10px;
+}
+.hero__title {
+  margin: 0 0 8px;
+  font-size: clamp(38px, 9vw, 64px);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.hero__tagline {
+  margin: 0 0 20px;
+  font-size: clamp(15px, 3.4vw, 19px);
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+.hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.hero__art {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ===== Buttons ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: var(--radius-btn);
+  border: 2px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 120ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+.btn:hover { background: var(--butter); }
+.btn:active { transform: translateY(1px); box-shadow: 0 3px 8px rgba(15,23,42,0.12); }
+.btn--mint { background: var(--mint); }
+.btn--peach { background: var(--peach); }
+.btn--coral { background: var(--coral); border-color: var(--coral-ink); color: var(--coral-ink); }
+.btn--coral:hover { background: #ffa1b3; }
+.btn--lg { padding: 14px 26px; font-size: 18px; }
+
+/* ===== Page title block (used by multiplayer / high-scores / donate) ===== */
+
+.page-title {
+  text-align: center;
+  margin: 8px 0 24px;
+}
+.page-title__heading {
+  margin: 0 0 6px;
+  font-size: clamp(30px, 7vw, 46px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+.page-title__sub {
+  margin: 0;
+  font-size: clamp(14px, 3.4vw, 18px);
+  color: var(--ink-soft);
+}
+
+.section-heading {
+  font-size: clamp(22px, 5vw, 28px);
+  font-weight: 800;
+  margin: 8px 0 16px;
+}
+
+/* ===== Card grid (shared by index.html and multiplayer.html) ===== */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.card {
+  background: var(--card);
+  border: 3px solid var(--mint);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow), var(--inset);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg), var(--inset);
+}
+.card--placeholder {
+  border-style: dashed;
+  border-color: var(--outline);
+  background: rgba(255, 255, 255, 0.5);
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  text-align: center;
+  padding: 24px;
+  color: var(--ink-soft);
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: none;
+}
+.card--placeholder:hover { transform: none; box-shadow: none; }
+
+.card__thumb-link {
+  display: block;
+  line-height: 0;
+}
+.card__thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+}
+.card__body {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.card__title {
+  margin: 0;
+  font-size: clamp(18px, 4vw, 22px);
+  font-weight: 800;
+}
+.card__desc {
+  margin: 0;
+  flex: 1;
+  color: var(--ink-soft);
+  font-size: clamp(13px, 3vw, 15px);
+  line-height: 1.45;
+}
+.card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+.card__tag {
+  background: var(--butter);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+}
+.card__play {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--coral);
+  color: var(--coral-ink);
+  font-weight: 800;
+  text-decoration: none;
+  border: 2px solid var(--coral-ink);
+}
+.card__play:hover { background: #ffa1b3; }
+
+/* ===== Footer ===== */
+
+.site-footer {
+  width: 100%;
+  margin-top: auto;
+  border-top: 1px solid var(--coral);
+}
+.site-footer__inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.site-footer__links {
+  display: flex;
+  gap: 16px;
+}
+.site-footer__links a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-weight: 700;
+  border-bottom: 2px dashed var(--outline);
+}
+.site-footer__links a:hover { color: var(--coral-ink); border-bottom-color: var(--coral-ink); }
+
+/* ===== Responsive: nav wrap ===== */
+
+@media (max-width: 640px) {
+  .site-header__inner { gap: 8px; }
+  .site-nav { width: 100%; justify-content: center; }
+  .site-nav__link { padding: 7px 12px; font-size: 14px; }
+}
