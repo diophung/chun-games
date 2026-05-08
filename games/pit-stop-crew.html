@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>Chun-Ga · Pit Stop Crew</title>
+  <link rel="stylesheet" href="../assets/site.css" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
     html, body {
@@ -25,7 +26,7 @@
       body { min-height: 100dvh; }
     }
 
-    header {
+    .game-header {
       width: 100%;
       max-width: 720px;
       display: flex;
@@ -36,7 +37,7 @@
       flex-wrap: wrap;
       font-variant-numeric: tabular-nums;
     }
-    header h1 {
+    .game-header h1 {
       margin: 0;
       font-size: clamp(20px, 5vw, 26px);
       letter-spacing: 0.04em;
@@ -52,15 +53,15 @@
       border-radius: 8px;
     }
     .stat strong { color: #fbbf24; margin-left: 4px; }
-    nav { display: flex; gap: 12px; }
-    nav a {
+    .game-header nav { display: flex; gap: 12px; }
+    .game-header nav a {
       color: #f1f5f9;
       text-decoration: none;
       opacity: 0.8;
       font-size: 14px;
       border-bottom: 1px dashed rgba(255,255,255,0.4);
     }
-    nav a:hover { opacity: 1; }
+    .game-header nav a:hover { opacity: 1; }
 
     main {
       flex: 1 1 auto;
@@ -225,14 +226,23 @@
     #start-btn:active { transform: translateY(2px); }
 
     @media (max-width: 480px) {
-      header { padding: 4px 2px 10px; }
+      .game-header { padding: 4px 2px 10px; }
       #pad { gap: 10px; max-width: 380px; }
       .crew-btn { border-radius: 18px; border-width: 3px; }
     }
   </style>
 </head>
 <body>
-  <header>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
+    <nav class="site-nav" aria-label="Primary">
+      <a class="site-nav__link" href="../index.html">Single Player</a>
+      <a class="site-nav__link" href="../multiplayer.html">Multi-Player</a>
+      <a class="site-nav__link" href="../high-scores.html">High Scores</a>
+      <a class="site-nav__link" href="../donate.html">Donate</a>
+    </nav>
+  </div></header>
+  <header class="game-header">
     <h1>🏁 Pit Stop Crew</h1>
     <div class="stats">
       <div class="stat">Round<strong id="round-count">0</strong></div>
@@ -276,6 +286,13 @@
     <ul id="end-stats"></ul>
     <button id="play-again" type="button">Play Again</button>
   </section>
+
+  <footer class="site-footer"><div class="site-footer__inner">
+    <span>Made by William with ❤️ and 🤖</span>
+    <span class="site-footer__links">
+      <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </span>
+  </div></footer>
 
   <script src="high-scores.js"></script>
   <script>
@@ -561,5 +578,6 @@
       setButtonsEnabled(false);
     })();
   </script>
+  <script src="../assets/site.js"></script>
 </body>
 </html>
