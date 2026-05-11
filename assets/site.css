@@ -363,6 +363,45 @@ a { color: inherit; }
 }
 .site-footer__links a:hover { color: var(--coral-ink); border-bottom-color: var(--coral-ink); }
 
+/* ===== Language switcher (footer) ===== */
+.site-footer__langs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.site-footer__langs-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.lang-pill {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1.5px solid var(--outline);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.lang-pill:hover {
+  background: var(--butter);
+  color: var(--ink);
+}
+.lang-pill:focus-visible {
+  outline: 2px solid var(--peach-ink);
+  outline-offset: 2px;
+}
+.lang-pill.is-active {
+  background: var(--mint);
+  border-color: var(--mint-ink);
+  color: var(--mint-ink);
+}
+
 /* ===== Responsive: nav wrap ===== */
 
 @media (max-width: 640px) {

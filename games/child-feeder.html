@@ -310,12 +310,12 @@
 </head>
 <body>
   <header class="site-header"><div class="site-header__inner">
-    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
-    <nav class="site-nav" aria-label="Primary">
-      <a class="site-nav__link" href="../index.html">Single Player</a>
-      <a class="site-nav__link" href="../multiplayer.html">Multi-Player</a>
-      <a class="site-nav__link" href="../high-scores.html">High Scores</a>
-      <a class="site-nav__link" href="../donate.html">Donate</a>
+    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub" data-i18n="logo.sub">— William's Games</span></a>
+    <nav class="site-nav" aria-label="Primary" data-i18n-aria-label="nav.aria">
+      <a class="site-nav__link" href="../index.html" data-i18n="nav.single">Single Player</a>
+      <a class="site-nav__link" href="../multiplayer.html" data-i18n="nav.multi">Multi-Player</a>
+      <a class="site-nav__link" href="../high-scores.html" data-i18n="nav.scores">High Scores</a>
+      <a class="site-nav__link" href="../donate.html" data-i18n="nav.donate">Donate</a>
     </nav>
   </div></header>
   <main id="app">
@@ -629,7 +629,7 @@
     <section id="end-screen" hidden></section>
   </main>
   <footer class="site-footer"><div class="site-footer__inner">
-    <span>Made by William with ❤️ and 🤖</span>
+    <span data-i18n="footer.credit">Made by William with ❤️ and 🤖</span>
     <span class="site-footer__links">
       <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
     </span>
@@ -1206,5 +1206,6 @@
     })();
   </script>
   <script src="../assets/site.js"></script>
+  <script src="../assets/i18n.js"></script>
 </body>
 </html>

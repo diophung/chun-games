@@ -14,24 +14,24 @@
 <body>
 
 <header class="site-header"><div class="site-header__inner">
-  <a class="site-logo" href="index.html">🎮 WiGa <span class="site-logo__sub">— William's Games</span></a>
-  <nav class="site-nav" aria-label="Primary">
-    <a class="site-nav__link" href="index.html">Single Player</a>
-    <a class="site-nav__link" href="multiplayer.html">Multi-Player</a>
-    <a class="site-nav__link" href="high-scores.html">High Scores</a>
-    <a class="site-nav__link" href="donate.html">Donate</a>
+  <a class="site-logo" href="index.html">🎮 WiGa <span class="site-logo__sub" data-i18n="logo.sub">— William's Games</span></a>
+  <nav class="site-nav" aria-label="Primary" data-i18n-aria-label="nav.aria">
+    <a class="site-nav__link" href="index.html" data-i18n="nav.single">Single Player</a>
+    <a class="site-nav__link" href="multiplayer.html" data-i18n="nav.multi">Multi-Player</a>
+    <a class="site-nav__link" href="high-scores.html" data-i18n="nav.scores">High Scores</a>
+    <a class="site-nav__link" href="donate.html" data-i18n="nav.donate">Donate</a>
   </nav>
 </div></header>
 
 <main class="site-main">
   <section class="hero" aria-labelledby="hero-title">
     <div>
-      <span class="hero__eyebrow">William's Games</span>
+      <span class="hero__eyebrow" data-i18n="hero.eyebrow">William's Games</span>
       <h1 class="hero__title" id="hero-title">WiGa 🎮</h1>
-      <p class="hero__tagline">Tiny browser games for kids and families.</p>
+      <p class="hero__tagline" data-i18n="hero.tagline">Tiny browser games for kids and families.</p>
       <div class="hero__ctas">
-        <a class="btn btn--mint btn--lg" href="#games">Play Single-Player ▶</a>
-        <a class="btn btn--peach btn--lg" href="multiplayer.html">Try Multi-Player 👬</a>
+        <a class="btn btn--mint btn--lg" href="#games" data-i18n="hero.cta_single">Play Single-Player ▶</a>
+        <a class="btn btn--peach btn--lg" href="multiplayer.html" data-i18n="hero.cta_multi">Try Multi-Player 👬</a>
       </div>
     </div>
     <svg class="hero__art" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cartoon scene with kids, a cat, a tiny car, and a tiny dragon">
@@ -91,7 +91,7 @@
     </svg>
   </section>
 
-  <h2 class="section-heading" id="games">All Games</h2>
+  <h2 class="section-heading" id="games" data-i18n="section.all_games">All Games</h2>
   <section class="card-grid home-grid" aria-label="Single-player games">
 
       <!-- ========== Type2Build ========== -->
@@ -124,12 +124,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Type2Build</h2>
-          <p class="card__desc">Type car-themed words to color a grayscale supercar photo. Race the 90-second clock — but watch your typos!</p>
+          <p class="card__desc" data-i18n="card.type2build.desc">Type car-themed words to color a grayscale supercar photo. Race the 90-second clock — but watch your typos!</p>
           <div class="card__tags">
             <span class="card__tag">Typing</span>
             <span class="card__tag">2D · SVG</span>
           </div>
-          <a class="card__play" href="games/type2build.html">Play →</a>
+          <a class="card__play" href="games/type2build.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -179,12 +179,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Zoomy Cars</h2>
-          <p class="card__desc">Cartoon 3D racing — drive 3 laps, grab spinning ⭐ coins, hit boost pads, dodge cones &amp; trees.</p>
+          <p class="card__desc" data-i18n="card.zoomy_car.desc">Cartoon 3D racing — drive 3 laps, grab spinning ⭐ coins, hit boost pads, dodge cones &amp; trees.</p>
           <div class="card__tags">
             <span class="card__tag">Racing</span>
             <span class="card__tag">3D · Three.js</span>
           </div>
-          <a class="card__play" href="games/zoomy-car.html">Play →</a>
+          <a class="card__play" href="games/zoomy-car.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -233,12 +233,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Child Feeder</h2>
-          <p class="card__desc">Raise a cartoon child from age 3 to 18 with food &amp; activities. Healthy choices grow them up faster — junk wears them down.</p>
+          <p class="card__desc" data-i18n="card.child_feeder.desc">Raise a cartoon child from age 3 to 18 with food &amp; activities. Healthy choices grow them up faster — junk wears them down.</p>
           <div class="card__tags">
             <span class="card__tag">Sim</span>
             <span class="card__tag">2D · SVG</span>
           </div>
-          <a class="card__play" href="games/child-feeder.html">Play →</a>
+          <a class="card__play" href="games/child-feeder.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -307,12 +307,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Dragon Eating Cheese</h2>
-          <p class="card__desc">Steer a hungry dragon snake to gobble cheese wedges. Pick game speed and cheese size — every bite levels you up.</p>
+          <p class="card__desc" data-i18n="card.dragon.desc">Steer a hungry dragon snake to gobble cheese wedges. Pick game speed and cheese size — every bite levels you up.</p>
           <div class="card__tags">
             <span class="card__tag">Snake</span>
             <span class="card__tag">2D · Canvas</span>
           </div>
-          <a class="card__play" href="games/dragon.html">Play →</a>
+          <a class="card__play" href="games/dragon.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -384,12 +384,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Car Memory</h2>
-          <p class="card__desc">Match 8 unique car-brand pairs. Flip two cards — if they match, they lock with a green ✓; if not, they flip back.</p>
+          <p class="card__desc" data-i18n="card.car_memory.desc">Match 8 unique car-brand pairs. Flip two cards — if they match, they lock with a green ✓; if not, they flip back.</p>
           <div class="card__tags">
             <span class="card__tag">Memory</span>
             <span class="card__tag">2D · CSS</span>
           </div>
-          <a class="card__play" href="games/car-memory.html">Play →</a>
+          <a class="card__play" href="games/car-memory.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -464,12 +464,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Engine Memory</h2>
-          <p class="card__desc">Match a car to its engine sound — synthesized in your browser. Flip a 🚗 card to see the brand, flip a 🔊 card to hear it rev. Same brand on both? You've got a pair.</p>
+          <p class="card__desc" data-i18n="card.engine_memory.desc">Match a car to its engine sound — synthesized in your browser. Flip a 🚗 card to see the brand, flip a 🔊 card to hear it rev. Same brand on both? You've got a pair.</p>
           <div class="card__tags">
             <span class="card__tag">Memory</span>
             <span class="card__tag">2D · CSS · Web Audio</span>
           </div>
-          <a class="card__play" href="games/engine-memory.html">Play →</a>
+          <a class="card__play" href="games/engine-memory.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -528,13 +528,13 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Pit Stop Crew</h2>
-          <p class="card__desc">The pit chief flashes a sequence of jobs (🔧 ⛽ 🚿 🏁) — repeat it back. Each round adds one more step. How long can you remember?</p>
+          <p class="card__desc" data-i18n="card.pit_stop_crew.desc">The pit chief flashes a sequence of jobs (🔧 ⛽ 🚿 🏁) — repeat it back. Each round adds one more step. How long can you remember?</p>
           <div class="card__tags">
             <span class="card__tag">Memory</span>
             <span class="card__tag">Sequence</span>
             <span class="card__tag">2D · Web Audio</span>
           </div>
-          <a class="card__play" href="games/pit-stop-crew.html">Play →</a>
+          <a class="card__play" href="games/pit-stop-crew.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -593,12 +593,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Memory Match Cards</h2>
-          <p class="card__desc">Flip colorful idea cards, remember their hiding spots, and match pairs with tiny creative story prompts.</p>
+          <p class="card__desc" data-i18n="card.memory_match.desc">Flip colorful idea cards, remember their hiding spots, and match pairs with tiny creative story prompts.</p>
           <div class="card__tags">
             <span class="card__tag">Memory</span>
             <span class="card__tag">2D · CSS</span>
           </div>
-          <a class="card__play" href="games/memory-match.html">Play →</a>
+          <a class="card__play" href="games/memory-match.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -664,12 +664,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Guess Who Detective</h2>
-          <p class="card__desc">Ask yes/no questions, eliminate suspects, and solve the mystery friend using careful deduction.</p>
+          <p class="card__desc" data-i18n="card.guess_who.desc">Ask yes/no questions, eliminate suspects, and solve the mystery friend using careful deduction.</p>
           <div class="card__tags">
             <span class="card__tag">Logic</span>
             <span class="card__tag">Deduction</span>
           </div>
-          <a class="card__play" href="games/guess-who.html">Play →</a>
+          <a class="card__play" href="games/guess-who.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -703,12 +703,12 @@
         </a>
         <div class="card__body">
           <h2 class="card__title">Tangram Puzzles</h2>
-          <p class="card__desc">Drag, rotate, and snap seven geometric pieces into house, rocket, and cat puzzle outlines.</p>
+          <p class="card__desc" data-i18n="card.tangram_puzzles.desc">Drag, rotate, and snap seven geometric pieces into house, rocket, and cat puzzle outlines.</p>
           <div class="card__tags">
             <span class="card__tag">Spatial</span>
             <span class="card__tag">SVG · Drag</span>
           </div>
-          <a class="card__play" href="games/tangram-puzzles.html">Play →</a>
+          <a class="card__play" href="games/tangram-puzzles.html" data-i18n="card.play">Play →</a>
         </div>
       </article>
 
@@ -716,12 +716,19 @@
 </main>
 
 <footer class="site-footer"><div class="site-footer__inner">
-  <span>Made by William with ❤️ and 🤖</span>
+  <span data-i18n="footer.credit">Made by William with ❤️ and 🤖</span>
+  <span class="site-footer__langs" data-i18n-aria-label="footer.lang" aria-label="Language">
+    <button class="lang-pill" data-lang="en" type="button" aria-pressed="true" lang="en">EN</button>
+    <button class="lang-pill" data-lang="vi" type="button" aria-pressed="false" lang="vi">VI</button>
+    <button class="lang-pill" data-lang="es" type="button" aria-pressed="false" lang="es">ES</button>
+    <button class="lang-pill" data-lang="zh" type="button" aria-pressed="false" lang="zh">中</button>
+  </span>
   <span class="site-footer__links">
     <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
   </span>
 </div></footer>
 
 <script src="assets/site.js"></script>
+<script src="assets/i18n.js"></script>
 </body>
 </html>
