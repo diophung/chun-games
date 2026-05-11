@@ -28,6 +28,10 @@
                           vi: "Trò chơi nhỏ trên trình duyệt cho trẻ em và gia đình.",
                           es: "Pequeños juegos del navegador para niños y familias.",
                           zh: "适合儿童和家庭的迷你浏览器游戏。" },
+    "hero.about":       { en: "Hi! I'm William, an {age}-year-old. This site is my work using AI to learn programming and gaming.",
+                          vi: "Xin chào! Mình là William, {age} tuổi. Trang này là dự án của mình dùng AI để học lập trình và làm game.",
+                          es: "¡Hola! Soy William, tengo {age} años. Este sitio es mi proyecto usando IA para aprender programación y videojuegos.",
+                          zh: "你好!我叫 William,今年 {age} 岁。这个网站是我用 AI 学习编程和游戏制作的作品。" },
     "hero.cta_single":  { en: "Play Single-Player ▶", vi: "Chơi một người ▶", es: "Jugar un jugador ▶", zh: "单人游戏 ▶" },
     "hero.cta_multi":   { en: "Try Multi-Player 👬",  vi: "Thử nhiều người 👬", es: "Probar multijugador 👬", zh: "试试多人游戏 👬" },
     "section.all_games": { en: "All Games",     vi: "Tất cả trò chơi", es: "Todos los juegos", zh: "全部游戏" },
@@ -151,10 +155,21 @@
     return DEFAULT_LANG;
   }
 
+  // William's age, derived from his birth year. Updates automatically each year.
+  const WILLIAM_BIRTH_YEAR = 2018;
+  function williamAge() {
+    return new Date().getFullYear() - WILLIAM_BIRTH_YEAR;
+  }
+
   function t(key, lang) {
     const dict = T[key];
     if (!dict) return key;
-    return dict[lang] || dict[DEFAULT_LANG] || key;
+    let value = dict[lang] || dict[DEFAULT_LANG] || key;
+    // Substitute {age} placeholder anywhere it appears in the string.
+    if (value.indexOf("{age}") >= 0) {
+      value = value.replace(/\{age\}/g, String(williamAge()));
+    }
+    return value;
   }
 
   function applyTranslations(lang) {
