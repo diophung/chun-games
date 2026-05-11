@@ -180,13 +180,10 @@
       el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder, lang));
     }
 
-    // Mark the active pill in the language switcher.
-    const pills = document.querySelectorAll(".lang-pill");
-    for (let i = 0; i < pills.length; i++) {
-      const pill = pills[i];
-      const isActive = pill.dataset.lang === lang;
-      pill.classList.toggle("is-active", isActive);
-      pill.setAttribute("aria-pressed", isActive ? "true" : "false");
+    // Sync any language-picker <select> elements to the current lang.
+    const selects = document.querySelectorAll(".site-lang-select");
+    for (let i = 0; i < selects.length; i++) {
+      if (selects[i].value !== lang) selects[i].value = lang;
     }
   }
 
@@ -200,11 +197,10 @@
 
   function init() {
     applyTranslations(currentLang());
-    const pills = document.querySelectorAll(".lang-pill");
-    for (let i = 0; i < pills.length; i++) {
-      pills[i].addEventListener("click", function () {
-        const lang = this.dataset.lang;
-        if (lang) setLang(lang);
+    const selects = document.querySelectorAll(".site-lang-select");
+    for (let i = 0; i < selects.length; i++) {
+      selects[i].addEventListener("change", function () {
+        if (this.value) setLang(this.value);
       });
     }
   }
