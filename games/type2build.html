@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Chun-Ga · Type2Build</title>
+  <title>WiGa · Type2Build</title>
   <style>
     * { box-sizing: border-box; }
     html, body {
@@ -11,7 +11,7 @@
       padding: 0;
       height: 100%;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #87ceeb;
+      background: #f3ede1;
       color: #222;
       overflow: hidden;
     }
@@ -44,26 +44,48 @@
       flex: 1 1 auto;
       min-height: 0;
       display: flex;
-      align-items: stretch;
+      flex-direction: column;
+      align-items: center;
       justify-content: center;
       padding: 8px;
+      gap: 6px;
+    }
+    /* The single car photo. Starts grayscale; saturation rises as you type. */
+    #car-photo {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      filter: saturate(0);
+      transition: filter 220ms ease;
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
+    #car-photo.vrooming {
+      animation: vroom-bounce 600ms cubic-bezier(0.34, 1.4, 0.5, 1) both;
+    }
+    @keyframes vroom-bounce {
+      0%   { transform: translateX(0)    scale(1); }
+      25%  { transform: translateX(24px) scale(1.04); }
+      55%  { transform: translateX(-12px) scale(1.0); }
+      80%  { transform: translateX(8px)  scale(1.02); }
+      100% { transform: translateX(0)    scale(1); }
+    }
+    #car-caption {
+      text-align: center;
+      font-size: clamp(11px, 2.4vw, 13px);
+      color: rgba(0,0,0,0.55);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      min-height: 1.2em;
     }
     #word-area {
       flex: 0 0 auto;
       padding: 12px 16px 16px;
       background: #fff;
       box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
-    }
-    #city-svg {
-      width: 100%;
-      height: 100%;
-      max-height: 100%;
-      display: block;
-    }
-    [data-section-id] {
-      transition: fill 280ms ease-out;
-    }
-    #word-area {
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -111,9 +133,7 @@
       letter-spacing: 0.08em;
       width: 100%;
     }
-    #word-input:focus {
-      border-color: #2563eb;
-    }
+    #word-input:focus { border-color: #2563eb; }
     #end-screen {
       position: fixed;
       inset: 0;
@@ -150,15 +170,37 @@
       min-height: 48px;
     }
     #play-again:active { transform: translateY(1px); }
-@media (max-width: 480px) {
-  header { padding: 6px 10px; }
-  main { padding: 4px; }
-  #word-area { padding: 10px 12px 12px; }
-}
-@supports (height: 100dvh) {
-  body { min-height: 100dvh; height: 100dvh; }
-}
-#word-input::placeholder { color: #9ca3af; }
+
+    /* Confetti — short 1-second burst on word complete. */
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      overflow: hidden;
+    }
+    #confetti[hidden] { display: none !important; }
+    .confetti-piece {
+      position: absolute;
+      width: 9px;
+      height: 13px;
+      will-change: transform, opacity;
+      animation: confetti-fly 950ms cubic-bezier(0.45, 0.05, 0.55, 1) forwards;
+    }
+    @keyframes confetti-fly {
+      0%   { transform: translate(0, 0)        rotate(0deg);                 opacity: 1; }
+      100% { transform: translate(var(--cdx), var(--cdy)) rotate(var(--crot)); opacity: 0; }
+    }
+
+    @media (max-width: 480px) {
+      header { padding: 6px 10px; }
+      main { padding: 4px; }
+      #word-area { padding: 10px 12px 12px; }
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; height: 100dvh; }
+    }
+    #word-input::placeholder { color: #9ca3af; }
 
    /* WiGa minimal chrome — small floating back-link + footer
       so the game canvas stays full-screen. */
@@ -216,64 +258,34 @@
       <a href="child-feeder.html">Child Feeder</a>
       <a href="car-memory.html">Car Memory</a>
     </nav>
-    <div id="stats-mini">0 / 13</div>
+    <div id="stats-mini">0 / 12</div>
   </header>
-  <main id="city">
-  <svg id="city-svg" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax meet" aria-label="city skyline">
-    <!-- ground strip -->
-    <rect x="0" y="380" width="1000" height="20" fill="#7d8a96" />
-
-    <!-- decorative crane behind tall building 5 -->
-    <line x1="430" y1="380" x2="430" y2="40" stroke="#445566" stroke-width="3" />
-    <line x1="430" y1="50" x2="560" y2="50" stroke="#445566" stroke-width="3" />
-    <line x1="540" y1="50" x2="540" y2="90" stroke="#445566" stroke-width="2" />
-
-    <!-- 13 building sections, all grey -->
-    <rect data-section-id="0"  x="20"  y="240" width="70"  height="140" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="1"  x="90"  y="180" width="80"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="2"  x="170" y="220" width="60"  height="160" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="3"  x="230" y="140" width="90"  height="240" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="4"  x="320" y="200" width="70"  height="180" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="5"  x="390" y="100" width="80"  height="280" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="6"  x="470" y="160" width="80"  height="220" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="7"  x="550" y="220" width="70"  height="160" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="8"  x="620" y="180" width="80"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="9"  x="700" y="120" width="85"  height="260" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="10" x="785" y="200" width="70"  height="180" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="11" x="855" y="240" width="70"  height="140" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-    <rect data-section-id="12" x="925" y="180" width="55"  height="200" fill="#aaaaaa" stroke="#333" stroke-width="2" />
-
-    <!-- decorative window dots (purely visual, never colored) -->
-    <g fill="#ffffff" opacity="0.45">
-      <circle cx="55"  cy="280" r="3" /><circle cx="55"  cy="305" r="3" /><circle cx="55"  cy="330" r="3" />
-      <circle cx="265" cy="200" r="3" /><circle cx="265" cy="230" r="3" /><circle cx="285" cy="200" r="3" /><circle cx="285" cy="230" r="3" />
-      <circle cx="430" cy="180" r="3" /><circle cx="430" cy="220" r="3" /><circle cx="430" cy="260" r="3" />
-      <circle cx="660" cy="220" r="3" /><circle cx="660" cy="250" r="3" /><circle cx="680" cy="220" r="3" />
-      <circle cx="745" cy="180" r="3" /><circle cx="745" cy="220" r="3" /><circle cx="745" cy="260" r="3" />
-    </g>
-  </svg>
-</main>
+  <main id="garage">
+    <img id="car-photo" alt="" />
+    <div id="car-caption" aria-live="polite"></div>
+  </main>
   <section id="word-area">
-  <div id="word-display" aria-live="polite">&mdash;</div>
-  <div id="word-timer-bar"><div id="word-timer-fill"></div></div>
-  <input
-    id="word-input"
-    type="text"
-    inputmode="latin"
-    autocomplete="off"
-    autocorrect="off"
-    autocapitalize="off"
-    spellcheck="false"
-    autofocus
-    placeholder="type here"
-    aria-label="type the word"
-  />
-</section>
-<section id="end-screen" hidden>
-  <h2 id="end-headline"></h2>
-  <ul id="end-stats"></ul>
-  <button id="play-again" type="button">Play Again</button>
-</section>
+    <div id="word-display" aria-live="polite">&mdash;</div>
+    <div id="word-timer-bar"><div id="word-timer-fill"></div></div>
+    <input
+      id="word-input"
+      type="text"
+      inputmode="latin"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      autofocus
+      placeholder="type here"
+      aria-label="type the word"
+    />
+  </section>
+  <section id="end-screen" hidden>
+    <h2 id="end-headline"></h2>
+    <ul id="end-stats"></ul>
+    <button id="play-again" type="button">Play Again</button>
+  </section>
+  <div id="confetti" hidden aria-hidden="true"></div>
   <div class="wiga-mini-footer">
     Made by William with ❤️ and 🤖 ·
     <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -283,10 +295,11 @@
     (function () {
       "use strict";
 
-      const SECTION_COUNT = 13;
+      const CAR_COUNT = 12;
       const WORD_TIMER_PER_CHAR = 1.2;   // seconds per character
       const GLOBAL_TIMER_START = 90;     // seconds
       const TYPO_PENALTY = 2;            // seconds deducted from global timer per typo
+      const CELEBRATE_MS = 1000;         // total celebration window per word complete
 
       const WORDS = [
         "sedan","coupe","wagon","truck","tires","turbo","motor","drift","rally","viper",
@@ -297,26 +310,38 @@
         "ignition","radiator","seatbelt","steering"
       ];
 
-      const PALETTE = [
-        "#e74c3c", "#3498db", "#f1c40f", "#27ae60",
-        "#9b59b6", "#e67e22", "#1abc9c", "#e84393"
+      // 12 hyper-realistic supercar photos sourced from Wikimedia Commons.
+      // See games/cars/CREDITS.md for per-photo attribution + license.
+      const PHOTOS = [
+        { src: "cars/01.jpg", label: "Bugatti Veyron 16.4" },
+        { src: "cars/02.jpg", label: "Lamborghini Aventador SV" },
+        { src: "cars/03.jpg", label: "Ferrari LaFerrari" },
+        { src: "cars/04.jpg", label: "Porsche 911 GT3 (992)" },
+        { src: "cars/05.jpg", label: "McLaren P1" },
+        { src: "cars/06.jpg", label: "Pagani Huayra" },
+        { src: "cars/07.jpg", label: "Koenigsegg Agera N" },
+        { src: "cars/08.jpg", label: "Aston Martin Vantage V8" },
+        { src: "cars/09.jpg", label: "Mercedes-AMG GT" },
+        { src: "cars/10.jpg", label: "Audi R8 V10 plus" },
+        { src: "cars/11.jpg", label: "Nissan GT-R (R35)" },
+        { src: "cars/12.jpg", label: "Chevrolet Corvette C8" },
       ];
 
       const state = {
-        phase: "idle",            // "idle" | "playing" | "ended"
-        endReason: null,          // null | "win" | "timeout"
+        phase: "idle",
+        endReason: null,
         wordQueue: [],
-        sectionQueue: [],
         currentWord: null,
+        currentPhotoIdx: null,
+        previousPhotoIdx: null,
         wordTimer: 0,
         globalTimer: GLOBAL_TIMER_START,
         typos: 0,
         correctChars: 0,
-        sectionsCompleted: 0,
+        carsCompleted: 0,
         lastFrameMs: 0,
       };
 
-      // ----- DOM lookups (cached once) -----
       const els = {
         globalTimer: document.getElementById("global-timer"),
         statsMini:   document.getElementById("stats-mini"),
@@ -328,7 +353,9 @@
         endHeadline: document.getElementById("end-headline"),
         endStats:    document.getElementById("end-stats"),
         playAgain:   document.getElementById("play-again"),
-        citySvg:     document.getElementById("city-svg"),
+        photo:       document.getElementById("car-photo"),
+        caption:     document.getElementById("car-caption"),
+        confetti:    document.getElementById("confetti"),
       };
 
       // ----- Pure helpers -----
@@ -341,12 +368,24 @@
         return a;
       }
 
-      function pickRandom(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
-      }
-
       function formatSeconds(s) {
         return (Math.max(0, s)).toFixed(1) + "s";
+      }
+
+      // Pick a random photo index, with no consecutive repeat.
+      function pickNextPhotoIdx() {
+        if (PHOTOS.length <= 1) return 0;
+        let idx;
+        do {
+          idx = Math.floor(Math.random() * PHOTOS.length);
+        } while (idx === state.previousPhotoIdx);
+        return idx;
+      }
+
+      function applyPhotoSaturation(progress) {
+        const sat = Math.max(0, Math.min(1, progress));
+        // Use toFixed to keep the inline style short and deterministic.
+        els.photo.style.filter = "saturate(" + sat.toFixed(3) + ")";
       }
 
       // ----- Render helpers (no innerHTML; build DOM nodes explicitly) -----
@@ -354,7 +393,7 @@
         const target = state.currentWord || "";
         const frag = document.createDocumentFragment();
         if (target.length === 0) {
-          frag.appendChild(document.createTextNode("\u2014")); // em dash
+          frag.appendChild(document.createTextNode("—"));
         } else {
           for (let i = 0; i < target.length; i++) {
             const span = document.createElement("span");
@@ -368,7 +407,7 @@
 
       function renderTimers() {
         els.globalTimer.textContent = formatSeconds(state.globalTimer);
-        els.statsMini.textContent = state.sectionsCompleted + " / " + SECTION_COUNT;
+        els.statsMini.textContent = state.carsCompleted + " / " + CAR_COUNT;
         const total = (state.currentWord ? state.currentWord.length : 1) * WORD_TIMER_PER_CHAR;
         const pct = Math.max(0, Math.min(100, (state.wordTimer / total) * 100));
         els.wordFill.style.width = pct + "%";
@@ -376,37 +415,109 @@
 
       function flashRed() {
         els.wordDisplay.classList.remove("flash-red");
-        // Force reflow so the animation can replay if triggered rapidly.
         void els.wordDisplay.offsetWidth;
         els.wordDisplay.classList.add("flash-red");
       }
 
-      function resetCityToGrey() {
-        const sections = els.citySvg.querySelectorAll("[data-section-id]");
-        sections.forEach(s => s.setAttribute("fill", "#aaaaaa"));
+      // ----- Audio: synthesized engine "vroom" -----
+      let audioCtx = null;
+      function ensureAudio() {
+        if (audioCtx) return audioCtx;
+        try {
+          const Ctor = window.AudioContext || window.webkitAudioContext;
+          if (!Ctor) return null;
+          audioCtx = new Ctor();
+        } catch (err) {
+          audioCtx = null;
+        }
+        return audioCtx;
+      }
+      function playVroom() {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const t0 = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(70, t0);
+        osc.frequency.exponentialRampToValueAtTime(280, t0 + 0.22);
+        osc.frequency.exponentialRampToValueAtTime(150, t0 + 0.55);
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(900, t0);
+        filter.frequency.exponentialRampToValueAtTime(1800, t0 + 0.22);
+        filter.frequency.exponentialRampToValueAtTime(700, t0 + 0.55);
+        filter.Q.value = 0.9;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, t0);
+        gain.gain.linearRampToValueAtTime(0.22, t0 + 0.04);
+        gain.gain.linearRampToValueAtTime(0.0, t0 + 0.6);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + 0.65);
+      }
+
+      // ----- Confetti at a screen position -----
+      function spawnConfetti(centerX, centerY) {
+        const palette = ["#e74c3c", "#3498db", "#f1c40f", "#27ae60", "#9b59b6", "#e67e22", "#1abc9c", "#e84393"];
+        const N = 22;
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < N; i++) {
+          const piece = document.createElement("span");
+          piece.className = "confetti-piece";
+          piece.style.left = (centerX - 4) + "px";
+          piece.style.top  = (centerY - 6) + "px";
+          piece.style.background = palette[i % palette.length];
+          const angle = (Math.random() * Math.PI) - Math.PI;
+          const dist  = 110 + Math.random() * 130;
+          const dx = Math.cos(angle) * dist;
+          const dy = Math.sin(angle) * dist + 30;
+          piece.style.setProperty("--cdx", dx.toFixed(0) + "px");
+          piece.style.setProperty("--cdy", dy.toFixed(0) + "px");
+          piece.style.setProperty("--crot", (Math.random() * 720 - 360).toFixed(0) + "deg");
+          frag.appendChild(piece);
+        }
+        els.confetti.replaceChildren(frag);
+        els.confetti.hidden = false;
+        setTimeout(() => { els.confetti.hidden = true; els.confetti.replaceChildren(); }, CELEBRATE_MS);
+      }
+
+      function celebratePhoto() {
+        // Lock the photo at full color and play the vroom + confetti for ~1s.
+        applyPhotoSaturation(1);
+        els.photo.classList.add("vrooming");
+        playVroom();
+        const rect = els.photo.getBoundingClientRect();
+        spawnConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        setTimeout(() => els.photo.classList.remove("vrooming"), 650);
       }
 
       // ----- Game lifecycle -----
       function startGame() {
         state.phase = "playing";
         state.endReason = null;
-        state.wordQueue = shuffle(WORDS).slice(0, SECTION_COUNT);
-        state.sectionQueue = shuffle(
-          Array.from({ length: SECTION_COUNT }, (_, i) => i)
-        );
+        state.wordQueue = shuffle(WORDS).slice(0, CAR_COUNT);
+        state.currentPhotoIdx = null;
+        state.previousPhotoIdx = null;
         state.globalTimer = GLOBAL_TIMER_START;
         state.typos = 0;
         state.correctChars = 0;
-        state.sectionsCompleted = 0;
+        state.carsCompleted = 0;
+        state.lastFrameMs = 0;
 
-        resetCityToGrey();
         els.endScreen.hidden = true;
+        els.confetti.hidden = true;
+        els.confetti.replaceChildren();
         els.wordArea.hidden = false;
         els.input.value = "";
+        els.photo.classList.remove("vrooming");
 
         loadNextWord();
         renderTimers();
-        state.lastFrameMs = 0;
         requestAnimationFrame(tick);
         els.input.focus();
       }
@@ -417,15 +528,25 @@
           state.wordTimer = 0;
           renderWordDisplay(0);
           if (state.phase === "playing") {
-            endGame(state.sectionsCompleted === SECTION_COUNT ? "win" : "timeout");
+            endGame(state.carsCompleted === CAR_COUNT ? "win" : "timeout");
           }
           return;
         }
+
         state.currentWord = state.wordQueue.shift();
         state.wordTimer = state.currentWord.length * WORD_TIMER_PER_CHAR;
         els.input.value = "";
         renderWordDisplay(0);
         renderTimers();
+
+        // Pick the next photo (no consecutive repeat) and reset to grayscale.
+        state.previousPhotoIdx = state.currentPhotoIdx;
+        state.currentPhotoIdx  = pickNextPhotoIdx();
+        const photo = PHOTOS[state.currentPhotoIdx];
+        els.photo.src = photo.src;
+        els.photo.alt = photo.label;
+        els.caption.textContent = photo.label;
+        applyPhotoSaturation(0);
       }
 
       function tick(now) {
@@ -443,6 +564,8 @@
         }
 
         if (state.wordTimer <= 0 && state.currentWord) {
+          // Word timed out — abandon this car (leave it partly colored) and move on.
+          state.currentWord = null;
           loadNextWord();
         }
 
@@ -456,19 +579,19 @@
         const denom = state.correctChars + state.typos;
         const accuracy = denom === 0 ? 100 : Math.round((state.correctChars / denom) * 100);
         const score = Math.max(0, Math.round(
-          state.sectionsCompleted * 1000 +
-          (state.sectionsCompleted > 0 ? accuracy * 20 : 0) +
+          state.carsCompleted * 1000 +
+          (state.carsCompleted > 0 ? accuracy * 20 : 0) +
           Math.max(0, state.globalTimer) * 50 -
           state.typos * 100 +
           (reason === "win" ? 5000 : 0)
         ));
 
         els.endHeadline.textContent =
-          reason === "win" ? "City complete!" : "Time's up!";
+          reason === "win" ? "Garage filled!" : "Time's up!";
 
         const stats = [
           "Time used: " + totalTime + "s",
-          "Words completed: " + state.sectionsCompleted + " / " + SECTION_COUNT,
+          "Cars finished: " + state.carsCompleted + " / " + CAR_COUNT,
           "Typos: " + state.typos,
           "Accuracy: " + accuracy + "%",
           "Score: " + score + " pts",
@@ -487,21 +610,13 @@
             gameName: "Type2Build",
             score,
             scoreLabel: "pts",
-            detail: state.sectionsCompleted + "/" + SECTION_COUNT + " words · " + accuracy + "% · " + totalTime + "s",
+            detail: state.carsCompleted + "/" + CAR_COUNT + " cars · " + accuracy + "% · " + totalTime + "s",
           });
           window.ChunHighScores.render(els.endScreen, "type2build", { scoreLabel: "pts" }, els.playAgain);
         }
 
         els.endScreen.hidden = false;
         els.playAgain.focus();
-      }
-
-      function completeSection() {
-        if (state.sectionQueue.length === 0) return;
-        const id = state.sectionQueue.shift();
-        const el = els.citySvg.querySelector('[data-section-id="' + id + '"]');
-        if (el) el.setAttribute("fill", pickRandom(PALETTE));
-        state.sectionsCompleted += 1;
       }
 
       function onInput() {
@@ -520,21 +635,31 @@
         }
 
         if (validLen < current.length) {
+          // Typo — roll back to last valid prefix and dock global timer.
           els.input.value = current.slice(0, validLen);
           state.typos += 1;
           state.globalTimer = Math.max(0, state.globalTimer - TYPO_PENALTY);
           flashRed();
           renderWordDisplay(validLen);
+          applyPhotoSaturation(validLen / target.length);
           renderTimers();
           return;
         }
 
         renderWordDisplay(current.length);
+        applyPhotoSaturation(current.length / target.length);
 
         if (current === target) {
           state.correctChars += target.length;
-          completeSection();
-          loadNextWord();
+          state.carsCompleted += 1;
+          celebratePhoto();
+          renderTimers();
+          // Hold the completed photo on screen for 1s, then load the next word.
+          const finishedWord = state.currentWord;
+          state.currentWord = null;
+          setTimeout(() => {
+            if (state.phase === "playing" && state.currentWord === null) loadNextWord();
+          }, CELEBRATE_MS);
         }
       }
 
@@ -556,10 +681,16 @@
       // Prevent paste cheating.
       els.input.addEventListener("paste", (e) => e.preventDefault());
 
+      // Resume audio context on first user gesture (browsers require this).
+      const resumeAudio = () => {
+        const ctx = ensureAudio();
+        if (ctx && ctx.state === "suspended") ctx.resume();
+      };
+      document.addEventListener("pointerdown", resumeAudio, { once: true });
+      els.input.addEventListener("focus", resumeAudio, { once: true });
+
       // Auto-start on load.
       startGame();
-
-
     })();
   </script>
 </body>
