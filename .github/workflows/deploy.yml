@@ -19,7 +19,7 @@ jobs:
       - name: Copy site files via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: williamphung.com
+          host: ssh.williamphung.com
           username: dio
           port: 22
           key: ${{ secrets.DEPLOY_SSH_KEY }}
