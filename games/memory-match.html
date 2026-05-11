@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>Chun-Ga · Memory Match Cards</title>
-  <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="stylesheet" href="../assets/site.css?v=3" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -313,12 +313,18 @@
       <a class="site-nav__link" href="../multiplayer.html" data-i18n="nav.multi">Multi-Player</a>
       <a class="site-nav__link" href="../high-scores.html" data-i18n="nav.scores">High Scores</a>
       <a class="site-nav__link" href="../donate.html" data-i18n="nav.donate">Donate</a>
-      <select class="site-lang-select" data-i18n-aria-label="footer.lang" aria-label="Language">
-        <option value="en">Language: English</option>
-        <option value="vi">Ngôn ngữ: Tiếng Việt</option>
-        <option value="es">Idioma: Español</option>
-        <option value="zh">语言: 中文</option>
-      </select>
+      <div class="lang-picker">
+        <button class="lang-picker__toggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span>Language: English</span>
+          <span class="lang-picker__chevron" aria-hidden="true">▾</span>
+        </button>
+        <ul class="lang-picker__menu" role="listbox" hidden>
+          <li><button class="lang-picker__option" type="button" data-lang="en" role="option" aria-selected="true">Language: English</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="vi" role="option" aria-selected="false">Ngôn ngữ: Tiếng Việt</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="es" role="option" aria-selected="false">Idioma: Español</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="zh" role="option" aria-selected="false">语言: 中文</button></li>
+        </ul>
+      </div>
     </nav>
   </div></header>
   <main id="app">
@@ -721,6 +727,6 @@
     })();
   </script>
   <script src="../assets/site.js"></script>
-  <script src="../assets/i18n.js"></script>
+  <script src="../assets/i18n.js?v=3"></script>
 </body>
 </html>

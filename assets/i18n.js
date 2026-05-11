@@ -180,10 +180,14 @@
       el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder, lang));
     }
 
-    // Sync any language-picker <select> elements to the current lang.
-    const selects = document.querySelectorAll(".site-lang-select");
-    for (let i = 0; i < selects.length; i++) {
-      if (selects[i].value !== lang) selects[i].value = lang;
+    // Mark the active option in each custom language picker (visual only —
+    // the toggle button always reads "Language: English" no matter what).
+    const options = document.querySelectorAll(".lang-picker__option");
+    for (let i = 0; i < options.length; i++) {
+      const opt = options[i];
+      const isActive = opt.dataset.lang === lang;
+      opt.classList.toggle("is-active", isActive);
+      opt.setAttribute("aria-selected", isActive ? "true" : "false");
     }
   }
 
@@ -195,14 +199,48 @@
     document.dispatchEvent(new CustomEvent("wiga:langchange", { detail: { lang: lang } }));
   }
 
+  function closeAllPickers() {
+    const menus = document.querySelectorAll(".lang-picker__menu");
+    for (let i = 0; i < menus.length; i++) menus[i].hidden = true;
+    const toggles = document.querySelectorAll(".lang-picker__toggle");
+    for (let i = 0; i < toggles.length; i++) toggles[i].setAttribute("aria-expanded", "false");
+  }
+
   function init() {
     applyTranslations(currentLang());
-    const selects = document.querySelectorAll(".site-lang-select");
-    for (let i = 0; i < selects.length; i++) {
-      selects[i].addEventListener("change", function () {
-        if (this.value) setLang(this.value);
+    const pickers = document.querySelectorAll(".lang-picker");
+    for (let i = 0; i < pickers.length; i++) {
+      const picker = pickers[i];
+      const toggle = picker.querySelector(".lang-picker__toggle");
+      const menu   = picker.querySelector(".lang-picker__menu");
+      if (!toggle || !menu) continue;
+
+      toggle.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        const wasOpen = toggle.getAttribute("aria-expanded") === "true";
+        closeAllPickers();
+        if (!wasOpen) {
+          toggle.setAttribute("aria-expanded", "true");
+          menu.hidden = false;
+        }
       });
+
+      const options = picker.querySelectorAll(".lang-picker__option");
+      for (let j = 0; j < options.length; j++) {
+        options[j].addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          const lang = this.dataset.lang;
+          if (lang) setLang(lang);
+          closeAllPickers();
+        });
+      }
     }
+    // Click anywhere outside a picker → close.
+    document.addEventListener("click", closeAllPickers);
+    // ESC also closes.
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape") closeAllPickers();
+    });
   }
 
   // Expose a tiny public API for game pages that want to translate at runtime.

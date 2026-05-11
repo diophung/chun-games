@@ -363,8 +363,15 @@ a { color: inherit; }
 }
 .site-footer__links a:hover { color: var(--coral-ink); border-bottom-color: var(--coral-ink); }
 
-/* ===== Language picker (header) ===== */
-.site-lang-select {
+/* ===== Language picker (custom button + dropdown menu, header) =====
+   The toggle always reads "Language: English" so users can identify the
+   picker even if the rest of the page is in another script. The menu
+   shows each option in its own language. */
+.lang-picker {
+  position: relative;
+  display: inline-block;
+}
+.lang-picker__toggle {
   font: inherit;
   font-weight: 700;
   font-size: 14px;
@@ -372,29 +379,68 @@ a { color: inherit; }
   background: var(--mint);
   border: 2px solid var(--mint-ink);
   border-radius: var(--radius-pill);
-  padding: 7px 32px 7px 14px;
+  padding: 7px 14px;
   cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  /* Inline SVG chevron via background-image so the control is fully self-styled. */
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'><path d='M1 1.5l5 5 5-5' stroke='%232f6b54' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 10px 7px;
-  transition: background-color 140ms ease, border-color 140ms ease;
-  max-width: 260px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 140ms ease;
 }
-.site-lang-select:hover {
-  background-color: #a3dfc5;
-}
-.site-lang-select:focus-visible {
+.lang-picker__toggle:hover { background-color: #a3dfc5; }
+.lang-picker__toggle:focus-visible {
   outline: 2px solid var(--coral-ink);
   outline-offset: 2px;
 }
-.site-lang-select option {
+.lang-picker__chevron {
+  font-size: 10px;
+  line-height: 1;
+  margin-top: 1px;
+  transition: transform 160ms ease;
+}
+.lang-picker__toggle[aria-expanded="true"] .lang-picker__chevron {
+  transform: rotate(180deg);
+}
+.lang-picker__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
   background: var(--card);
-  color: var(--ink);
+  border: 2px solid var(--mint-ink);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  min-width: 240px;
+  max-width: calc(100vw - 24px);
+}
+.lang-picker__menu[hidden] { display: none; }
+.lang-picker__menu li { margin: 0; padding: 0; }
+.lang-picker__option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
   font-weight: 600;
+  padding: 8px 12px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  margin: 2px 0;
+}
+.lang-picker__option:hover { background: var(--butter); }
+.lang-picker__option:focus-visible {
+  outline: 2px solid var(--coral-ink);
+  outline-offset: 1px;
+}
+.lang-picker__option.is-active {
+  background: var(--mint);
+  border-color: var(--mint-ink);
+  color: var(--mint-ink);
 }
 
 /* ===== Responsive: nav wrap ===== */
