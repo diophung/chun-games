@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Simon Says</title>
+  <link rel="stylesheet" href="../assets/site.css?v=4" />
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #f8fafc;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 60%, #020617 100%);
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+
+    .game-header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .game-header h1 {
+      margin: 0;
+      font-size: clamp(20px, 5vw, 26px);
+      letter-spacing: 0.04em;
+    }
+    .stats {
+      display: flex;
+      gap: 8px;
+      font-size: clamp(13px, 3.2vw, 15px);
+    }
+    .stat {
+      background: rgba(0,0,0,0.45);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .stat strong { color: #fbbf24; margin-left: 4px; }
+    .game-header nav { display: flex; gap: 12px; }
+    .game-header nav a {
+      color: #f1f5f9;
+      text-decoration: none;
+      opacity: 0.8;
+      font-size: 14px;
+      border-bottom: 1px dashed rgba(255,255,255,0.4);
+    }
+    .game-header nav a:hover { opacity: 1; }
+
+    main {
+      flex: 1 1 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 12px 0;
+    }
+
+    #message {
+      font-size: clamp(15px, 4vw, 20px);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-align: center;
+      padding: 8px 18px;
+      background: rgba(0,0,0,0.45);
+      border-radius: 999px;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    #message[data-mood="watch"]   { color: #fbbf24; }
+    #message[data-mood="play"]    { color: #4ade80; }
+    #message[data-mood="error"]   { color: #fecaca; background: rgba(127,29,29,0.6); border-color: rgba(248,113,113,0.5); }
+
+    /* Classic Simon pad: square divided into 4 quadrants with a dark hub
+       to keep the iconic look. */
+    #pad {
+      position: relative;
+      width: min(92vw, 460px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 60%),
+        #0b1220;
+      box-shadow:
+        inset 0 0 0 4px rgba(255,255,255,0.06),
+        0 24px 50px rgba(0,0,0,0.55);
+      touch-action: manipulation;
+    }
+
+    .pad-btn {
+      position: relative;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+      transition: filter 90ms ease, transform 90ms ease, box-shadow 120ms ease;
+      filter: brightness(0.55) saturate(0.95);
+      box-shadow: inset 0 4px 14px rgba(255,255,255,0.18), inset 0 -10px 24px rgba(0,0,0,0.45);
+      outline: none;
+    }
+    .pad-btn:focus-visible {
+      outline: 3px solid rgba(255,255,255,0.7);
+      outline-offset: -6px;
+    }
+    .pad-btn:disabled { cursor: default; }
+
+    /* Sculpt each quadrant to round only its outer corner so the four
+       buttons read as a single circular Simon pad. */
+    .pad-btn[data-id="red"] {
+      background: radial-gradient(circle at 30% 30%, #fb7185 0%, #b91c1c 80%);
+      border-top-left-radius: 100% 100%;
+    }
+    .pad-btn[data-id="blue"] {
+      background: radial-gradient(circle at 70% 30%, #60a5fa 0%, #1d4ed8 80%);
+      border-top-right-radius: 100% 100%;
+    }
+    .pad-btn[data-id="yellow"] {
+      background: radial-gradient(circle at 30% 70%, #fde68a 0%, #b45309 80%);
+      border-bottom-left-radius: 100% 100%;
+    }
+    .pad-btn[data-id="green"] {
+      background: radial-gradient(circle at 70% 70%, #86efac 0%, #15803d 80%);
+      border-bottom-right-radius: 100% 100%;
+    }
+
+    .pad-btn.lit {
+      filter: brightness(1.45) saturate(1.25);
+      box-shadow:
+        inset 0 4px 14px rgba(255,255,255,0.45),
+        0 0 28px 6px rgba(255,255,255,0.35);
+      transform: scale(1.01);
+    }
+    .pad-btn.tap-press {
+      transform: scale(0.985);
+    }
+
+    /* Central hub label, purely decorative. */
+    #pad::after {
+      content: "SIMON";
+      position: absolute;
+      inset: 50%;
+      width: 28%;
+      aspect-ratio: 1 / 1;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle at 50% 35%, #1f2937 0%, #0b1220 80%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f1f5f9;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      font-size: clamp(11px, 2.6vw, 14px);
+      box-shadow:
+        inset 0 0 0 3px rgba(255,255,255,0.08),
+        0 4px 12px rgba(0,0,0,0.55);
+      pointer-events: none;
+    }
+
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      z-index: 100;
+    }
+    #end-screen[hidden] { display: none !important; }
+    #end-headline {
+      font-size: clamp(28px, 8vw, 44px);
+      margin: 0;
+      text-align: center;
+    }
+    #end-stats {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: clamp(16px, 4vw, 20px);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 4px 0; }
+    #play-again {
+      font-size: clamp(18px, 5vw, 22px);
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 48px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+    }
+    #play-again:active { transform: translateY(1px); }
+
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      z-index: 50;
+      background: rgba(2,6,23,0.88);
+      padding: 24px;
+      text-align: center;
+    }
+    #start-overlay[hidden] { display: none !important; }
+    #start-overlay h2 {
+      font-size: clamp(24px, 6.5vw, 38px);
+      margin: 0;
+    }
+    #start-overlay p {
+      font-size: clamp(14px, 3.6vw, 17px);
+      max-width: 480px;
+      line-height: 1.45;
+      margin: 0;
+      opacity: 0.92;
+    }
+    #start-btn {
+      font-size: clamp(18px, 5vw, 24px);
+      padding: 14px 32px;
+      border: none;
+      border-radius: 999px;
+      background: #16a34a;
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      min-height: 52px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+    }
+    #start-btn:active { transform: translateY(2px); }
+
+    @media (max-width: 480px) {
+      .game-header { padding: 4px 2px 10px; }
+      #pad { gap: 10px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub" data-i18n="logo.sub">— William's Games</span></a>
+    <nav class="site-nav" aria-label="Primary" data-i18n-aria-label="nav.aria">
+      <a class="site-nav__link" href="../index.html" data-i18n="nav.single">Single Player</a>
+      <a class="site-nav__link" href="../multiplayer.html" data-i18n="nav.multi">Multi-Player</a>
+      <a class="site-nav__link" href="../high-scores.html" data-i18n="nav.scores">High Scores</a>
+      <a class="site-nav__link" href="../donate.html" data-i18n="nav.donate">Donate</a>
+      <div class="lang-picker">
+        <button class="lang-picker__toggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span>Language: English</span>
+          <span class="lang-picker__chevron" aria-hidden="true">▾</span>
+        </button>
+        <ul class="lang-picker__menu" role="listbox" hidden>
+          <li><button class="lang-picker__option" type="button" data-lang="en" role="option" aria-selected="true">Language: English</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="vi" role="option" aria-selected="false">Ngôn ngữ: Tiếng Việt</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="es" role="option" aria-selected="false">Idioma: Español</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="zh" role="option" aria-selected="false">语言: 中文</button></li>
+        </ul>
+      </div>
+    </nav>
+  </div></header>
+
+  <header class="game-header">
+    <h1>🎵 Simon Says</h1>
+    <div class="stats">
+      <div class="stat">Round<strong id="round-count">0</strong></div>
+      <div class="stat">Best<strong id="best-score">—</strong></div>
+    </div>
+    <nav aria-label="other games">
+      <a href="../index.html">Home</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="message" data-mood="watch" aria-live="polite">Tap Start to begin</div>
+    <div id="pad" aria-label="Simon Says color pads">
+      <button class="pad-btn" data-id="red"    type="button" aria-label="Red pad"></button>
+      <button class="pad-btn" data-id="blue"   type="button" aria-label="Blue pad"></button>
+      <button class="pad-btn" data-id="yellow" type="button" aria-label="Yellow pad"></button>
+      <button class="pad-btn" data-id="green"  type="button" aria-label="Green pad"></button>
+    </div>
+  </main>
+
+  <div id="start-overlay">
+    <h2>🎵 Simon Says</h2>
+    <p>Watch the lights, listen to the tones, then tap the colors back in the same order. Every round adds one more step — how far can you go?</p>
+    <button id="start-btn" type="button">Start →</button>
+  </div>
+
+  <section id="end-screen" hidden>
+    <h2 id="end-headline">🛑 Game Over</h2>
+    <ul id="end-stats"></ul>
+    <button id="play-again" type="button">Play Again</button>
+  </section>
+
+  <footer class="site-footer"><div class="site-footer__inner">
+    <span data-i18n="footer.credit">Made by William with ❤️ and 🤖</span>
+    <span class="site-footer__links">
+      <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </span>
+  </div></footer>
+
+  <script src="high-scores.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      // Classic Simon tones (close to the original electronic toy):
+      //   green  = E4   (329.63 Hz)
+      //   red    = A3   (220.00 Hz)
+      //   yellow = D4   (293.66 Hz) — substitute for the classic Eb so the
+      //                              tones still feel pleasant together
+      //   blue   = G4   (392.00 Hz, an octave below the original)
+      // The pads themselves live in a 2x2 grid: red TL, blue TR,
+      // yellow BL, green BR (matches the classic toy layout).
+      const PADS = [
+        { id: "red",    freq: 220.00 },
+        { id: "blue",   freq: 392.00 },
+        { id: "yellow", freq: 293.66 },
+        { id: "green",  freq: 329.63 },
+      ];
+      const ID_TO_PAD = Object.fromEntries(PADS.map(p => [p.id, p]));
+
+      // Playback timing — slightly slower than Pit Stop so the classic
+      // Simon "ka-doonk" cadence comes through, then accelerates with
+      // sequence length.
+      const FLASH_BASE_MS = 560;
+      const FLASH_MIN_MS  = 240;
+      const GAP_BASE_MS   = 180;
+      const GAP_MIN_MS    = 70;
+      // Number of rounds over which the speed ramps from base → min.
+      const SPEED_RAMP_ROUNDS = 18;
+
+      const state = {
+        phase: "idle",     // "idle" | "showing" | "awaiting" | "over"
+        sequence: [],
+        playerStep: 0,
+        round: 0,
+        showTimer: 0,
+      };
+
+      const els = {
+        round:        document.getElementById("round-count"),
+        best:         document.getElementById("best-score"),
+        message:      document.getElementById("message"),
+        pad:          document.getElementById("pad"),
+        buttons:      Array.from(document.querySelectorAll(".pad-btn")),
+        startOverlay: document.getElementById("start-overlay"),
+        startBtn:     document.getElementById("start-btn"),
+        endScreen:    document.getElementById("end-screen"),
+        endHeadline:  document.getElementById("end-headline"),
+        endStats:     document.getElementById("end-stats"),
+        playAgain:    document.getElementById("play-again"),
+      };
+
+      const buttonsById = Object.fromEntries(
+        els.buttons.map(b => [b.dataset.id, b])
+      );
+
+      // ---------- Audio (Web Audio API, lazy-initialized from a gesture) ----------
+
+      let audioCtx = null;
+      function ensureAudio() {
+        if (!audioCtx) {
+          const Ctor = window.AudioContext || window.webkitAudioContext;
+          if (!Ctor) return null;
+          try { audioCtx = new Ctor(); } catch (err) { return null; }
+        }
+        // iOS Safari starts the context suspended until a user gesture.
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        return audioCtx;
+      }
+
+      function playTone(freq, duration, opts) {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const o = opts || {};
+        const wave = o.wave || "sine";
+        const peak = o.peak == null ? 0.22 : o.peak;
+
+        const osc = ctx.createOscillator();
+        osc.type = wave;
+        osc.frequency.setValueAtTime(freq, now);
+        if (o.endFreq != null) {
+          osc.frequency.exponentialRampToValueAtTime(o.endFreq, now + duration);
+        }
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(peak, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.05);
+      }
+
+      function playPad(id, durationMs) {
+        const pad = ID_TO_PAD[id];
+        if (!pad) return;
+        const dur = (durationMs || 320) / 1000;
+        // Sine wave keeps the classic toy's pure-tone character.
+        playTone(pad.freq, dur, { wave: "sine", peak: 0.24 });
+      }
+
+      function playError() {
+        // Descending bleat to signal a wrong tap.
+        playTone(196, 0.20, { wave: "sawtooth", peak: 0.20 });
+        setTimeout(() => playTone(110, 0.42, { wave: "sawtooth", peak: 0.20, endFreq: 55 }), 180);
+      }
+
+      // ---------- UI helpers ----------
+
+      function setMessage(text, mood) {
+        els.message.textContent = text;
+        els.message.dataset.mood = mood || "watch";
+      }
+
+      function setButtonsEnabled(enabled) {
+        for (const b of els.buttons) b.disabled = !enabled;
+      }
+
+      function flashButton(id, durationMs) {
+        const btn = buttonsById[id];
+        if (!btn) return;
+        btn.classList.add("lit");
+        playPad(id, durationMs);
+        setTimeout(() => btn.classList.remove("lit"), durationMs);
+      }
+
+      function truncateName(name) {
+        const max = 12;
+        return name.length <= max ? name : name.slice(0, max - 1) + "…";
+      }
+
+      function renderBest() {
+        const top = window.ChunHighScores ? window.ChunHighScores.best("simon-says") : null;
+        if (!top) {
+          els.best.textContent = "—";
+          return;
+        }
+        els.best.textContent = "Round " + top.score + " (" + truncateName(top.name) + ")";
+      }
+
+      function renderRound() {
+        els.round.textContent = String(state.round);
+      }
+
+      // ---------- Round flow ----------
+
+      function flashTimingFor(round) {
+        // Ramp flash + gap durations down linearly with sequence length so
+        // pressure builds, then clamp at a fair floor.
+        const t = Math.min(1, Math.max(0, (round - 1) / SPEED_RAMP_ROUNDS));
+        const flash = Math.round(FLASH_BASE_MS - (FLASH_BASE_MS - FLASH_MIN_MS) * t);
+        const gap   = Math.round(GAP_BASE_MS   - (GAP_BASE_MS   - GAP_MIN_MS)   * t);
+        return { flash, gap };
+      }
+
+      let scoreRecorded = false;
+
+      function startGame() {
+        els.endScreen.hidden = true;
+        els.startOverlay.hidden = true;
+        state.sequence = [];
+        state.round = 0;
+        state.playerStep = 0;
+        scoreRecorded = false;
+        renderRound();
+        renderBest();
+        setMessage("Get ready…", "watch");
+        setButtonsEnabled(false);
+        setTimeout(nextRound, 450);
+      }
+
+      function nextRound() {
+        state.round += 1;
+        renderRound();
+        // Append exactly one new step — the player keeps everything they
+        // already memorized, classic Simon style.
+        const nextId = PADS[Math.floor(Math.random() * PADS.length)].id;
+        state.sequence.push(nextId);
+        state.playerStep = 0;
+        showSequence();
+      }
+
+      function showSequence() {
+        state.phase = "showing";
+        setButtonsEnabled(false);
+        setMessage("Watch…", "watch");
+        const { flash, gap } = flashTimingFor(state.round);
+        const seq = state.sequence;
+
+        let idx = 0;
+        function step() {
+          if (idx >= seq.length) {
+            state.phase = "awaiting";
+            setMessage("Your turn!", "play");
+            setButtonsEnabled(true);
+            return;
+          }
+          flashButton(seq[idx], flash);
+          idx += 1;
+          state.showTimer = setTimeout(step, flash + gap);
+        }
+        // Small pause before the first flash so the first beat is clearly
+        // a new sequence rather than a continuation.
+        state.showTimer = setTimeout(step, 250);
+      }
+
+      function handleTap(id) {
+        if (state.phase !== "awaiting") return;
+        // Make sure audio is alive — handleTap also runs from touchstart,
+        // which counts as a user gesture on iOS Safari.
+        ensureAudio();
+        const expected = state.sequence[state.playerStep];
+        const btn = buttonsById[id];
+
+        if (btn) {
+          btn.classList.add("tap-press", "lit");
+          playPad(id, 240);
+          setTimeout(() => btn.classList.remove("tap-press", "lit"), 220);
+        }
+
+        if (id !== expected) {
+          gameOver();
+          return;
+        }
+
+        state.playerStep += 1;
+        if (state.playerStep >= state.sequence.length) {
+          // Round complete — celebrate briefly, then advance.
+          state.phase = "showing";
+          setButtonsEnabled(false);
+          setMessage("Nice!", "play");
+          setTimeout(nextRound, 500);
+        }
+      }
+
+      function gameOver() {
+        state.phase = "over";
+        setButtonsEnabled(false);
+        setMessage("Wrong color! Game over.", "error");
+        playError();
+
+        // Score = number of rounds the player FULLY completed before the
+        // mistake. If they got the first step wrong on round 1, that's 0.
+        const score = Math.max(0, state.round - 1);
+        const stats = [
+          "Rounds completed: " + score,
+          "You reached round: " + state.round,
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+        els.endHeadline.textContent =
+          score >= 15 ? "🏆 Simon Master!" :
+          score >= 8  ? "🌟 Great memory!" :
+                        "🛑 Game Over";
+
+        // Record exactly once per game-over, regardless of how many times
+        // this function might be re-entered (defensive guard).
+        if (!scoreRecorded && window.ChunHighScores && score > 0) {
+          scoreRecorded = true;
+          window.ChunHighScores.record({
+            gameId: "simon-says",
+            gameName: "Simon Says",
+            score,
+            scoreLabel: "rounds",
+            detail: state.sequence.length + " steps shown",
+          });
+          window.ChunHighScores.render(els.endScreen, "simon-says", { scoreLabel: "rounds" }, els.playAgain);
+        } else if (window.ChunHighScores) {
+          // Still show the board (without recording) so the player can see
+          // existing high scores even on a round-1 flub.
+          window.ChunHighScores.render(els.endScreen, "simon-says", { scoreLabel: "rounds" }, els.playAgain);
+        }
+        renderBest();
+
+        setTimeout(() => {
+          els.endScreen.hidden = false;
+          els.playAgain.focus();
+        }, 650);
+      }
+
+      // ---------- Wiring ----------
+
+      // Use pointerdown when available (covers both mouse + touch), and
+      // fall back to touchstart + click on older browsers. preventDefault
+      // on touchstart stops the synthetic mouse click that would otherwise
+      // fire a second handleTap.
+      els.buttons.forEach(btn => {
+        const id = btn.dataset.id;
+        // Touch first — preventDefault avoids the 300ms click delay AND
+        // suppresses the duplicate synthetic click event on iOS.
+        btn.addEventListener("touchstart", (ev) => {
+          ev.preventDefault();
+          handleTap(id);
+        }, { passive: false });
+        // Mouse/keyboard activation — only reached on non-touch
+        // interactions because touchstart's preventDefault cancels the
+        // emulated click.
+        btn.addEventListener("click", () => handleTap(id));
+      });
+
+      els.startBtn.addEventListener("click", () => {
+        // Crucial for iOS Safari: kick the AudioContext alive while we're
+        // still inside the user-gesture call stack.
+        ensureAudio();
+        startGame();
+      });
+
+      els.playAgain.addEventListener("click", () => {
+        ensureAudio();
+        startGame();
+      });
+
+      renderBest();
+      setButtonsEnabled(false);
+    })();
+  </script>
+  <script src="../assets/site.js"></script>
+  <script src="../assets/i18n.js?v=4"></script>
+</body>
+</html>

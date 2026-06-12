@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Chun-Ga · Bubble Pop</title>
+  <link rel="stylesheet" href="../assets/site.css?v=4" />
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #17324d;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+    #app {
+      width: 100%;
+      max-width: 540px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #app header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.78);
+      border: 2px solid rgba(255,255,255,0.75);
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(31,41,55,0.12);
+      font-variant-numeric: tabular-nums;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(20px, 5.5vw, 30px);
+      line-height: 1;
+      color: #1d4ed8;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.8);
+    }
+    .stats, nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: #ffffff;
+      border: 2px solid #bae6fd;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: clamp(12px, 3vw, 14px);
+      font-weight: 700;
+      color: #1d4ed8;
+    }
+    .stat strong { color: #be123c; margin-left: 4px; }
+    .stat.lives strong { color: #16a34a; }
+    .stat.lives.warn strong { color: #dc2626; }
+    nav a, button.linky {
+      color: #1d4ed8;
+      font: inherit;
+      font-weight: 800;
+      text-decoration: none;
+      border: none;
+      border-bottom: 2px dashed rgba(29,78,216,0.35);
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
+    #stage-wrap {
+      position: relative;
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 14px 38px rgba(31,41,55,0.22);
+      background: linear-gradient(180deg, #bae6fd 0%, #dbeafe 50%, #fef3c7 100%);
+      aspect-ratio: 3 / 4;
+      max-height: calc(100vh - 200px);
+    }
+    @supports (max-height: calc(100dvh - 200px)) {
+      #stage-wrap { max-height: calc(100dvh - 200px); }
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+    #combo-toast {
+      position: absolute;
+      top: 12%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.6);
+      padding: 8px 18px;
+      background: rgba(190,18,60,0.92);
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      font-size: clamp(14px, 4vw, 20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease, transform 280ms cubic-bezier(.3,1.7,.4,1);
+      box-shadow: 0 8px 22px rgba(190,18,60,0.4);
+      white-space: nowrap;
+    }
+    #combo-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+    #message {
+      margin: 0;
+      min-height: 1.6em;
+      text-align: center;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.72);
+      border-radius: 14px;
+      color: #1d4ed8;
+      font-size: clamp(13px, 3.4vw, 16px);
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(31,41,55,0.08);
+    }
+    #end-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 22px;
+      background: rgba(15,23,42,0.92);
+      color: #fff;
+      text-align: center;
+    }
+    #end-screen[hidden] { display: none !important; }
+    #end-screen h2 {
+      margin: 0;
+      font-size: clamp(30px, 8vw, 50px);
+      color: #fef3c7;
+      text-shadow: 0 3px 0 rgba(0,0,0,0.25);
+    }
+    #end-stats {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: clamp(16px, 4vw, 21px);
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 3px 0; }
+    .primary {
+      min-height: 52px;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 28px;
+      background: #facc15;
+      color: #17324d;
+      font: inherit;
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.28);
+    }
+    .primary:active { transform: translateY(1px); }
+    #start-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: rgba(15,23,42,0.55);
+      color: #fff;
+      text-align: center;
+      padding: 18px;
+    }
+    #start-overlay[hidden] { display: none !important; }
+    #start-overlay h2 {
+      margin: 0;
+      font-size: clamp(28px, 8vw, 44px);
+      color: #fef3c7;
+      text-shadow: 0 3px 0 rgba(0,0,0,0.3);
+    }
+    #start-overlay p {
+      margin: 0;
+      font-size: clamp(13px, 3.4vw, 17px);
+      max-width: 360px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+    @media (max-width: 520px) {
+      body { padding: 8px; }
+      #app header { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub" data-i18n="logo.sub">— William's Games</span></a>
+    <nav class="site-nav" aria-label="Primary" data-i18n-aria-label="nav.aria">
+      <a class="site-nav__link" href="../index.html" data-i18n="nav.single">Single Player</a>
+      <a class="site-nav__link" href="../multiplayer.html" data-i18n="nav.multi">Multi-Player</a>
+      <a class="site-nav__link" href="../high-scores.html" data-i18n="nav.scores">High Scores</a>
+      <a class="site-nav__link" href="../donate.html" data-i18n="nav.donate">Donate</a>
+      <div class="lang-picker">
+        <button class="lang-picker__toggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span>Language: English</span>
+          <span class="lang-picker__chevron" aria-hidden="true">▾</span>
+        </button>
+        <ul class="lang-picker__menu" role="listbox" hidden>
+          <li><button class="lang-picker__option" type="button" data-lang="en" role="option" aria-selected="true">Language: English</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="vi" role="option" aria-selected="false">Ngôn ngữ: Tiếng Việt</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="es" role="option" aria-selected="false">Idioma: Español</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="zh" role="option" aria-selected="false">语言: 中文</button></li>
+        </ul>
+      </div>
+    </nav>
+  </div></header>
+
+  <main id="app">
+    <header>
+      <h1>🫧 Bubble Pop</h1>
+      <div class="stats" aria-label="game stats">
+        <div class="stat">Score<strong id="score-count">0</strong></div>
+        <div class="stat lives" id="lives-stat">Lives<strong id="lives-count">5</strong></div>
+        <div class="stat">Best<strong id="combo-count">×1</strong></div>
+      </div>
+      <nav aria-label="game navigation">
+        <a href="../index.html">Home</a>
+        <button class="linky" id="restart-btn" type="button">Restart</button>
+      </nav>
+    </header>
+
+    <p id="message">Tap floating bubbles to pop them. Match 3+ same colors quickly for combos. Avoid the dark bombs!</p>
+
+    <div id="stage-wrap">
+      <canvas id="stage" aria-label="bubble field"></canvas>
+      <div id="combo-toast" aria-live="polite"></div>
+      <div id="start-overlay">
+        <h2>Ready?</h2>
+        <p>Tap anywhere to start. Pop the bubbles before they escape the top. Bombs are dark with a fuse — don't tap them!</p>
+        <button class="primary" id="start-btn" type="button">Tap to Start</button>
+      </div>
+    </div>
+  </main>
+
+  <section id="end-screen" hidden>
+    <h2 id="end-title">💥 Game Over</h2>
+    <ul id="end-stats"></ul>
+    <button class="primary" id="play-again" type="button">Play Again</button>
+  </section>
+
+  <footer class="site-footer"><div class="site-footer__inner">
+    <span data-i18n="footer.credit">Made by William with ❤️ and 🤖</span>
+    <span class="site-footer__links">
+      <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </span>
+  </div></footer>
+
+  <script src="high-scores.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      // ---------- Config ----------
+
+      const START_LIVES = 5;
+      const COMBO_WINDOW_MS = 1200;
+      const COMBO_THRESHOLD = 3;        // 3 same-color pops within window => combo
+      const COMBO_BONUS_PER_BUBBLE = 3; // each combo bubble gives +3 (replaces base +1)
+      const BASE_SPAWN_MS = 900;        // first spawn interval
+      const MIN_SPAWN_MS = 280;         // floor as difficulty ramps
+      const RAMP_SECONDS = 75;          // seconds to ramp from base -> min
+      const BOMB_START_CHANCE = 0.0;
+      const BOMB_MAX_CHANCE = 0.18;
+      const BOMB_RAMP_SECONDS = 60;
+
+      // Bubble colors — bright/playful palette. Limit to a small set so combos are achievable.
+      const BUBBLE_COLORS = [
+        { id: "pink",   fill: "#ec4899", shine: "#fbcfe8", ring: "#9d174d" },
+        { id: "blue",   fill: "#3b82f6", shine: "#bfdbfe", ring: "#1e3a8a" },
+        { id: "green",  fill: "#22c55e", shine: "#bbf7d0", ring: "#14532d" },
+        { id: "yellow", fill: "#facc15", shine: "#fef9c3", ring: "#854d0e" },
+        { id: "purple", fill: "#a855f7", shine: "#e9d5ff", ring: "#581c87" },
+        { id: "orange", fill: "#f97316", shine: "#fed7aa", ring: "#7c2d12" },
+      ];
+
+      // ---------- DOM ----------
+
+      const canvas = document.getElementById("stage");
+      const ctx = canvas.getContext("2d");
+      const $score = document.getElementById("score-count");
+      const $lives = document.getElementById("lives-count");
+      const $livesStat = document.getElementById("lives-stat");
+      const $combo = document.getElementById("combo-count");
+      const $msg = document.getElementById("message");
+      const $restart = document.getElementById("restart-btn");
+      const $startOverlay = document.getElementById("start-overlay");
+      const $startBtn = document.getElementById("start-btn");
+      const $endScreen = document.getElementById("end-screen");
+      const $endTitle = document.getElementById("end-title");
+      const $endStats = document.getElementById("end-stats");
+      const $playAgain = document.getElementById("play-again");
+      const $stageWrap = document.getElementById("stage-wrap");
+      const $comboToast = document.getElementById("combo-toast");
+
+      // ---------- State ----------
+
+      const state = {
+        phase: "idle",         // idle | playing | ended
+        bubbles: [],
+        particles: [],
+        score: 0,
+        lives: START_LIVES,
+        bestCombo: 1,           // tracks the largest combo achieved
+        comboHistory: [],       // [{ colorId, t }] of recent same-color pops
+        scoreRecorded: false,
+        startTime: 0,
+        lastFrame: 0,
+        lastSpawn: 0,
+        spawnInterval: BASE_SPAWN_MS,
+        nextId: 1,
+        cssW: 0,
+        cssH: 0,
+        dpr: 1,
+        bubblesPopped: 0,
+        bombsHit: 0,
+      };
+
+      // ---------- Canvas sizing (DPR-aware) ----------
+
+      function resizeCanvas() {
+        const rect = $stageWrap.getBoundingClientRect();
+        const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+        state.cssW = rect.width;
+        state.cssH = rect.height;
+        state.dpr = dpr;
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        canvas.style.width = rect.width + "px";
+        canvas.style.height = rect.height + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      // Observe wrap directly so aspect-ratio + dynamic viewport changes redraw correctly.
+      if (typeof ResizeObserver !== "undefined") {
+        const ro = new ResizeObserver(resizeCanvas);
+        ro.observe($stageWrap);
+      }
+
+      // ---------- Utility ----------
+
+      function rand(min, max) { return min + Math.random() * (max - min); }
+      function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+      function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+      function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+      // ---------- Difficulty ramp ----------
+
+      function elapsedSec() {
+        return (performance.now() - state.startTime) / 1000;
+      }
+
+      function currentSpawnInterval() {
+        const t = clamp(elapsedSec() / RAMP_SECONDS, 0, 1);
+        return BASE_SPAWN_MS + (MIN_SPAWN_MS - BASE_SPAWN_MS) * t;
+      }
+
+      function currentBombChance() {
+        const t = clamp(elapsedSec() / BOMB_RAMP_SECONDS, 0, 1);
+        return BOMB_START_CHANCE + (BOMB_MAX_CHANCE - BOMB_START_CHANCE) * t;
+      }
+
+      function currentSpeedRange() {
+        // Drift speed (px/sec) widens over time.
+        const t = clamp(elapsedSec() / RAMP_SECONDS, 0, 1);
+        const minSpeed = 50 + 20 * t;
+        const maxSpeed = 110 + 100 * t;
+        return [minSpeed, maxSpeed];
+      }
+
+      function currentRadiusRange() {
+        // Bubbles get a touch smaller as it ramps up — keeps tap targets generous early.
+        const t = clamp(elapsedSec() / RAMP_SECONDS, 0, 1);
+        const base = Math.min(state.cssW, state.cssH);
+        const rMin = base * (0.07 - 0.015 * t);
+        const rMax = base * (0.13 - 0.02 * t);
+        return [rMin, rMax];
+      }
+
+      // ---------- Spawning ----------
+
+      function spawnBubble() {
+        const [rMin, rMax] = currentRadiusRange();
+        const r = rand(rMin, rMax);
+        const [sMin, sMax] = currentSpeedRange();
+        const isBomb = Math.random() < currentBombChance();
+
+        const x = rand(r + 6, state.cssW - r - 6);
+        const y = state.cssH + r + 2;
+        const vy = -rand(sMin, sMax);
+        const vx = rand(-30, 30);
+        const wobble = rand(0, Math.PI * 2);
+        const wobbleSpeed = rand(1.2, 2.6);
+        const wobbleAmp = rand(8, 22);
+
+        const bubble = {
+          id: state.nextId++,
+          x, y, r,
+          vx, vy,
+          wobble,
+          wobbleSpeed,
+          wobbleAmp,
+          isBomb,
+          color: isBomb ? null : pick(BUBBLE_COLORS),
+          age: 0,
+          spawnY: y,
+        };
+        state.bubbles.push(bubble);
+      }
+
+      // ---------- Particles (pop burst) ----------
+
+      function spawnPopBurst(x, y, color, isBomb) {
+        const fill = isBomb ? "#1f2937" : color.fill;
+        const count = isBomb ? 18 : 12;
+        for (let i = 0; i < count; i++) {
+          const ang = (i / count) * Math.PI * 2 + rand(-0.3, 0.3);
+          const speed = rand(80, 220);
+          state.particles.push({
+            x, y,
+            vx: Math.cos(ang) * speed,
+            vy: Math.sin(ang) * speed,
+            life: rand(0.4, 0.7),
+            maxLife: 0.7,
+            r: rand(2, 5),
+            color: fill,
+          });
+        }
+      }
+
+      // ---------- Input ----------
+
+      function canvasPointFromEvent(e) {
+        const rect = canvas.getBoundingClientRect();
+        let cx, cy;
+        if (e.touches && e.touches.length > 0) {
+          cx = e.touches[0].clientX;
+          cy = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+          cx = e.changedTouches[0].clientX;
+          cy = e.changedTouches[0].clientY;
+        } else {
+          cx = e.clientX;
+          cy = e.clientY;
+        }
+        return { x: cx - rect.left, y: cy - rect.top };
+      }
+
+      function handleTap(e) {
+        // Prevent the synthetic mousedown/click that follows a touchstart.
+        if (e.cancelable) e.preventDefault();
+        if (state.phase !== "playing") return;
+
+        const p = canvasPointFromEvent(e);
+
+        // Find topmost bubble (last in array = drawn last = on top) whose disc contains the tap.
+        for (let i = state.bubbles.length - 1; i >= 0; i--) {
+          const b = state.bubbles[i];
+          const dx = p.x - displayX(b);
+          const dy = p.y - b.y;
+          if (dx * dx + dy * dy <= b.r * b.r) {
+            popBubble(i);
+            return;
+          }
+        }
+      }
+
+      // Touchstart first; suppress duplicate mousedown via preventDefault.
+      canvas.addEventListener("touchstart", handleTap, { passive: false });
+      canvas.addEventListener("mousedown", function (e) {
+        // Mouse-only path (desktops + trackpads). Touch already handled above.
+        handleTap(e);
+      });
+
+      // ---------- Combo tracking ----------
+
+      function updateComboHistory(colorId) {
+        const now = performance.now();
+        // Drop entries older than the window or with different color.
+        state.comboHistory = state.comboHistory.filter(
+          h => h.colorId === colorId && now - h.t <= COMBO_WINDOW_MS
+        );
+        state.comboHistory.push({ colorId, t: now });
+        return state.comboHistory.length;
+      }
+
+      function showComboToast(streak, colorName) {
+        $comboToast.textContent = "Combo ×" + streak + "! +" + (COMBO_BONUS_PER_BUBBLE) + " each";
+        $comboToast.classList.remove("show");
+        // Force reflow to retrigger transition.
+        void $comboToast.offsetWidth;
+        $comboToast.classList.add("show");
+        clearTimeout(showComboToast._t);
+        showComboToast._t = setTimeout(() => $comboToast.classList.remove("show"), 900);
+      }
+
+      // ---------- Pop / miss ----------
+
+      function popBubble(idx) {
+        const b = state.bubbles[idx];
+        state.bubbles.splice(idx, 1);
+        spawnPopBurst(displayX(b), b.y, b.color, b.isBomb);
+
+        if (b.isBomb) {
+          state.bombsHit++;
+          loseLife("💣 Bomb! −1 life");
+          state.comboHistory = []; // bomb breaks combos
+          return;
+        }
+
+        state.bubblesPopped++;
+        const streak = updateComboHistory(b.color.id);
+        if (streak >= COMBO_THRESHOLD) {
+          // Combo bonus replaces the base +1 — net effect: +3 per bubble in the combo run.
+          state.score += COMBO_BONUS_PER_BUBBLE;
+          if (streak > state.bestCombo) state.bestCombo = streak;
+          if (streak === COMBO_THRESHOLD) {
+            // First time hitting the threshold this run — quietly upgrade the previous two pops too.
+            state.score += (COMBO_THRESHOLD - 1) * (COMBO_BONUS_PER_BUBBLE - 1);
+          }
+          showComboToast(streak, b.color.id);
+        } else {
+          state.score += 1;
+        }
+        updateHud();
+      }
+
+      function loseLife(reason) {
+        state.lives -= 1;
+        flashLives();
+        if (reason) $msg.textContent = reason;
+        if (state.lives <= 0) {
+          state.lives = 0;
+          updateHud();
+          endGame();
+        } else {
+          updateHud();
+        }
+      }
+
+      // ---------- HUD ----------
+
+      function updateHud() {
+        $score.textContent = String(state.score);
+        $lives.textContent = String(state.lives);
+        $combo.textContent = "×" + state.bestCombo;
+        $livesStat.classList.toggle("warn", state.lives <= 2);
+      }
+
+      function flashLives() {
+        $livesStat.classList.add("warn");
+        setTimeout(() => {
+          if (state.lives > 2) $livesStat.classList.remove("warn");
+        }, 380);
+      }
+
+      // ---------- Helpers for drawing ----------
+
+      function displayX(b) {
+        // Apply horizontal wobble for drawing + hit-testing.
+        return b.x + Math.sin(b.wobble) * b.wobbleAmp;
+      }
+
+      // ---------- Update + Render ----------
+
+      function step(now) {
+        if (state.phase !== "playing") return;
+        const dt = Math.min(0.05, (now - state.lastFrame) / 1000);
+        state.lastFrame = now;
+
+        // Update difficulty
+        state.spawnInterval = currentSpawnInterval();
+
+        // Spawn
+        if (now - state.lastSpawn >= state.spawnInterval) {
+          state.lastSpawn = now;
+          spawnBubble();
+          // Occasional double-spawn once spawn interval is short enough.
+          if (state.spawnInterval < 500 && Math.random() < 0.35) spawnBubble();
+        }
+
+        // Update bubbles
+        for (let i = state.bubbles.length - 1; i >= 0; i--) {
+          const b = state.bubbles[i];
+          b.age += dt;
+          b.wobble += b.wobbleSpeed * dt;
+          b.y += b.vy * dt;
+          b.x += b.vx * dt;
+
+          // Bounce horizontally off walls so they stay in play
+          if (b.x < b.r + 4) { b.x = b.r + 4; b.vx = Math.abs(b.vx) * 0.6; }
+          else if (b.x > state.cssW - b.r - 4) { b.x = state.cssW - b.r - 4; b.vx = -Math.abs(b.vx) * 0.6; }
+
+          if (b.y + b.r < -4) {
+            // Escaped the top.
+            state.bubbles.splice(i, 1);
+            if (b.isBomb) {
+              // Bombs escaping is a relief — small score bump.
+              state.score += 1;
+              updateHud();
+            } else {
+              loseLife("🫧 A bubble escaped! −1 life");
+              state.comboHistory = [];
+              if (state.phase !== "playing") return;
+            }
+          }
+        }
+
+        // Update particles
+        for (let i = state.particles.length - 1; i >= 0; i--) {
+          const p = state.particles[i];
+          p.life -= dt;
+          if (p.life <= 0) {
+            state.particles.splice(i, 1);
+            continue;
+          }
+          p.vy += 220 * dt; // gravity on particles
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+        }
+
+        draw();
+        requestAnimationFrame(step);
+      }
+
+      function draw() {
+        const w = state.cssW, h = state.cssH;
+        ctx.clearRect(0, 0, w, h);
+
+        // Soft cloud sparkles in the sky — purely decorative.
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "#fff";
+        for (let i = 0; i < 4; i++) {
+          const cx = ((i * 137 + (state.startTime % 360)) % w);
+          const cy = (i * 71) % (h * 0.6) + 30;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // Draw bubbles
+        for (const b of state.bubbles) {
+          const cx = displayX(b);
+          const cy = b.y;
+          if (b.isBomb) drawBomb(cx, cy, b.r);
+          else drawBubble(cx, cy, b.r, b.color);
+        }
+
+        // Draw particles
+        for (const p of state.particles) {
+          const alpha = clamp(p.life / p.maxLife, 0, 1);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function drawBubble(cx, cy, r, color) {
+        // Outer translucent body
+        const grad = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.1, cx, cy, r);
+        grad.addColorStop(0, color.shine);
+        grad.addColorStop(0.45, color.fill);
+        grad.addColorStop(1, color.ring);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ring outline
+        ctx.lineWidth = Math.max(1.5, r * 0.05);
+        ctx.strokeStyle = "rgba(255,255,255,0.55)";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 0.96, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Highlight glint
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.beginPath();
+        ctx.ellipse(cx - r * 0.38, cy - r * 0.42, r * 0.22, r * 0.13, -0.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Second small glint
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.beginPath();
+        ctx.arc(cx - r * 0.12, cy - r * 0.62, r * 0.07, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawBomb(cx, cy, r) {
+        // Dark sphere
+        const grad = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.35, r * 0.1, cx, cy, r);
+        grad.addColorStop(0, "#475569");
+        grad.addColorStop(0.6, "#1f2937");
+        grad.addColorStop(1, "#0f172a");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bomb outline
+        ctx.lineWidth = Math.max(1.5, r * 0.05);
+        ctx.strokeStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 0.97, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Fuse
+        ctx.strokeStyle = "#a16207";
+        ctx.lineWidth = Math.max(1.5, r * 0.08);
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(cx + r * 0.4, cy - r * 0.75);
+        ctx.quadraticCurveTo(cx + r * 0.9, cy - r * 1.15, cx + r * 1.05, cy - r * 0.85);
+        ctx.stroke();
+
+        // Fuse spark (flickers using time)
+        const sparkR = r * (0.16 + 0.04 * Math.sin(performance.now() / 80));
+        const sx = cx + r * 1.05;
+        const sy = cy - r * 0.85;
+        const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sparkR);
+        sg.addColorStop(0, "#fef9c3");
+        sg.addColorStop(0.5, "#f97316");
+        sg.addColorStop(1, "rgba(249,115,22,0)");
+        ctx.fillStyle = sg;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sparkR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Warning "X" eyes for menace
+        ctx.strokeStyle = "#fca5a5";
+        ctx.lineWidth = Math.max(1.2, r * 0.06);
+        ctx.lineCap = "round";
+        const ex = r * 0.22, ey = r * 0.12, off = r * 0.28;
+        // left X
+        ctx.beginPath();
+        ctx.moveTo(cx - off - ex, cy - ey);
+        ctx.lineTo(cx - off + ex, cy + ey);
+        ctx.moveTo(cx - off + ex, cy - ey);
+        ctx.lineTo(cx - off - ex, cy + ey);
+        ctx.stroke();
+        // right X
+        ctx.beginPath();
+        ctx.moveTo(cx + off - ex, cy - ey);
+        ctx.lineTo(cx + off + ex, cy + ey);
+        ctx.moveTo(cx + off + ex, cy - ey);
+        ctx.lineTo(cx + off - ex, cy + ey);
+        ctx.stroke();
+      }
+
+      // ---------- Game flow ----------
+
+      function resetState() {
+        state.bubbles.length = 0;
+        state.particles.length = 0;
+        state.score = 0;
+        state.lives = START_LIVES;
+        state.bestCombo = 1;
+        state.comboHistory = [];
+        state.scoreRecorded = false;
+        state.bubblesPopped = 0;
+        state.bombsHit = 0;
+        state.spawnInterval = BASE_SPAWN_MS;
+        state.nextId = 1;
+        $msg.textContent = "Tap floating bubbles to pop them. Match 3+ same colors quickly for combos. Avoid the dark bombs!";
+        updateHud();
+      }
+
+      function startGame() {
+        resetState();
+        resizeCanvas();
+        $endScreen.hidden = true;
+        $startOverlay.hidden = true;
+        state.phase = "playing";
+        state.startTime = performance.now();
+        state.lastFrame = state.startTime;
+        state.lastSpawn = state.startTime;
+        requestAnimationFrame(step);
+      }
+
+      function endGame() {
+        if (state.phase === "ended") return;
+        state.phase = "ended";
+        const survived = (performance.now() - state.startTime) / 1000;
+
+        $endTitle.textContent = state.score >= 50 ? "🎉 Nice popping!" : "💥 Game Over";
+
+        const stats = [
+          "Score: " + state.score + " pops",
+          "Bubbles popped: " + state.bubblesPopped,
+          "Best combo: ×" + state.bestCombo,
+          "Bombs hit: " + state.bombsHit,
+          "Time: " + Math.round(survived) + "s",
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        $endStats.replaceChildren(frag);
+
+        if (window.ChunHighScores && !state.scoreRecorded) {
+          state.scoreRecorded = true;
+          window.ChunHighScores.record({
+            gameId: "bubble-pop",
+            gameName: "Bubble Pop",
+            score: state.score,
+            scoreLabel: "pops",
+            detail: "best ×" + state.bestCombo + " · " + Math.round(survived) + "s",
+          });
+          window.ChunHighScores.render($endScreen, "bubble-pop", { scoreLabel: "pops" }, $playAgain);
+        }
+
+        $endScreen.hidden = false;
+        $playAgain.focus();
+      }
+
+      // ---------- Wire-up ----------
+
+      function handleStartClick(e) {
+        if (e && e.cancelable) e.preventDefault();
+        startGame();
+      }
+
+      $startBtn.addEventListener("click", handleStartClick);
+      $startBtn.addEventListener("touchstart", handleStartClick, { passive: false });
+
+      $playAgain.addEventListener("click", function () { startGame(); });
+      $restart.addEventListener("click", function () { startGame(); });
+
+      // First-time setup: size canvas + draw idle frame.
+      resizeCanvas();
+      // Draw a quiet idle frame so the canvas isn't blank.
+      ctx.clearRect(0, 0, state.cssW, state.cssH);
+
+    })();
+  </script>
+  <script src="../assets/site.js"></script>
+  <script src="../assets/i18n.js?v=4"></script>
+</body>
+</html>

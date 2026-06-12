@@ -145,6 +145,12 @@
       es: "Una cuadrícula de memoria 4×4 para dos jugadores, por turnos. Quien encuentre más parejas gana.",
       zh: "4×4 记忆网格,两人轮流玩。找到更多配对的玩家获胜。"
     },
+    "card.fruit_catch.desc": {
+      en: "Slide a basket left and right to catch falling 🍎🍌🍇 — but dodge 💣 bombs! Golden sparkles are worth 5. How long can you last as it speeds up?",
+      vi: "Trượt giỏ trái và phải để hứng trái cây rơi 🍎🍌🍇 — nhưng tránh bom 💣! Ngôi sao vàng được 5 điểm. Bạn trụ được bao lâu khi tốc độ tăng?",
+      es: "Desliza una cesta a izquierda y derecha para atrapar frutas que caen 🍎🍌🍇 — ¡pero esquiva las bombas 💣! Las chispas doradas valen 5. ¿Cuánto durarás cuando se acelere?",
+      zh: "左右滑动篮子接住掉落的水果 🍎🍌🍇 — 但要躲开炸弹 💣!金色闪光值 5 分。速度越来越快,你能坚持多久?"
+    },
   };
 
   function currentLang() {

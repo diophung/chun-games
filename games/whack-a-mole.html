@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Chun-Ga · Whack-a-Mole</title>
+  <link rel="stylesheet" href="../assets/site.css?v=4" />
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #1f2937;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      background:
+        radial-gradient(circle at 18% 14%, rgba(255,255,255,0.6), transparent 38%),
+        linear-gradient(180deg, #fef3c7 0%, #fde68a 55%, #fbbf24 100%);
+    }
+    @supports (height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
+    #app {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #app > header.game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.78);
+      border: 2px solid rgba(255,255,255,0.85);
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(31,41,55,0.14);
+      font-variant-numeric: tabular-nums;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 6vw, 32px);
+      line-height: 1;
+      color: #92400e;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.7);
+    }
+    .stats, nav.game-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: #ffffff;
+      border: 2px solid #fcd34d;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: clamp(13px, 3.2vw, 15px);
+      font-weight: 700;
+      color: #78350f;
+    }
+    .stat strong { color: #b91c1c; margin-left: 4px; }
+    nav.game-nav a, button.linky {
+      color: #92400e;
+      font: inherit;
+      font-weight: 800;
+      text-decoration: none;
+      border: none;
+      border-bottom: 2px dashed rgba(146,64,14,0.4);
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
+    #message {
+      margin: 0;
+      min-height: 2.4em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.78);
+      border-radius: 16px;
+      color: #78350f;
+      font-size: clamp(15px, 3.7vw, 18px);
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(31,41,55,0.08);
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+    .hole {
+      position: relative;
+      aspect-ratio: 1;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at 50% 30%, #3f2613 0%, #5a3a22 55%, #7a5031 100%);
+      box-shadow:
+        inset 0 14px 28px rgba(0,0,0,0.55),
+        inset 0 -4px 0 rgba(255,255,255,0.06),
+        0 6px 14px rgba(31,41,55,0.18);
+      overflow: hidden;
+      outline: none;
+      touch-action: manipulation;
+    }
+    .hole::after {
+      /* grass rim */
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 7px solid #65a30d;
+      box-shadow:
+        0 0 0 3px #4d7c0f inset,
+        0 4px 0 rgba(0,0,0,0.18);
+      pointer-events: none;
+    }
+    .hole:focus-visible {
+      box-shadow:
+        inset 0 14px 28px rgba(0,0,0,0.55),
+        0 0 0 4px #ef4444,
+        0 6px 14px rgba(31,41,55,0.18);
+    }
+    .mole {
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: -6%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      transform: translateY(110%);
+      transition: transform 220ms cubic-bezier(.2,1.4,.4,1);
+      pointer-events: none;
+      will-change: transform;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35));
+    }
+    .hole.up .mole { transform: translateY(0%); }
+    .hole.whacked .mole {
+      transform: translateY(0%) scale(0.85);
+      transition: transform 120ms ease;
+    }
+    .mole-emoji {
+      font-size: clamp(54px, 14vw, 96px);
+      line-height: 1;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .hole.golden .mole-emoji {
+      filter:
+        drop-shadow(0 0 6px #fde047)
+        drop-shadow(0 0 16px #facc15);
+    }
+    .hole.golden::before {
+      /* sparkle ring around the hole when a golden mole is up */
+      content: "";
+      position: absolute;
+      inset: 6%;
+      border-radius: 50%;
+      box-shadow: 0 0 22px 6px rgba(250,204,21,0.55);
+      pointer-events: none;
+      animation: sparkle 700ms ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    @keyframes sparkle {
+      from { opacity: 0.5; }
+      to   { opacity: 0.95; }
+    }
+    .pop {
+      position: absolute;
+      left: 50%;
+      top: 38%;
+      transform: translate(-50%, -50%) scale(0.6);
+      color: #fff;
+      font-weight: 900;
+      font-size: clamp(20px, 5.5vw, 32px);
+      text-shadow:
+        -2px -2px 0 #b91c1c,
+         2px -2px 0 #b91c1c,
+        -2px  2px 0 #b91c1c,
+         2px  2px 0 #b91c1c,
+         0 4px 6px rgba(0,0,0,0.35);
+      pointer-events: none;
+      opacity: 0;
+      animation: pop 600ms ease-out forwards;
+      z-index: 3;
+    }
+    .pop.golden { color: #fde047; }
+    @keyframes pop {
+      0%   { opacity: 0;   transform: translate(-50%, -10%) scale(0.6); }
+      20%  { opacity: 1;   transform: translate(-50%, -60%) scale(1.1); }
+      100% { opacity: 0;   transform: translate(-50%, -160%) scale(1); }
+    }
+    #timer-bar {
+      height: 10px;
+      width: 100%;
+      background: rgba(255,255,255,0.65);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: 0 3px 8px rgba(31,41,55,0.12);
+    }
+    #timer-bar > span {
+      display: block;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #16a34a, #facc15 70%, #ef4444);
+      transition: width 200ms linear;
+    }
+    #start-screen, #end-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 22px;
+      background: rgba(120,53,15,0.92);
+      color: #fff;
+      text-align: center;
+    }
+    #start-screen[hidden], #end-screen[hidden] { display: none !important; }
+    #start-screen h2, #end-screen h2 {
+      margin: 0;
+      font-size: clamp(30px, 9vw, 52px);
+    }
+    #end-stats {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: clamp(17px, 4vw, 22px);
+      font-variant-numeric: tabular-nums;
+    }
+    #end-stats li { padding: 4px 0; }
+    .primary {
+      min-height: 52px;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 28px;
+      background: #fde047;
+      color: #78350f;
+      font: inherit;
+      font-size: clamp(17px, 4.2vw, 21px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      touch-action: manipulation;
+    }
+    .primary:active { transform: translateY(1px); }
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: clamp(13px, 3.2vw, 15px);
+      color: #fef3c7;
+    }
+    .legend strong { color: #fde047; }
+    @media (max-width: 520px) {
+      body { padding: 8px; }
+      #board { gap: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-logo" href="../index.html">🎮 WiGa <span class="site-logo__sub" data-i18n="logo.sub">— William's Games</span></a>
+    <nav class="site-nav" aria-label="Primary" data-i18n-aria-label="nav.aria">
+      <a class="site-nav__link" href="../index.html" data-i18n="nav.single">Single Player</a>
+      <a class="site-nav__link" href="../multiplayer.html" data-i18n="nav.multi">Multi-Player</a>
+      <a class="site-nav__link" href="../high-scores.html" data-i18n="nav.scores">High Scores</a>
+      <a class="site-nav__link" href="../donate.html" data-i18n="nav.donate">Donate</a>
+      <div class="lang-picker">
+        <button class="lang-picker__toggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span>Language: English</span>
+          <span class="lang-picker__chevron" aria-hidden="true">▾</span>
+        </button>
+        <ul class="lang-picker__menu" role="listbox" hidden>
+          <li><button class="lang-picker__option" type="button" data-lang="en" role="option" aria-selected="true">Language: English</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="vi" role="option" aria-selected="false">Ngôn ngữ: Tiếng Việt</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="es" role="option" aria-selected="false">Idioma: Español</button></li>
+          <li><button class="lang-picker__option" type="button" data-lang="zh" role="option" aria-selected="false">语言: 中文</button></li>
+        </ul>
+      </div>
+    </nav>
+  </div></header>
+
+  <main id="app">
+    <header class="game-header">
+      <h1>🔨 Whack-a-Mole</h1>
+      <div class="stats" aria-label="game stats">
+        <div class="stat">Score<strong id="score-count">0</strong></div>
+        <div class="stat">Time<strong id="time-count">60s</strong></div>
+      </div>
+      <nav class="game-nav" aria-label="game navigation">
+        <a href="../index.html">Home</a>
+        <button class="linky" id="restart-btn" type="button">Restart</button>
+      </nav>
+    </header>
+
+    <div id="timer-bar" aria-hidden="true"><span id="timer-fill"></span></div>
+    <p id="message">Tap the moles before they duck! Golden moles are worth 5.</p>
+    <section id="board" aria-label="whack-a-mole board"></section>
+  </main>
+
+  <section id="start-screen">
+    <h2>🔨 Whack-a-Mole</h2>
+    <p>Tap moles for <strong>+1</strong>. Golden moles for <strong>+5</strong> — they're fast!</p>
+    <p>You have <strong>60 seconds</strong>. Ready?</p>
+    <button class="primary" id="start-btn" type="button">Start</button>
+  </section>
+
+  <section id="end-screen" hidden>
+    <h2>🏁 Time's up!</h2>
+    <ul id="end-stats"></ul>
+    <button class="primary" id="play-again" type="button">Play Again</button>
+  </section>
+
+  <footer class="site-footer"><div class="site-footer__inner">
+    <span data-i18n="footer.credit">Made by William with ❤️ and 🤖</span>
+    <span class="site-footer__links">
+      <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </span>
+  </div></footer>
+
+  <script src="high-scores.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const HOLE_COUNT = 9;
+      const ROUND_SECONDS = 60;
+      const GOLDEN_CHANCE = 0.14; // ~14% of moles are golden
+
+      // Difficulty curve, indexed by elapsed seconds.
+      // Returns the min/max ms a mole stays up, the gap between spawns,
+      // and how many moles can be up simultaneously.
+      function difficultyAt(elapsed) {
+        // t goes 0..1 across the round
+        const t = Math.min(1, elapsed / ROUND_SECONDS);
+        // mole-up duration shrinks from ~1100ms down to ~520ms
+        const upMin = Math.round(900  - 480 * t);
+        const upMax = Math.round(1350 - 600 * t);
+        // spawn gap shrinks from 700ms down to 240ms
+        const gap   = Math.round(700  - 460 * t);
+        // simultaneous moles: 1 -> 3
+        const maxConcurrent = t < 0.33 ? 1 : (t < 0.66 ? 2 : 3);
+        return { upMin, upMax, gap, maxConcurrent };
+      }
+
+      const state = {
+        phase: "idle", // idle | playing | ended
+        score: 0,
+        startTime: 0,
+        endTime: 0,
+        tickerId: 0,
+        spawnTimeoutId: 0,
+        scoreRecorded: false,
+        // Per-hole timer ids so we can clear them on restart.
+        holes: [],
+      };
+
+      const els = {
+        board: document.getElementById("board"),
+        score: document.getElementById("score-count"),
+        time: document.getElementById("time-count"),
+        timerFill: document.getElementById("timer-fill"),
+        message: document.getElementById("message"),
+        restart: document.getElementById("restart-btn"),
+        startScreen: document.getElementById("start-screen"),
+        startBtn: document.getElementById("start-btn"),
+        endScreen: document.getElementById("end-screen"),
+        endStats: document.getElementById("end-stats"),
+        playAgain: document.getElementById("play-again"),
+      };
+
+      function buildBoard() {
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < HOLE_COUNT; i++) {
+          const hole = document.createElement("button");
+          hole.className = "hole";
+          hole.type = "button";
+          hole.setAttribute("aria-label", "Hole " + (i + 1));
+
+          const mole = document.createElement("span");
+          mole.className = "mole";
+
+          const emoji = document.createElement("span");
+          emoji.className = "mole-emoji";
+          emoji.textContent = "🐹";
+
+          mole.appendChild(emoji);
+          hole.appendChild(mole);
+
+          const handler = (ev) => {
+            // preventDefault on touchstart so the synthetic click doesn't
+            // also fire and double-count the whack.
+            if (ev.type === "touchstart") ev.preventDefault();
+            whack(i);
+          };
+          hole.addEventListener("touchstart", handler, { passive: false });
+          hole.addEventListener("click", handler);
+
+          state.holes.push({
+            el: hole,
+            moleEl: mole,
+            emojiEl: emoji,
+            up: false,
+            golden: false,
+            hideTimeoutId: 0,
+          });
+          frag.appendChild(hole);
+        }
+        els.board.replaceChildren(frag);
+      }
+
+      function clearHoleTimer(hole) {
+        if (hole.hideTimeoutId) {
+          clearTimeout(hole.hideTimeoutId);
+          hole.hideTimeoutId = 0;
+        }
+      }
+
+      function hideMole(idx, opts) {
+        const hole = state.holes[idx];
+        if (!hole) return;
+        clearHoleTimer(hole);
+        hole.up = false;
+        hole.golden = false;
+        hole.el.classList.remove("up", "golden", "whacked");
+        hole.emojiEl.textContent = "🐹";
+      }
+
+      function popUpRandomMole() {
+        if (state.phase !== "playing") return;
+        const elapsed = (performance.now() - state.startTime) / 1000;
+        const cfg = difficultyAt(elapsed);
+
+        const upCount = state.holes.filter(h => h.up).length;
+        if (upCount < cfg.maxConcurrent) {
+          // Pick from holes that are currently empty.
+          const available = [];
+          for (let i = 0; i < state.holes.length; i++) {
+            if (!state.holes[i].up) available.push(i);
+          }
+          if (available.length > 0) {
+            const idx = available[Math.floor(Math.random() * available.length)];
+            const golden = Math.random() < GOLDEN_CHANCE;
+            popUp(idx, golden, cfg);
+          }
+        }
+
+        // Schedule the next spawn attempt.
+        const jitter = Math.round(cfg.gap * (0.6 + Math.random() * 0.8));
+        state.spawnTimeoutId = setTimeout(popUpRandomMole, jitter);
+      }
+
+      function popUp(idx, golden, cfg) {
+        const hole = state.holes[idx];
+        if (!hole || hole.up) return;
+        hole.up = true;
+        hole.golden = golden;
+        hole.emojiEl.textContent = golden ? "✨🐹" : "🐹";
+        hole.el.classList.add("up");
+        if (golden) hole.el.classList.add("golden");
+
+        // Golden moles disappear faster — about 60% of the regular window.
+        const minMs = Math.max(260, golden ? Math.round(cfg.upMin * 0.6) : cfg.upMin);
+        const maxMs = Math.max(minMs + 80, golden ? Math.round(cfg.upMax * 0.6) : cfg.upMax);
+        const upMs = Math.round(minMs + Math.random() * (maxMs - minMs));
+
+        hole.hideTimeoutId = setTimeout(() => {
+          // Only hide if it wasn't already whacked.
+          if (hole.up) hideMole(idx);
+        }, upMs);
+      }
+
+      function whack(idx) {
+        if (state.phase !== "playing") return;
+        const hole = state.holes[idx];
+        if (!hole || !hole.up) return;
+
+        const points = hole.golden ? 5 : 1;
+        state.score += points;
+        els.score.textContent = String(state.score);
+
+        // Show a floating "+1" / "+5" indicator.
+        const pop = document.createElement("span");
+        pop.className = "pop" + (hole.golden ? " golden" : "");
+        pop.textContent = "+" + points;
+        hole.el.appendChild(pop);
+        setTimeout(() => pop.remove(), 650);
+
+        hole.el.classList.add("whacked");
+        // Briefly let the squish show, then hide.
+        const wasGolden = hole.golden;
+        clearHoleTimer(hole);
+        hole.hideTimeoutId = setTimeout(() => {
+          hideMole(idx);
+        }, 120);
+
+        if (wasGolden) {
+          els.message.textContent = "Golden mole! ✨ +5";
+        }
+      }
+
+      function updateTimer() {
+        const now = performance.now();
+        const remainingMs = Math.max(0, state.endTime - now);
+        const remainingS = Math.ceil(remainingMs / 1000);
+        els.time.textContent = remainingS + "s";
+        els.timerFill.style.width = (remainingMs / (ROUND_SECONDS * 1000) * 100) + "%";
+        if (remainingMs <= 0) {
+          endGame();
+        }
+      }
+
+      function startGame() {
+        // Clean up any lingering timers/state.
+        clearInterval(state.tickerId);
+        clearTimeout(state.spawnTimeoutId);
+        state.tickerId = 0;
+        state.spawnTimeoutId = 0;
+        for (let i = 0; i < state.holes.length; i++) hideMole(i);
+
+        state.phase = "playing";
+        state.score = 0;
+        state.scoreRecorded = false;
+        state.startTime = performance.now();
+        state.endTime = state.startTime + ROUND_SECONDS * 1000;
+
+        els.score.textContent = "0";
+        els.time.textContent = ROUND_SECONDS + "s";
+        els.timerFill.style.width = "100%";
+        els.message.textContent = "Tap the moles before they duck! Golden moles are worth 5.";
+        els.startScreen.hidden = true;
+        els.endScreen.hidden = true;
+
+        state.tickerId = setInterval(updateTimer, 200);
+        // Kick off the spawn loop after a short beat so the player can see the board.
+        state.spawnTimeoutId = setTimeout(popUpRandomMole, 350);
+      }
+
+      function endGame() {
+        if (state.phase === "ended") return;
+        state.phase = "ended";
+        clearInterval(state.tickerId);
+        clearTimeout(state.spawnTimeoutId);
+        state.tickerId = 0;
+        state.spawnTimeoutId = 0;
+        for (let i = 0; i < state.holes.length; i++) hideMole(i);
+        els.time.textContent = "0s";
+        els.timerFill.style.width = "0%";
+
+        const stats = [
+          "Score: " + state.score + " moles",
+          "Time: " + ROUND_SECONDS + "s",
+        ];
+        const frag = document.createDocumentFragment();
+        for (const line of stats) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          frag.appendChild(li);
+        }
+        els.endStats.replaceChildren(frag);
+
+        if (!state.scoreRecorded) {
+          state.scoreRecorded = true;
+          if (window.ChunHighScores) {
+            window.ChunHighScores.record({
+              gameId: "whack-a-mole",
+              gameName: "Whack-a-Mole",
+              score: state.score,
+              scoreLabel: "moles",
+            });
+          }
+        }
+        if (window.ChunHighScores) {
+          window.ChunHighScores.render(
+            els.endScreen,
+            "whack-a-mole",
+            { scoreLabel: "moles" },
+            els.playAgain
+          );
+        }
+
+        els.endScreen.hidden = false;
+        els.playAgain.focus();
+      }
+
+      // Wire up controls.
+      els.restart.addEventListener("click", () => {
+        if (state.phase === "playing") {
+          // Confirm-free quick restart.
+          startGame();
+        } else {
+          startGame();
+        }
+      });
+      els.startBtn.addEventListener("click", startGame);
+      els.playAgain.addEventListener("click", startGame);
+
+      buildBoard();
+    })();
+  </script>
+  <script src="../assets/site.js"></script>
+  <script src="../assets/i18n.js?v=4"></script>
+</body>
+</html>

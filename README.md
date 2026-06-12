@@ -6,7 +6,7 @@ Every game is static HTML with a shared local high-score helper: zero build step
 
 The site is split into four sections, all reachable from the top nav on every chrome page:
 
-- **[Single Player](./index.html)** — the main games catalog (10 games today)
+- **[Single Player](./index.html)** — the main games catalog (14 games today)
 - **[Multi-Player](./multiplayer.html)** — pass-and-play games for two on one screen
 - **[High Scores](./high-scores.html)** — best runs saved on this device, one tile per game
 - **[Donate](./donate.html)** — a thank-you page with a coffee-tip link
@@ -24,9 +24,14 @@ The site is split into four sections, all reachable from the top nav on every ch
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
 | [Engine Memory](#engine-memory) | <img src="docs/screenshots/engine-memory.png" width="240" alt="Engine Memory preview" /> | [`games/engine-memory.html`](./games/engine-memory.html) | 2D · CSS · Web Audio |
 | [Pit Stop Crew](#pit-stop-crew) | <img src="docs/screenshots/pit-stop-crew.png" width="240" alt="Pit Stop Crew preview" /> | [`games/pit-stop-crew.html`](./games/pit-stop-crew.html) | 2D · CSS · Web Audio |
+| [Simon Says](#simon-says) | <img src="docs/screenshots/simon-says.png" width="240" alt="Simon Says preview" /> | [`games/simon-says.html`](./games/simon-says.html) | 2D · CSS · Web Audio |
 | [Memory Match Cards](#memory-match-cards) | <img src="docs/screenshots/memory-match.png" width="240" alt="Memory Match preview" /> | [`games/memory-match.html`](./games/memory-match.html) | 2D · CSS |
 | [Guess Who Detective](#guess-who-detective) | <img src="docs/screenshots/guess-who.png" width="240" alt="Guess Who Detective preview" /> | [`games/guess-who.html`](./games/guess-who.html) | 2D · CSS |
+| [Color Match Rush](#color-match-rush) | <img src="docs/screenshots/color-match.png" width="240" alt="Color Match Rush preview" /> | [`games/color-match.html`](./games/color-match.html) | 2D · CSS · SVG |
 | [Tangram Puzzles](#tangram-puzzles) | <img src="docs/screenshots/tangram-puzzles.png" width="240" alt="Tangram Puzzles preview" /> | [`games/tangram-puzzles.html`](./games/tangram-puzzles.html) | 2D · SVG |
+| [Whack-a-Mole](#whack-a-mole) | <img src="docs/screenshots/whack-a-mole.png" width="240" alt="Whack-a-Mole preview" /> | [`games/whack-a-mole.html`](./games/whack-a-mole.html) | 2D · CSS |
+| [Bubble Pop](#bubble-pop) | <img src="docs/screenshots/bubble-pop.png" width="240" alt="Bubble Pop preview" /> | [`games/bubble-pop.html`](./games/bubble-pop.html) | 2D · Canvas |
+| [Catch the Falling Fruit](#catch-the-falling-fruit) | <img src="docs/screenshots/fruit-catch.png" width="240" alt="Catch the Falling Fruit preview" /> | [`games/fruit-catch.html`](./games/fruit-catch.html) | 2D · Canvas |
 
 ---
 
@@ -176,6 +181,26 @@ A different brain workout from the spatial memory games on this page: instead of
 
 ---
 
+### Simon Says
+
+![Simon Says — round pad split into red, blue, yellow, and green quadrants](docs/screenshots/simon-says.png)
+
+The classic memory game. Four colored quadrants — red, blue, yellow, green — light up and play a tone in sequence; you tap them back in the same order. Each round adds one more step, and the playback gradually accelerates as the sequence grows.
+
+**Controls:** mouse / touch — tap the colored quadrants in the same order Simon flashes them. Tap **Start** to begin (this also wakes audio on iOS Safari).
+
+**Highlights**
+- Classic 2×2 quadrant pad with a dark center hub — pads light up when flashed or tapped
+- Each color has its own pure sine-wave tone (A3 / G4 / D4 / E4) generated live with Web Audio — no audio files
+- Sequence grows by one each round; flash speed ramps from ~560ms down to ~240ms over 18 rounds
+- Touchstart handlers with `preventDefault` for snappy mobile taps and no double-fire
+- Header stats: **Round** (current attempt) and **Best** (top round saved with player name)
+- End screen with score, headline that levels up ("Game Over" → "Great memory!" → "Simon Master!"), and **Play Again** button
+
+▶ [Open `games/simon-says.html`](./games/simon-says.html)
+
+---
+
 ### Memory Match Cards
 
 ![Memory Match — 4×4 grid of face-down cards with imaginative themes](docs/screenshots/memory-match.png)
@@ -214,6 +239,29 @@ A single-player deduction game inspired by yes/no mystery guessing. The game sec
 
 ---
 
+### Color Match Rush
+
+![Color Match Rush — a target color chip with four colored shape choices below](docs/screenshots/color-match.png)
+
+A fast-paced reaction game aimed at younger players (about 7+). Each round shows a target color (as a colored circle and a word) and four colored shape choices. Tap the shape whose color matches the target circle — ignore the word! Each correct tap scores +1 and instantly spawns a new round. A per-round timer shrinks slightly every 5 rounds (3.0s → 1.0s floor), and a single time-out ends the run.
+
+After round 10 the word may show a different color name or be rendered in a different color than the target — a Stroop-style twist. The rule never changes: always match the colored circle.
+
+**Controls:** mouse / touch — tap one of the four shape buttons.
+
+**Highlights**
+- 8 bright, easy-to-name colors (red, blue, green, yellow, purple, orange, pink, cyan)
+- 4 large tap-friendly choice buttons mixing circles and stars
+- Per-round timer with a color-shifting progress bar (green → yellow → red)
+- Timer shrinks ~50ms every 5 rounds, never below 1.0s
+- Stroop-style word/chip mismatch unlocks after round 10 (just match the circle!)
+- Wrong tap = no points + a short red shake; round continues
+- End screen with score and rounds played; local high-score leaderboard
+
+▶ [Open `games/color-match.html`](./games/color-match.html)
+
+---
+
 ### Tangram Puzzles
 
 ![Tangram Puzzles — Little House outline with seven colored pieces](docs/screenshots/tangram-puzzles.png)
@@ -229,6 +277,73 @@ Drag, rotate, and snap seven geometric pieces onto dotted outlines to complete k
 - Builds spatial reasoning, patience, and problem solving
 
 ▶ [Open `games/tangram-puzzles.html`](./games/tangram-puzzles.html)
+
+---
+
+### Whack-a-Mole
+
+![Whack-a-Mole — 3×3 grid of holes with cartoon moles popping up](docs/screenshots/whack-a-mole.png)
+
+A classic reflex game on a 3×3 grid of dirt holes. Moles pop up at random — tap them before they duck back down. Difficulty ramps over the 60-second round: moles stay up for shorter and shorter, and eventually two or three can be up at once. Occasional **golden moles** sparkle, vanish faster, and are worth **+5**.
+
+**Controls:** mouse / touch — tap any popped-up mole. Touch handlers `preventDefault` so a tap counts exactly once.
+
+**Highlights**
+- 3×3 grid with chunky tap targets and rounded "grass rim" holes
+- 60-second round with a live score and a colored timer bar
+- Difficulty curve: mole-up duration shrinks from ~1.1s to ~0.5s, simultaneous moles grow 1 → 2 → 3
+- Golden mole bonus (~14% spawn rate, ✨ sparkle ring, +5 points, faster duck)
+- Floating "+1" / "+5" pop indicators on every hit
+- Start screen, end screen with "Play Again", and a saved top-5 leaderboard via `ChunHighScores`
+
+▶ [Open `games/whack-a-mole.html`](./games/whack-a-mole.html)
+
+---
+
+### Bubble Pop
+
+![Bubble Pop — colorful bubbles drifting up a pastel sky](docs/screenshots/bubble-pop.png)
+
+A fast-reflex tapping game on an HTML5 Canvas. Colorful bubbles spawn at the bottom and drift upward with a gentle horizontal wobble — tap each one before it escapes the top of the playfield. Every miss costs one of your 5 lives. As the round goes on, bubbles spawn faster, drift quicker, and the occasional **dark bomb** appears among them — pop it and you lose a life instead.
+
+**Controls:** mouse / touch — tap a bubble to pop it. Touch handlers `preventDefault` so taps don't double-fire on mobile.
+
+**Highlights**
+- Canvas-rendered bubbles with radial gradients, twin glints, and per-bubble wobble drift
+- 6-color palette (pink, blue, green, yellow, purple, orange) for satisfying combo chases
+- **Combo bonus**: pop 3+ same-color bubbles within ~1.2 seconds and each combo bubble is worth +3 instead of +1
+- Difficulty ramps over ~75 seconds — spawn interval shrinks from 900ms toward 280ms, speeds and double-spawns kick in, and bombs grow from 0% to ~18% of spawns
+- **Bombs** are visually distinct (dark sphere, lit fuse with flickering spark, red X eyes) and cost a life when tapped
+- 5-life "missed bubble" counter; lives stat turns red as you approach zero
+- Pop-burst particle effects with gravity on every tap
+- Start overlay, end screen with run stats (score, bubbles popped, best combo, bombs hit, time), and a saved top-5 leaderboard via `ChunHighScores`
+
+▶ [Open `games/bubble-pop.html`](./games/bubble-pop.html)
+
+---
+
+### Catch the Falling Fruit
+
+![Catch the Falling Fruit — basket sliding under raining 🍎🍌🍇 with a 💣 bomb mixed in](docs/screenshots/fruit-catch.png)
+
+A friendly arcade game aimed at younger players (about 7+). A wooden basket sits at the bottom of the play field; drag your finger (or move the mouse) to slide it left and right and catch fruit (🍎 🍌 🍇 🍓 🍑 🍐 🍊 🥝) falling from the top. Regular fruit is worth **+1**, a glowing ✨ golden pickup is worth **+5**, and 💣 bombs cost a life. You start with 3 ❤️ — lose them all and it's game over.
+
+The difficulty ramps up as you play: fall speed gets faster, fruits spawn more often, and bombs slowly become more common. There's no fixed time limit — the question is *how long can you last*?
+
+**Controls**
+- Touch: drag anywhere on the play field to slide the basket
+- Mouse: just move the cursor over the field
+- Keyboard: ← / → (or A / D) arrows; Space or Enter restarts on the game-over screen
+
+**Highlights**
+- HiDPI Canvas 2D play field, responsive sizing for phones and tablets
+- 3-life system keeps runs short and forgiving for younger players
+- Floating "+1 / +5 / 💥" pop-ups celebrate every catch (and every bomb)
+- Golden ✨ pickup gets a soft halo so it's easy to spot among the rain
+- Drifting clouds, grass strip, and a smiley basket for the playful WiGa vibe
+- High score saved with the shared `ChunHighScores` helper (top 5 per device)
+
+▶ [Open `games/fruit-catch.html`](./games/fruit-catch.html)
 
 ---
 
@@ -285,9 +400,13 @@ open games/dragon.html                 # dragon snake game
 open games/car-memory.html             # memory game
 open games/engine-memory.html          # engine-sound memory game
 open games/pit-stop-crew.html          # pit-crew sequence memory game
+open games/simon-says.html             # classic Simon Says color/tone sequence
 open games/memory-match.html           # creative memory game
 open games/guess-who.html              # deduction game
 open games/tangram-puzzles.html        # tangram puzzle game
+open games/whack-a-mole.html           # reflex tap game
+open games/bubble-pop.html             # bubble-popping reflex game
+open games/fruit-catch.html            # catch the falling fruit
 open games/memory-match-duel.html      # 2-player memory match
 ```
 
