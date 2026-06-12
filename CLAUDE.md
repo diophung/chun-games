@@ -4,53 +4,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project shape
 
-A static-only browser-game playground. There is **no build step, no package manager, no test suite, and no linter** — every game is a single self-contained HTML file with inline `<style>` and `<script>`. Edits ship by reloading the browser.
+**WiGa ("William's Games")** — a static-only browser-game playground. There is **no build step, no package manager, no test suite, and no linter** — every game is a single self-contained HTML file with inline `<style>` and `<script>`. Edits ship by reloading the browser. Note the dual branding: user-facing chrome and i18n say "WiGa"/"William", but the high-score module and its localStorage keys keep the legacy `chun-ga.*` / `ChunHighScores` names — do not "fix" these or you orphan saved scores.
 
 ## Running locally
 
-- `./run.sh [port]` — starts `python3 -m http.server` on the given port (default 8000) from the repo root. Use this rather than `open file://...` so relative `<script src="high-scores.js">` paths resolve.
-- Or `python3 -m http.server` from the repo root, then visit `http://localhost:8000/index.html`.
+- `./run.sh [port]` — starts `python3 -m http.server` (default port 8000) from the repo root. Use this rather than `open file://...` so relative `<script src="high-scores.js">` paths resolve.
+- Then visit `http://localhost:8000/index.html`.
 
-The home page is `index.html`; individual games live at `games/<id>.html`.
+## Pages & architecture
 
-## Architecture
+Chrome pages (`index.html`, `multiplayer.html`, `high-scores.html`, `donate.html`) share a header/nav/footer and load the shared assets in `assets/`:
 
-### Catalog ↔ game contract
+- **`assets/i18n.js`** — translates the page after `DOMContentLoaded` by walking `data-i18n` / `data-i18n-aria-label` / `data-i18n-placeholder` attributes. Supports **en, vi, es, zh**; choice persists in `localStorage["wiga.lang"]`. All strings live in the `T` dictionary inside this file — **any new chrome/card text must be added there in all four languages**, and the element needs the matching `data-i18n` attribute. Exposes `window.WiGaI18n` (`t`, `setLang`, `currentLang`). The `{age}` placeholder auto-computes William's age from `WILLIAM_BIRTH_YEAR`.
+- **`assets/site.js`** — marks the active nav link. **`assets/site.css`** — shared chrome styling. Loaded by chrome pages, *not* by games (games only borrow `site.css` for fonts/vars).
+- Assets are cache-busted with `?v=N` query strings; bump `N` together when you change a shared asset.
 
-`index.html` is a hand-maintained catalog. The page has two synchronized things that must stay in sync when adding/renaming/removing a game:
+### High scores (`games/high-scores.js`)
 
-1. An `<article class="card">` block with the thumbnail SVG, title, description, tags, and `Play →` link.
-2. An entry in the `games` array in the inline script near the bottom (`{ id, name }`) which drives the floating "High Scores" sidebar.
+The only shared JS module used by games. Plain `<script>` (no ES modules), exposes `window.ChunHighScores`:
 
-The `id` here is the same string passed to `ChunHighScores` from the game itself — it is the localStorage key, so renaming an `id` orphans existing scores. Current IDs: `type2build`, `zoomy-car`, `child-feeder`, `dragon`, `car-memory`, `memory-match`, `guess-who`, `tangram-puzzles`.
+- `record({ gameId, gameName, score, scoreLabel, detail, sort, limit, minScore })` — prompts for a player name when the run makes the top 5, persists to `localStorage["chun-ga.high-scores.<gameId>"]`, remembers the name under `chun-ga.last-player-name`.
+- `render(container, gameId, opts, beforeNode)` — injects a styled leaderboard (auto-installs its CSS once).
+- `best(gameId, opts)` / `load(gameId)` — read access.
 
-The `README.md` table is also hand-maintained and must be updated alongside the catalog.
+`sort` defaults to `"desc"` (higher wins); pass `"asc"` for time-style games. Call `record` exactly once per game-over (games guard with a `scoreRecorded` flag), then `render`. Include path: from a game in `games/` use `<script src="high-scores.js">`; from `high-scores.html` at root use `<script src="games/high-scores.js">`.
 
-### Shared high-score helper (`games/high-scores.js`)
+`high-scores.html` holds the authoritative **`GAMES` registry** (`{ id, name, scoreLabel }`) and renders one tile per game by reading saved scores. The `id` must match the string the game passes to `ChunHighScores` (= the localStorage key); renaming it orphans scores.
 
-The only shared module. It is loaded via a plain `<script>` tag (no module imports) and exposes `window.ChunHighScores` with:
+### Per-game files (`games/<id>.html`)
 
-- `record({ gameId, gameName, score, scoreLabel, detail, sort, limit, minScore })` — pops a `prompt()` for the player name when the run qualifies for the top 5, persists to `localStorage` under `chun-ga.high-scores.<gameId>`, and remembers the last-used name under `chun-ga.last-player-name`.
-- `render(container, gameId, opts, beforeNode)` — injects a styled `<section class="high-score-box">` leaderboard; auto-installs its CSS once via a `#chun-high-score-styles` `<style>` tag.
-- `best(gameId, opts)` / `load(gameId)` — read access. Used by `index.html` to build the catalog sidebar.
+Fully self-contained: HTML + inline CSS + one big inline `<script>`. Exception: `zoomy-car.html` uses `<script type="module">` with Three.js via an `importmap` CDN — the only third-party runtime dep. **Mobile/touch support is part of the contract** (touch input + viewport-aware sizing); don't break it when refactoring. Most games load `i18n.js` and `high-scores.js`; `memory-match-duel` is a local 2-player game (no high score).
 
-`sort` defaults to `"desc"` (higher score wins). Pass `"asc"` for time-style "lower is better" games — every existing game uses the default. Always call `record` exactly once per game-over (games guard with a `scoreRecorded` flag), then `render` to show the updated board.
+## Adding / renaming a game
 
-In games inside `games/`, include it as `<script src="high-scores.js"></script>` (relative). From `index.html` at the root, it's `<script src="games/high-scores.js"></script>`.
+1. Create `games/<id>.html` from an existing game; include `high-scores.js` and call `record(...)` + `render(...)` on game-over (single-player games).
+2. Add an `<article class="card">` block (thumbnail SVG, title, description, tags, `Play →` link) to `index.html`.
+3. Add a `{ id, name, scoreLabel }` row to the `GAMES` array in `high-scores.html`.
+4. Add card-description strings to the `T` dict in `assets/i18n.js` (all 4 languages) and wire `data-i18n` on the card.
+5. Update the `## Games` table / section in `README.md`; optionally add a 16:9 `docs/screenshots/<id>.png`.
 
-### Per-game files
+## Deploy
 
-Each `games/<id>.html` is fully self-contained: HTML structure, inline CSS, and one big inline `<script>` (or `<script type="module">` for `zoomy-car.html`, which uses Three.js via an `importmap` CDN — currently the only third-party runtime dep). When adding a feature you'll usually be editing one large script block, not creating new files.
-
-Mobile support is part of the contract: every game handles touch input and uses viewport-aware sizing. Don't break that when refactoring.
-
-## Adding a new game
-
-1. Create `games/<id>.html` from an existing game as a template; include `<script src="high-scores.js"></script>` and call `ChunHighScores.record(...)` + `render(...)` on game-over.
-2. Add a card block + a `{ id, name }` entry to `index.html`.
-3. Add a row to the `## Games` table and a section in `README.md`.
-4. (Optional) Drop a 16:9 thumbnail in `docs/screenshots/<id>.png` if the README references one.
+Push to `main` → `.github/workflows/deploy.yml` SCPs the site to `ssh.williamphung.com:/var/www/williamphung.com/`. Only the listed paths (`index.html`, the other chrome HTML, `assets/**`, `games/**`, `docs/screenshots/**`, `README.md`) are deployed — new top-level files must be added to that `source:` list. **Do not commit, push, or deploy unless explicitly asked.**
 
 ## Design + plan docs
 
-`docs/superpowers/specs/` holds design specs and `docs/superpowers/plans/` holds implementation plans, paired by date and feature (`YYYY-MM-DD-<feature>-design.md` + `YYYY-MM-DD-<feature>-impl.md`). These are written before non-trivial features so the agent and human are aligned — follow the existing structure when adding new ones.
+`docs/superpowers/specs/` (design) and `docs/superpowers/plans/` (implementation) are paired by date/feature (`YYYY-MM-DD-<feature>-design.md` + `-impl.md`), written before non-trivial features. Follow the existing structure when adding new ones.
