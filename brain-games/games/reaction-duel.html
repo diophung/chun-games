@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Reaction Duel ⚡</title>
+<style>
+:root{
+  --bg-grad: linear-gradient(160deg,#2b1e66 0%, #3b2fb0 45%, #1f6feb 100%);
+  --paper:#ffffff; --ink:#13183a; --ink-soft:#5b6488;
+  --c-blue:#3a86ff; --c-orange:#fb8500; --c-green:#06d6a0; --c-pink:#ff5d8f; --c-yellow:#ffd166; --c-purple:#9b5de5;
+  --ok:#06d6a0; --warn:#ff6b6b; --radius:20px;
+  --font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  --red-field:#e63946;
+  --go-field:#06d6a0;
+  --p1:#3a86ff; --p2:#ff5d8f;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%; margin:0;}
+body{
+  font-family:var(--font);
+  background:var(--bg-grad) fixed;
+  color:var(--ink);
+  overflow:hidden;
+  -webkit-user-select:none; user-select:none;
+  touch-action:none;
+}
+button{font-family:var(--font); cursor:pointer;}
+.btn{
+  border:none; border-radius:999px; padding:16px 26px; font-size:1.15rem; font-weight:800;
+  background:var(--c-blue); color:#fff; box-shadow:0 6px 0 rgba(0,0,0,.18), 0 8px 18px rgba(0,0,0,.22);
+  transition:transform .08s ease, box-shadow .08s ease; min-height:48px; min-width:48px;
+}
+.btn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.18), 0 4px 10px rgba(0,0,0,.22);}
+.btn:focus-visible{outline:4px solid #fff; outline-offset:3px;}
+.btn.big{font-size:1.5rem; padding:20px 44px;}
+.btn.green{background:var(--c-green);}
+.btn.orange{background:var(--c-orange);}
+.btn.pink{background:var(--c-pink);}
+.btn.purple{background:var(--c-purple);}
+.btn.ghost{background:rgba(255,255,255,.18); color:#fff; box-shadow:0 4px 0 rgba(0,0,0,.18);}
+.btn.sel{outline:5px solid #fff; outline-offset:2px;}
+
+/* ===== layout ===== */
+#app{position:fixed; inset:0; display:flex; flex-direction:column;}
+
+/* top bar (during play) */
+#topbar{
+  display:none; align-items:center; justify-content:space-between; gap:8px;
+  padding:8px 10px; background:rgba(13,16,42,.55); color:#fff; flex:0 0 auto; z-index:30;
+}
+#topbar.show{display:flex;}
+.tb-group{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.tb-pill{
+  background:rgba(255,255,255,.16); border-radius:999px; padding:6px 12px; font-weight:800; font-size:.95rem;
+  display:flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.tb-pill.p1{box-shadow:inset 0 0 0 2px var(--p1);}
+.tb-pill.p2{box-shadow:inset 0 0 0 2px var(--p2);}
+.icon-btn{
+  border:none; border-radius:999px; width:48px; height:48px; font-size:1.3rem; line-height:1;
+  background:rgba(255,255,255,.18); color:#fff; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 0 rgba(0,0,0,.2);
+}
+.icon-btn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2);}
+.icon-btn:focus-visible{outline:4px solid #fff; outline-offset:2px;}
+
+/* arena */
+#arena{position:relative; flex:1 1 auto; display:none;}
+#arena.show{display:block;}
+.side{
+  position:absolute; top:0; bottom:0; width:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; color:#fff; overflow:hidden;
+  transition:background-color .05s linear;
+  background:#6c7393;
+}
+#sideL{left:0; border-right:4px solid rgba(255,255,255,.5);}
+#sideR{right:0;}
+.side .who{
+  position:absolute; top:10px; font-weight:800; font-size:clamp(.95rem,3.5vw,1.4rem);
+  background:rgba(0,0,0,.28); padding:6px 14px; border-radius:999px; display:flex; align-items:center; gap:6px;
+}
+.side .roundscore{
+  position:absolute; bottom:14px; display:flex; gap:8px; align-items:center; font-weight:800;
+  font-size:clamp(1.2rem,5vw,2rem);
+}
+.dot{font-size:clamp(1.1rem,4.5vw,1.8rem); opacity:.35;}
+.dot.on{opacity:1;}
+.side .bigtxt{
+  font-size:clamp(1.6rem,7vw,3.4rem); font-weight:800; line-height:1.1; padding:0 8px;
+  text-shadow:0 3px 0 rgba(0,0,0,.18); pointer-events:none;
+}
+.side .subtxt{
+  margin-top:10px; font-size:clamp(1rem,3.6vw,1.6rem); font-weight:700; opacity:.95; pointer-events:none;
+}
+.side .ms{
+  margin-top:6px; font-size:clamp(1rem,3.8vw,1.7rem); font-weight:800; pointer-events:none;
+}
+.side.flash{animation:flashpulse .4s ease;}
+@keyframes flashpulse{0%{filter:brightness(1.6);}100%{filter:brightness(1);}}
+
+/* center divider VS chip */
+#vschip{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  background:#13183a; color:#fff; font-weight:800; border-radius:999px; padding:8px 14px;
+  z-index:5; box-shadow:0 4px 14px rgba(0,0,0,.4); font-size:clamp(.9rem,3vw,1.2rem);
+  pointer-events:none;
+}
+
+/* ===== overlays ===== */
+.overlay{
+  position:fixed; inset:0; z-index:60; display:none;
+  align-items:center; justify-content:center; padding:16px;
+  background:rgba(13,16,42,.62); backdrop-filter:blur(3px);
+}
+.overlay.show{display:flex;}
+.panel{
+  background:var(--paper); color:var(--ink); border-radius:var(--radius);
+  max-width:560px; width:100%; max-height:94vh; overflow:auto; padding:22px 20px 26px;
+  box-shadow:0 18px 50px rgba(0,0,0,.4); text-align:center;
+}
+.panel h1{font-size:clamp(1.8rem,7vw,2.6rem); margin:.1em 0 .1em; font-weight:800;}
+.panel h2{font-size:clamp(1.5rem,6vw,2.1rem); margin:.1em 0; font-weight:800;}
+.tagline{color:var(--ink-soft); font-size:1.05rem; margin:.2em 0 1em; font-weight:600;}
+.howto{
+  background:#eef1ff; border-radius:14px; padding:12px 14px; font-weight:700; font-size:1.05rem;
+  margin:0 auto 14px; max-width:440px; color:var(--ink);
+}
+.badges{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:0 auto 16px;}
+.badge{
+  border-radius:999px; padding:8px 14px; font-weight:800; font-size:.95rem;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.badge.age{background:#fff3d6; color:#8a5a00; box-shadow:inset 0 0 0 2px var(--c-yellow);}
+.badge.skill{background:#e6fff7; color:#04795a; box-shadow:inset 0 0 0 2px var(--c-green);}
+.section-label{font-weight:800; color:var(--ink-soft); margin:14px 0 8px; letter-spacing:.02em;}
+.diffrow{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:10px;}
+.diff-desc{color:var(--ink-soft); font-weight:600; font-size:.95rem; min-height:1.3em; margin-bottom:14px;}
+.row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;}
+.bigemoji{font-size:clamp(3rem,16vw,5rem); line-height:1; margin-top:6px;}
+.score-line{font-size:1.3rem; font-weight:800; margin:6px 0;}
+.best-line{font-size:1.2rem; font-weight:800; margin:4px 0 12px; color:#04795a;}
+.winner-chip{
+  display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:1.25rem;
+  border-radius:999px; padding:10px 18px; margin:6px 0 4px; color:#fff;
+}
+
+/* hub link top-left & mute top-right floating on start/over screens */
+.corner{
+  position:fixed; z-index:70; display:flex; gap:8px;
+}
+#cornerTL{top:10px; left:10px;}
+#cornerTR{top:10px; right:10px;}
+
+/* confetti */
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:80;}
+
+@media (prefers-reduced-motion: reduce){
+  .btn,.icon-btn{transition:none;}
+  .side.flash{animation:none;}
+}
+
+/* keyboard hint chips */
+.keyhint{font-size:.85rem; opacity:.8; font-weight:700; margin-top:4px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TOP BAR (play) -->
+  <div id="topbar">
+    <div class="tb-group">
+      <button class="icon-btn" id="btnPause" aria-label="Pause">⏸</button>
+      <button class="icon-btn" id="btnRestart" aria-label="Restart match">↻</button>
+    </div>
+    <div class="tb-group">
+      <span class="tb-pill p1">🔵 P1 <span id="tbScoreL">0</span></span>
+      <span class="tb-pill" id="tbLevel">🏁 To win: 3</span>
+      <span class="tb-pill p2">🌸 P2 <span id="tbScoreR">0</span></span>
+    </div>
+    <div class="tb-group">
+      <button class="icon-btn" id="btnMutePlay" aria-label="Mute sound">🔊</button>
+    </div>
+  </div>
+
+  <!-- ARENA -->
+  <div id="arena">
+    <div class="side" id="sideL">
+      <div class="who">🔵 Player 1 <span class="keyhint">(key A)</span></div>
+      <div class="bigtxt" id="txtL">✋</div>
+      <div class="subtxt" id="subL"></div>
+      <div class="ms" id="msL"></div>
+      <div class="roundscore" id="scoreL"></div>
+    </div>
+    <div class="side" id="sideR">
+      <div class="who">🌸 Player 2 <span class="keyhint">(key L)</span></div>
+      <div class="bigtxt" id="txtR">✋</div>
+      <div class="subtxt" id="subR"></div>
+      <div class="ms" id="msR"></div>
+      <div class="roundscore" id="scoreR"></div>
+    </div>
+    <div id="vschip">⚡ VS ⚡</div>
+  </div>
+</div>
+
+<!-- floating corner controls (start/over only) -->
+<div class="corner" id="cornerTL">
+  <a class="btn ghost" id="hubLink" href="../index.html" role="button">← Hub</a>
+</div>
+<div class="corner" id="cornerTR">
+  <button class="icon-btn" id="btnMuteTop" aria-label="Mute sound">🔊</button>
+</div>
+
+<!-- START OVERLAY -->
+<div class="overlay show" id="ovStart">
+  <div class="panel">
+    <div class="bigemoji">⚡🤺</div>
+    <h1>Reaction Duel</h1>
+    <p class="tagline">Two players. One screen. Fastest tap wins! 🏆</p>
+    <div class="howto">👀 Wait for <b>GREEN</b>, then tap YOUR side fast! ✋➡️🟢</div>
+    <div class="badges">
+      <span class="badge age">🧒 Age: Junior (7–9)</span>
+      <span class="badge skill">🧠 Skill: Reaction &amp; inhibition</span>
+    </div>
+
+    <div class="section-label">Pick a level</div>
+    <div class="diffrow">
+      <button class="btn green" data-diff="easy" id="dEasy">🟢 Easy</button>
+      <button class="btn orange" data-diff="medium" id="dMed">🟡 Medium</button>
+      <button class="btn pink" data-diff="hard" id="dHard">🔴 Hard</button>
+    </div>
+    <div class="diff-desc" id="diffDesc">🟢 Easy: slow, friendly. Great for new players.</div>
+
+    <div class="row">
+      <button class="btn big purple" id="btnPlay">Play ▶</button>
+    </div>
+    <div class="keyhint" style="margin-top:14px; color:var(--ink-soft);">⌨️ P1 = A key &nbsp;•&nbsp; P2 = L key</div>
+  </div>
+</div>
+
+<!-- PAUSE OVERLAY -->
+<div class="overlay" id="ovPause">
+  <div class="panel">
+    <div class="bigemoji">⏸️</div>
+    <h2>Paused</h2>
+    <p class="tagline">Take a breath. Ready when you are! 😌</p>
+    <div class="row">
+      <button class="btn green" id="btnResume">Resume ▶</button>
+      <button class="btn orange" id="btnPauseRestart">Restart ↻</button>
+      <button class="btn ghost" id="btnPauseHub" style="color:#13183a; background:#eef1ff;">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATCH OVER OVERLAY -->
+<div class="overlay" id="ovOver">
+  <div class="panel">
+    <div class="bigemoji" id="overEmoji">🎉</div>
+    <h2 id="overTitle">Great match! 🌟</h2>
+    <div class="winner-chip" id="winnerChip">🔵 Player 1 wins!</div>
+    <div class="score-line" id="overScore">🔵 3 — 1 🌸</div>
+    <div class="best-line" id="overBest">🏆 Best reaction: —</div>
+    <div class="row">
+      <button class="btn green" id="btnAgain">Play Again 🔄</button>
+      <button class="btn orange" id="btnChange">Change Level</button>
+      <button class="btn ghost" id="btnOverHub" style="color:#13183a; background:#eef1ff;">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ============================================================
+   SOUND (Web Audio only). Mute-aware. Resume on Play click.
+   ============================================================ */
+const Sound=(()=>{let ctx,muted=false;function ac(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx;}
+function tone(freq,dur,type,vol){if(muted)return;dur=dur||0.12;type=type||"sine";vol=vol||0.2;var c=ac();var o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);var t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur+0.03);}
+return{resume:function(){try{ac().resume();}catch(e){}},tone:tone,click:function(){tone(420,0.06,"square",0.15);},good:function(){tone(660,0.1);setTimeout(function(){tone(880,0.12);},90);},bad:function(){tone(160,0.18,"sawtooth",0.15);},win:function(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.16,"triangle",0.18);},i*120);});},toggleMute:function(){muted=!muted;return muted;},isMuted:function(){return muted;}};})();
+
+/* ============================================================
+   DIFFICULTY CONFIG — three genuinely different levels.
+   minDelay/maxDelay = ms before GREEN. fakeouts = misleading flashes.
+   ============================================================ */
+const DIFFS={
+  easy:   { label:"🟢 Easy",   minDelay:1800, maxDelay:2800, fakeouts:0, fakeChance:0,    falseStartPenalty:false,
+            desc:"🟢 Easy: slow, friendly. Great for new players." },
+  medium: { label:"🟡 Medium", minDelay:1200, maxDelay:3000, fakeouts:0, fakeChance:0,    falseStartPenalty:true,
+            desc:"🟡 Medium: shorter, surprising waits. Don't peek!" },
+  hard:   { label:"🔴 Hard",   minDelay:900,  maxDelay:3400, fakeouts:2, fakeChance:0.7,  falseStartPenalty:true,
+            desc:"🔴 Hard: tricky FAKE flashes 💛💙 — only tap on GREEN!" }
+};
+const TARGET_WINS=3; // best of 5 -> first to 3
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let diff="easy";
+let state="start"; // start | waiting | go | paused | over | between | result
+let scoreL=0, scoreR=0;
+let bestMs=null; // session best reaction (lower better)
+let goTime=0;     // timestamp when GREEN appeared
+let waitTimer=null;
+let fakeTimers=[];
+let roundActive=false;   // a round is currently running (red->green)
+let acceptingTaps=false; // taps are meaningful (during red and go)
+let roundLock=false;     // round already resolved, ignore further taps
+let nextRoundTimer=null;
+let resultTimer=null;
+
+/* ============================================================
+   DOM
+   ============================================================ */
+const $=(id)=>document.getElementById(id);
+const arena=$("arena"), topbar=$("topbar");
+const sideL=$("sideL"), sideR=$("sideR");
+const txtL=$("txtL"), txtR=$("txtR"), subL=$("subL"), subR=$("subR"), msL=$("msL"), msR=$("msR");
+const scoreLBox=$("scoreL"), scoreRBox=$("scoreR");
+const tbScoreL=$("tbScoreL"), tbScoreR=$("tbScoreR");
+const cornerTL=$("cornerTL"), cornerTR=$("cornerTR");
+
+const ovStart=$("ovStart"), ovPause=$("ovPause"), ovOver=$("ovOver");
+
+/* ============================================================
+   COLORS / FIELD HELPERS
+   ============================================================ */
+function setSide(side, bg, big, sub, ms){
+  const isL = side==="L";
+  const sEl = isL?sideL:sideR;
+  const tEl = isL?txtL:txtR;
+  const subEl = isL?subL:subR;
+  const msEl = isL?msL:msR;
+  sEl.style.backgroundColor=bg;
+  tEl.textContent=big;
+  subEl.textContent=sub||"";
+  if(ms!==undefined) msEl.textContent=ms||"";
+}
+function setBoth(bg, big, sub){
+  setSide("L", bg, big, sub, "");
+  setSide("R", bg, big, sub, "");
+}
+function flash(side){
+  const el = side==="L"?sideL:sideR;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+}
+
+function renderScoreDots(){
+  function dots(n){
+    let s="";
+    for(let i=0;i<TARGET_WINS;i++){ s+='<span class="dot'+(i<n?' on':'')+'">★</span>'; }
+    return s;
+  }
+  scoreLBox.innerHTML="🔵 "+dots(scoreL);
+  scoreRBox.innerHTML=dots(scoreR)+" 🌸";
+  tbScoreL.textContent=scoreL;
+  tbScoreR.textContent=scoreR;
+}
+
+/* ============================================================
+   GAME FLOW
+   ============================================================ */
+function showOverlay(el){
+  [ovStart,ovPause,ovOver].forEach(o=>o.classList.remove("show"));
+  if(el) el.classList.add("show");
+}
+function showCorners(on){
+  cornerTL.style.display = on?"flex":"none";
+  cornerTR.style.display = on?"flex":"none";
+}
+
+function clearTimers(){
+  if(waitTimer){clearTimeout(waitTimer); waitTimer=null;}
+  if(nextRoundTimer){clearTimeout(nextRoundTimer); nextRoundTimer=null;}
+  if(resultTimer){clearTimeout(resultTimer); resultTimer=null;}
+  fakeTimers.forEach(t=>clearTimeout(t)); fakeTimers=[];
+}
+
+function startMatch(){
+  scoreL=0; scoreR=0; bestMs=null;
+  renderScoreDots();
+  topbar.classList.add("show");
+  arena.classList.add("show");
+  showOverlay(null);
+  showCorners(false);
+  $("tbLevel").textContent="🏁 "+DIFFS[diff].label.replace(/^[^ ]+ /,'')+" · first to "+TARGET_WINS;
+  state="between";
+  startRound();
+}
+
+function startRound(){
+  clearTimers();
+  roundActive=true; acceptingTaps=true; roundLock=false;
+  state="waiting";
+  const cfg=DIFFS[diff];
+  // RED field — wait for green
+  setBoth(getCSS("--red-field"), "✋", "Wait for GREEN!");
+  msL.textContent=""; msR.textContent="";
+
+  // schedule fake-outs (HARD): brief misleading flashes that must be ignored
+  const delay = cfg.minDelay + Math.random()*(cfg.maxDelay-cfg.minDelay);
+  if(cfg.fakeouts>0){
+    let used=[];
+    for(let i=0;i<cfg.fakeouts;i++){
+      if(Math.random()>cfg.fakeChance) continue;
+      // place a fake flash somewhere safely before GREEN
+      const t = 400 + Math.random()*(delay-900);
+      if(t<300 || t>delay-300) continue;
+      used.push(t);
+    }
+    used.forEach(t=>{
+      const ft=setTimeout(()=>{
+        if(state!=="waiting") return;
+        const fakeColors=["--c-yellow","--c-blue","--c-purple","--c-orange"];
+        const pick=fakeColors[Math.floor(Math.random()*fakeColors.length)];
+        const icon = pick==="--c-yellow"?"💛": pick==="--c-blue"?"💙": pick==="--c-purple"?"💜":"🧡";
+        setBoth(getCSS(pick), icon, "Do NOT tap!");
+        Sound.tone(330,0.08,"square",0.1);
+        // revert back to red shortly after if still waiting
+        const back=setTimeout(()=>{
+          if(state==="waiting") setBoth(getCSS("--red-field"), "✋", "Wait for GREEN!");
+        }, 420);
+        fakeTimers.push(back);
+      }, t);
+      fakeTimers.push(ft);
+    });
+  }
+
+  waitTimer=setTimeout(goGreen, delay);
+}
+
+function goGreen(){
+  if(state!=="waiting") return;
+  state="go";
+  goTime=performance.now();
+  setBoth(getCSS("--go-field"), "GO! 🟢", "TAP NOW!");
+  Sound.tone(880,0.1,"triangle",0.18);
+}
+
+/* a player tapped their side. winnerSide = "L" or "R" */
+function handleTap(playerSide){
+  if(state==="paused" || state==="over" || state==="start") return;
+  if(!roundActive || roundLock) return;
+  if(!acceptingTaps) return;
+  const cfg=DIFFS[diff];
+
+  if(state==="waiting"){
+    // FALSE START — tapped during red (or fake). Other player wins round.
+    roundLock=true; acceptingTaps=false;
+    clearTimers();
+    const winner = playerSide==="L" ? "R" : "L";
+    Sound.bad();
+    showFalseStart(playerSide, winner);
+    awardRound(winner, null, true);
+    return;
+  }
+  if(state==="go"){
+    const ms = Math.round(performance.now()-goTime);
+    roundLock=true; acceptingTaps=false;
+    clearTimers();
+    Sound.good();
+    if(bestMs===null || ms<bestMs) bestMs=ms;
+    showReactionWin(playerSide, ms);
+    awardRound(playerSide, ms, false);
+    return;
+  }
+}
+
+function showFalseStart(loserSide, winnerSide){
+  // show red on loser, green-ish "you win" on winner
+  const loserEl = loserSide==="L"?"L":"R";
+  setSide(loserEl, getCSS("--warn"), "Too soon! ⏳", "Wait for green next time 🙂", "");
+  setSide(winnerSide, getCSS("--go-field"), "You win! 🏆", "Other tapped early", "");
+  flash(winnerSide);
+}
+
+function showReactionWin(winnerSide, ms){
+  const loserSide = winnerSide==="L"?"R":"L";
+  setSide(winnerSide, getCSS("--go-field"), "Winner! 🏆", "Super fast!", ms+" ms");
+  setSide(loserSide, "#6c7393", "So close! 🙂", "", "");
+  flash(winnerSide);
+}
+
+function awardRound(winnerSide, ms, falseStart){
+  if(winnerSide==="L") scoreL++; else scoreR++;
+  renderScoreDots();
+  state="result";
+  acceptingTaps=false;
+  // match over?
+  if(scoreL>=TARGET_WINS || scoreR>=TARGET_WINS){
+    resultTimer=setTimeout(()=>endMatch(scoreL>scoreR?"L":"R"), 1100);
+  } else {
+    // next round after a short pause
+    nextRoundTimer=setTimeout(()=>{ if(state==="result") startRound(); }, 1300);
+  }
+}
+
+function endMatch(winnerSide){
+  state="over";
+  roundActive=false; acceptingTaps=false;
+  clearTimers();
+  topbar.classList.remove("show");
+  arena.classList.remove("show");
+  showCorners(true);
+
+  const isL = winnerSide==="L";
+  const name = isL ? "🔵 Player 1" : "🌸 Player 2";
+  const col  = isL ? getCSS("--p1") : getCSS("--p2");
+  $("overEmoji").textContent="🎉🏆";
+  $("overTitle").textContent="Great match! 🌟";
+  const wc=$("winnerChip");
+  wc.textContent = name + " wins!";
+  wc.style.background=col;
+  $("overScore").textContent = "🔵 "+scoreL+" — "+scoreR+" 🌸";
+  $("overBest").textContent = bestMs!==null ? ("🏆 Best reaction: "+bestMs+" ms") : "🏆 Best reaction: —";
+
+  showOverlay(ovOver);
+  Sound.win();
+  celebrate(isL ? 0.25 : 0.75);
+}
+
+/* ============================================================
+   PAUSE
+   ============================================================ */
+let savedStateBeforePause=null;
+function pauseGame(){
+  if(state==="over"||state==="start"||state==="paused") return;
+  savedStateBeforePause=state;
+  clearTimers();
+  acceptingTaps=false;
+  state="paused";
+  showOverlay(ovPause);
+}
+function resumeGame(){
+  if(state!=="paused") return;
+  showOverlay(null);
+  // restart the current round fresh for fairness
+  state="between";
+  startRound();
+}
+
+/* ============================================================
+   CSS VAR HELPER
+   ============================================================ */
+function getCSS(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+/* ============================================================
+   CONFETTI 🎉
+   ============================================================ */
+const confCanvas=$("confetti");
+const cctx=confCanvas.getContext("2d");
+let confParticles=[], confRAF=null;
+function sizeConf(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  confCanvas.width=Math.floor(innerWidth*dpr);
+  confCanvas.height=Math.floor(innerHeight*dpr);
+  confCanvas.style.width=innerWidth+"px";
+  confCanvas.style.height=innerHeight+"px";
+  cctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function celebrate(originX){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  sizeConf();
+  const emojis=["🎉","⭐","🏆","✨","🟢","🔵","🌸","💥","🥳"];
+  const cx=innerWidth*originX, cy=innerHeight*0.35;
+  for(let i=0;i<80;i++){
+    confParticles.push({
+      x:cx, y:cy,
+      vx:(Math.random()-0.5)*9,
+      vy:-(Math.random()*9+4),
+      g:0.28+Math.random()*0.12,
+      r:Math.random()*Math.PI*2,
+      vr:(Math.random()-0.5)*0.3,
+      em:emojis[Math.floor(Math.random()*emojis.length)],
+      size:20+Math.random()*22,
+      life:0
+    });
+  }
+  if(!confRAF) confRAF=requestAnimationFrame(stepConf);
+}
+function stepConf(){
+  cctx.clearRect(0,0,innerWidth,innerHeight);
+  confParticles=confParticles.filter(p=>p.life<160 && p.y<innerHeight+60);
+  for(const p of confParticles){
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.life++;
+    cctx.save();
+    cctx.translate(p.x,p.y); cctx.rotate(p.r);
+    cctx.font=p.size+"px serif"; cctx.textAlign="center"; cctx.textBaseline="middle";
+    cctx.globalAlpha=Math.max(0,1-p.life/160);
+    cctx.fillText(p.em,0,0);
+    cctx.restore();
+  }
+  if(confParticles.length){ confRAF=requestAnimationFrame(stepConf); }
+  else { cctx.clearRect(0,0,innerWidth,innerHeight); confRAF=null; }
+}
+addEventListener("resize", ()=>{ if(confRAF) sizeConf(); });
+
+/* ============================================================
+   INPUT — pointer (mouse+touch) on each half + keyboard
+   ============================================================ */
+function bindSide(el, side){
+  el.addEventListener("pointerdown",(e)=>{
+    e.preventDefault();
+    handleTap(side);
+  }, {passive:false});
+}
+bindSide(sideL,"L");
+bindSide(sideR,"R");
+
+// prevent context menu / long-press selection messing play
+arena.addEventListener("contextmenu", e=>e.preventDefault());
+
+document.addEventListener("keydown",(e)=>{
+  const k=e.key.toLowerCase();
+  if(k==="a"){ if(arena.classList.contains("show")){ e.preventDefault(); handleTap("L"); } }
+  else if(k==="l"){ if(arena.classList.contains("show")){ e.preventDefault(); handleTap("R"); } }
+  else if(k==="p"){ if(state!=="start"&&state!=="over") pauseGame(); }
+  else if(k==="escape"){ if(state==="paused") resumeGame(); }
+});
+
+/* ============================================================
+   MUTE
+   ============================================================ */
+function updateMuteUI(){
+  const m=Sound.isMuted();
+  $("btnMuteTop").textContent=m?"🔇":"🔊";
+  $("btnMutePlay").textContent=m?"🔇":"🔊";
+  $("btnMuteTop").setAttribute("aria-label", m?"Unmute sound":"Mute sound");
+  $("btnMutePlay").setAttribute("aria-label", m?"Unmute sound":"Mute sound");
+}
+function toggleMute(){ Sound.toggleMute(); updateMuteUI(); }
+$("btnMuteTop").addEventListener("click", toggleMute);
+$("btnMutePlay").addEventListener("click", toggleMute);
+
+/* ============================================================
+   DIFFICULTY SELECT
+   ============================================================ */
+const diffBtns={easy:$("dEasy"), medium:$("dMed"), hard:$("dHard")};
+function selectDiff(d){
+  diff=d;
+  Object.keys(diffBtns).forEach(k=>diffBtns[k].classList.toggle("sel", k===d));
+  $("diffDesc").textContent=DIFFS[d].desc;
+  Sound.click();
+}
+Object.keys(diffBtns).forEach(k=>{
+  diffBtns[k].addEventListener("click",()=>selectDiff(k));
+});
+selectDiff("easy"); // default highlight
+
+/* ============================================================
+   BUTTON WIRING
+   ============================================================ */
+$("btnPlay").addEventListener("click",()=>{
+  Sound.resume();
+  Sound.click();
+  startMatch();
+});
+$("btnPause").addEventListener("click",()=>{ Sound.click(); pauseGame(); });
+$("btnRestart").addEventListener("click",()=>{ Sound.click(); startMatch(); });
+$("btnResume").addEventListener("click",()=>{ Sound.click(); resumeGame(); });
+$("btnPauseRestart").addEventListener("click",()=>{ Sound.click(); startMatch(); });
+$("btnPauseHub").addEventListener("click",()=>{ location.href="../index.html"; });
+$("btnAgain").addEventListener("click",()=>{ Sound.click(); startMatch(); });
+$("btnChange").addEventListener("click",()=>{
+  Sound.click();
+  clearTimers();
+  state="start";
+  topbar.classList.remove("show");
+  arena.classList.remove("show");
+  showCorners(true);
+  showOverlay(ovStart);
+});
+$("btnOverHub").addEventListener("click",()=>{ location.href="../index.html"; });
+
+/* ============================================================
+   INIT
+   ============================================================ */
+updateMuteUI();
+showCorners(true);
+renderScoreDots();
+</script>
+</body>
+</html>

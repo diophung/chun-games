@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Reaction Rush ⚡</title>
+<style>
+  :root{
+    --bg-grad: linear-gradient(160deg,#2b1e66 0%, #3b2fb0 45%, #1f6feb 100%);
+    --paper:#ffffff; --ink:#13183a; --ink-soft:#5b6488;
+    --c-blue:#3a86ff; --c-orange:#fb8500; --c-green:#06d6a0; --c-pink:#ff5d8f; --c-yellow:#ffd166; --c-purple:#9b5de5;
+    --ok:#06d6a0; --warn:#ff6b6b; --radius:20px;
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:var(--font);
+    background:var(--bg-grad) fixed;
+    color:var(--ink);
+    min-height:100vh;
+    overflow:hidden;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  @supports (height:100dvh){ body{min-height:100dvh;} }
+
+  /* ---------- Layout ---------- */
+  #wrap{
+    position:relative;
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:8px;
+    gap:8px;
+  }
+
+  /* ---------- Top bar ---------- */
+  #topbar{
+    width:100%;
+    max-width:760px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.25);
+    border-radius:var(--radius);
+    padding:6px 8px;
+    backdrop-filter:blur(4px);
+  }
+  .iconbtn{
+    border:none;
+    cursor:pointer;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:999px;
+    min-width:48px;
+    min-height:48px;
+    font-size:20px;
+    font-weight:800;
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 12px;
+    transition:transform .08s ease;
+    text-decoration:none;
+  }
+  .iconbtn:active{ transform:translateY(2px) scale(0.96); }
+  .iconbtn:focus-visible{ outline:4px solid var(--c-yellow); outline-offset:2px; }
+
+  .stats{
+    display:flex;
+    gap:6px;
+    flex:1;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .stat{
+    background:rgba(255,255,255,0.92);
+    border-radius:14px;
+    padding:4px 10px;
+    min-width:64px;
+    text-align:center;
+    line-height:1.05;
+    box-shadow:0 3px 8px rgba(0,0,0,0.2);
+  }
+  .stat .k{ font-size:10px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+  .stat .v{ font-size:18px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
+  #timeStat .v{ color:var(--c-blue); }
+  #timeStat.low .v{ color:var(--warn); }
+
+  /* ---------- Play area ---------- */
+  #playArea{
+    position:relative;
+    width:100%;
+    max-width:760px;
+    flex:1;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(255,255,255,0.10), transparent 40%),
+      linear-gradient(180deg, rgba(20,12,60,0.45), rgba(10,8,40,0.6));
+    border:2px solid rgba(255,255,255,0.22);
+    border-radius:var(--radius);
+    overflow:hidden;
+    touch-action:none;
+  }
+
+  .target{
+    position:absolute;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:1em;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35), inset 0 0 0 4px rgba(255,255,255,0.55);
+    animation:pop .16s ease-out;
+    will-change:transform;
+    border:none;
+  }
+  .target.good{ background:radial-gradient(circle at 35% 30%, #fff6, transparent 55%), var(--c-green); }
+  .target.bomb{ background:radial-gradient(circle at 35% 30%, #fff5, transparent 55%), #2a2a33; box-shadow:0 6px 18px rgba(0,0,0,0.5), inset 0 0 0 4px rgba(255,80,80,0.7); }
+  .target:focus-visible{ outline:4px solid var(--c-yellow); outline-offset:3px; }
+  .target .ring{
+    position:absolute;
+    inset:-6px;
+    border-radius:50%;
+    border:4px solid rgba(255,255,255,0.55);
+    pointer-events:none;
+    animation:shrink linear forwards;
+  }
+  @keyframes pop{ from{transform:scale(0.3); opacity:0;} to{transform:scale(1); opacity:1;} }
+  @keyframes shrink{ from{transform:scale(1.25); opacity:0.9;} to{transform:scale(0.55); opacity:0.2;} }
+
+  .float{
+    position:absolute;
+    font-weight:800;
+    font-size:18px;
+    pointer-events:none;
+    text-shadow:0 2px 4px rgba(0,0,0,0.5);
+    animation:floatUp .8s ease-out forwards;
+    color:#fff;
+  }
+  @keyframes floatUp{ from{transform:translateY(0); opacity:1;} to{transform:translateY(-46px); opacity:0;} }
+
+  /* combo banner */
+  #comboBanner{
+    position:absolute;
+    top:8px; left:50%;
+    transform:translateX(-50%);
+    background:var(--c-purple);
+    color:#fff;
+    font-weight:800;
+    padding:4px 14px;
+    border-radius:999px;
+    font-size:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    opacity:0;
+    transition:opacity .2s;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  #comboBanner.show{ opacity:1; }
+
+  /* ---------- Overlays ---------- */
+  .overlay{
+    position:absolute;
+    inset:0;
+    z-index:30;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px;
+    background:rgba(20,12,50,0.55);
+    backdrop-filter:blur(3px);
+  }
+  .overlay.hidden{ display:none; }
+  .panel{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:18px 18px 20px;
+    width:100%;
+    max-width:430px;
+    max-height:100%;
+    overflow:auto;
+    text-align:center;
+    box-shadow:0 18px 50px rgba(0,0,0,0.45);
+  }
+  .panel h1{ margin:.1em 0 .05em; font-weight:800; font-size:clamp(26px,7vw,38px); line-height:1.05; }
+  .panel h2{ margin:.1em 0 .3em; font-weight:800; font-size:clamp(22px,6vw,30px); }
+  .bigemoji{ font-size:clamp(46px,13vw,64px); line-height:1; }
+  .howto{ font-size:15px; color:var(--ink-soft); margin:.2em 0 .7em; font-weight:600; }
+
+  .badges{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:.4em 0 1em; }
+  .badge{
+    background:#eef1ff;
+    color:var(--ink);
+    border:2px solid #d7dcff;
+    border-radius:999px;
+    padding:6px 12px;
+    font-size:12.5px;
+    font-weight:800;
+    display:inline-flex;
+    gap:6px;
+    align-items:center;
+  }
+  .badge .lbl{ color:var(--ink-soft); font-weight:700; }
+
+  .difftitle{ font-weight:800; font-size:14px; color:var(--ink-soft); margin:.2em 0 .4em; }
+  .diffrow{ display:flex; gap:8px; justify-content:center; margin-bottom:14px; }
+  .diffbtn{
+    flex:1;
+    max-width:120px;
+    border:3px solid #e6e9f5;
+    background:#fff;
+    color:var(--ink);
+    border-radius:16px;
+    padding:10px 4px;
+    cursor:pointer;
+    font-weight:800;
+    font-size:15px;
+    min-height:62px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    transition:transform .08s, border-color .12s, background .12s;
+  }
+  .diffbtn .sub{ font-size:10.5px; font-weight:700; color:var(--ink-soft); }
+  .diffbtn:active{ transform:translateY(2px) scale(0.97); }
+  .diffbtn:focus-visible{ outline:4px solid var(--c-yellow); outline-offset:2px; }
+  .diffbtn[aria-pressed="true"]{ border-color:var(--c-purple); background:#f4efff; box-shadow:0 0 0 3px rgba(155,93,229,0.25); }
+
+  .bigbtn{
+    border:none;
+    cursor:pointer;
+    width:100%;
+    border-radius:999px;
+    padding:15px 18px;
+    font-size:21px;
+    font-weight:800;
+    color:#fff;
+    background:linear-gradient(180deg,var(--c-green),#04b487);
+    box-shadow:0 8px 20px rgba(6,214,160,0.45);
+    transition:transform .08s;
+    margin-top:4px;
+  }
+  .bigbtn:active{ transform:translateY(3px) scale(0.98); }
+  .bigbtn:focus-visible{ outline:4px solid var(--c-yellow); outline-offset:3px; }
+
+  .btnrow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .btnrow .pill{
+    flex:1;
+    min-width:120px;
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    padding:13px 12px;
+    font-size:16px;
+    font-weight:800;
+    color:#fff;
+    box-shadow:0 6px 16px rgba(0,0,0,0.25);
+    transition:transform .08s;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:48px;
+  }
+  .btnrow .pill:active{ transform:translateY(2px) scale(0.98); }
+  .btnrow .pill:focus-visible{ outline:4px solid var(--c-yellow); outline-offset:2px; }
+  .p-blue{ background:linear-gradient(180deg,var(--c-blue),#2563eb); }
+  .p-purple{ background:linear-gradient(180deg,var(--c-purple),#7c43d6); }
+  .p-orange{ background:linear-gradient(180deg,var(--c-orange),#e06f00); }
+  .p-pink{ background:linear-gradient(180deg,var(--c-pink),#e6447b); }
+
+  .resultgrid{ display:flex; gap:10px; justify-content:center; margin:10px 0 4px; flex-wrap:wrap; }
+  .rcard{ background:#f3f5ff; border-radius:16px; padding:12px 16px; min-width:96px; }
+  .rcard .rk{ font-size:11px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; }
+  .rcard .rv{ font-size:26px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .bestline{ font-size:16px; font-weight:800; margin-top:8px; }
+  .newbest{ color:var(--c-purple); animation:pulse 1s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.07);} }
+  .encourage{ font-size:18px; font-weight:800; margin:.2em 0 .4em; }
+
+  /* countdown */
+  #countdown{
+    position:absolute; inset:0; z-index:25;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(70px,24vw,150px); font-weight:800; color:#fff;
+    text-shadow:0 6px 20px rgba(0,0,0,0.5);
+    pointer-events:none;
+  }
+  #countdown.hidden{ display:none; }
+  .cdpop{ animation:cd .9s ease-out; }
+  @keyframes cd{ from{transform:scale(0.2); opacity:0;} 30%{opacity:1;} to{transform:scale(1.6); opacity:0;} }
+
+  /* confetti */
+  .confetti{
+    position:absolute; top:-20px;
+    font-size:22px; z-index:40; pointer-events:none;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{ to{ transform:translateY(110vh) rotate(540deg); opacity:0.1; } }
+
+  .foot{ font-size:11px; color:var(--ink-soft); margin-top:10px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .target,.float,.cdpop,.newbest,.confetti,.target .ring{ animation:none !important; }
+    .confetti{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <a class="iconbtn" id="hubBtn" href="../index.html" aria-label="Back to Hub" title="Back to Hub">←</a>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><div class="k">Score</div><div class="v" id="scoreStat">0</div></div>
+      <div class="stat" id="timeStat"><div class="k">Time</div><div class="v" id="timeVal">30</div></div>
+      <div class="stat"><div class="k">Avg ms</div><div class="v" id="avgStat">—</div></div>
+      <div class="stat"><div class="k">Level</div><div class="v" id="levelStat">—</div></div>
+    </div>
+    <button class="iconbtn" id="pauseBtn" aria-label="Pause" title="Pause">⏸</button>
+    <button class="iconbtn" id="restartBtn" aria-label="Restart" title="Restart">↻</button>
+    <button class="iconbtn" id="muteBtn" aria-label="Mute sound" title="Mute">🔊</button>
+  </div>
+
+  <!-- Play area -->
+  <div id="playArea" aria-label="Play area. Tap the friendly emoji, avoid bombs.">
+    <div id="comboBanner" aria-hidden="true"></div>
+    <div id="countdown" class="hidden" aria-hidden="true"></div>
+
+    <!-- START -->
+    <div class="overlay" id="startOverlay">
+      <div class="panel">
+        <div class="bigemoji">⚡😊</div>
+        <h1>Reaction Rush</h1>
+        <p class="howto">👆 Tap the smiley fast! Skip the bombs 💣</p>
+        <div class="badges">
+          <span class="badge"><span class="lbl">Ages</span> 👶 Junior (7-9)</span>
+          <span class="badge"><span class="lbl">Skill</span> 🧠 Reaction &amp; processing speed</span>
+        </div>
+        <div class="difftitle">Pick a level</div>
+        <div class="diffrow" role="group" aria-label="Difficulty">
+          <button class="diffbtn" id="diffEasy" data-diff="easy" aria-pressed="false">🟢 Easy<span class="sub">Big · slow · no bombs</span></button>
+          <button class="diffbtn" id="diffMedium" data-diff="medium" aria-pressed="true">🟡 Medium<span class="sub">Some bombs</span></button>
+          <button class="diffbtn" id="diffHard" data-diff="hard" aria-pressed="false">🔴 Hard<span class="sub">Small · fast · more bombs</span></button>
+        </div>
+        <button class="bigbtn" id="playBtn">Play ▶</button>
+        <div class="foot">30-second round · Best run kept this visit 🏆</div>
+      </div>
+    </div>
+
+    <!-- PAUSE -->
+    <div class="overlay hidden" id="pauseOverlay">
+      <div class="panel">
+        <div class="bigemoji">⏸️</div>
+        <h2>Paused</h2>
+        <p class="howto">Take a breath, then keep going! 🌟</p>
+        <button class="bigbtn" id="resumeBtn">Resume ▶</button>
+        <div class="btnrow">
+          <button class="pill p-orange" id="pauseRestartBtn">Restart ↻</button>
+          <a class="pill p-blue" id="pauseHubBtn" href="../index.html">← Hub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div class="overlay hidden" id="overOverlay">
+      <div class="panel">
+        <div class="bigemoji" id="overEmoji">🎉</div>
+        <h2 id="overTitle">Great run! 🌟</h2>
+        <p class="encourage" id="overMsg">Awesome reflexes!</p>
+        <div class="resultgrid">
+          <div class="rcard"><div class="rk">Hits</div><div class="rv" id="resHits">0</div></div>
+          <div class="rcard"><div class="rk">Avg ms</div><div class="rv" id="resAvg">—</div></div>
+          <div class="rcard"><div class="rk">Score</div><div class="rv" id="resScore">0</div></div>
+        </div>
+        <div class="bestline" id="bestLine">🏆 Best run: 0 hits</div>
+        <button class="bigbtn" id="againBtn">Play Again 🔄</button>
+        <div class="btnrow">
+          <button class="pill p-purple" id="changeBtn">Change Level</button>
+          <a class="pill p-blue" id="overHubBtn" href="../index.html">← Hub</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ===================== Sound ===================== */
+const Sound=(()=>{let ctx,muted=false;function ac(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx;}
+function tone(freq,dur,type,vol){if(muted)return;dur=dur||0.12;type=type||"sine";vol=vol||0.2;var c=ac();var o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);var t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur+0.03);}
+return{resume:function(){try{ac().resume();}catch(e){}},tone:tone,click:function(){tone(420,0.06,"square",0.15);},good:function(){tone(660,0.1);setTimeout(function(){tone(880,0.12);},90);},bad:function(){tone(160,0.18,"sawtooth",0.15);},win:function(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.16,"triangle",0.18);},i*120);});},toggleMute:function(){muted=!muted;return muted;},isMuted:function(){return muted;}};})();
+
+/* ===================== Config ===================== */
+var DIFF={
+  easy:   { life:1500, size:84, spawn:900,  bombChance:0,    roundMs:30000, emojis:["😀","😃","🙂","😺","🐶","🐸","🌟","🍎"] },
+  medium: { life:1000, size:64, spawn:680,  bombChance:0.18, roundMs:30000, emojis:["😀","😄","😺","🐶","🐸","🐥","🌟","🍎","🍓","🎈"] },
+  hard:   { life:700,  size:50, spawn:480,  bombChance:0.30, roundMs:30000, emojis:["😀","😄","😺","🐶","🐸","🐥","🌟","🍎","🍓","🎈","⭐","🦊"] }
+};
+var COMBO_WINDOW=900; // ms between hits to keep combo
+
+/* ===================== State ===================== */
+var state={
+  diff:"medium",
+  running:false,
+  paused:false,
+  score:0,
+  hits:0,
+  misses:0,
+  reactionSum:0,
+  combo:0,
+  lastHitTime:0,
+  timeLeft:0,
+  endAt:0,
+  bestHits:0,
+  bestAvg:null
+};
+var spawnTimer=null, tickTimer=null, lastTick=0;
+var targets=[]; // active target objects
+
+/* ===================== DOM ===================== */
+var el=function(id){return document.getElementById(id);};
+var playArea=el("playArea");
+var scoreStat=el("scoreStat"), timeVal=el("timeVal"), timeStat=el("timeStat");
+var avgStat=el("avgStat"), levelStat=el("levelStat");
+var comboBanner=el("comboBanner");
+var startOverlay=el("startOverlay"), pauseOverlay=el("pauseOverlay"), overOverlay=el("overOverlay");
+var countdownEl=el("countdown");
+
+/* ===================== Difficulty selection ===================== */
+var diffBtns=[el("diffEasy"),el("diffMedium"),el("diffHard")];
+function selectDiff(d){
+  state.diff=d;
+  diffBtns.forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-diff")===d ? "true":"false"); });
+  Sound.click();
+}
+diffBtns.forEach(function(b){ b.addEventListener("click",function(){ selectDiff(b.getAttribute("data-diff")); }); });
+
+/* ===================== Helpers ===================== */
+function show(o){ o.classList.remove("hidden"); }
+function hide(o){ o.classList.add("hidden"); }
+
+function updateHud(){
+  scoreStat.textContent=state.score;
+  timeVal.textContent=Math.ceil(state.timeLeft/1000);
+  avgStat.textContent= state.hits>0 ? Math.round(state.reactionSum/state.hits) : "—";
+  levelStat.textContent= state.diff.charAt(0).toUpperCase()+state.diff.slice(1);
+  if(state.timeLeft<=6000){ timeStat.classList.add("low"); } else { timeStat.classList.remove("low"); }
+}
+
+function floatText(x,y,txt,color){
+  var f=document.createElement("div");
+  f.className="float";
+  f.textContent=txt;
+  if(color) f.style.color=color;
+  f.style.left=x+"px";
+  f.style.top=y+"px";
+  playArea.appendChild(f);
+  setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); },820);
+}
+
+function showCombo(mult){
+  comboBanner.textContent="🔥 Combo x"+mult+"!";
+  comboBanner.classList.add("show");
+  clearTimeout(comboBanner._t);
+  comboBanner._t=setTimeout(function(){ comboBanner.classList.remove("show"); },800);
+}
+
+/* ===================== Spawning ===================== */
+function clearTargets(){
+  targets.forEach(function(t){
+    clearTimeout(t.timeout);
+    if(t.node.parentNode) t.node.parentNode.removeChild(t.node);
+  });
+  targets=[];
+}
+
+function spawnOne(){
+  if(!state.running||state.paused) return;
+  var cfg=DIFF[state.diff];
+  var rect=playArea.getBoundingClientRect();
+  var size=cfg.size;
+  // keep margin so target is fully inside; shrink if area is tiny
+  var maxX=Math.max(10, rect.width-size-8);
+  var maxY=Math.max(10, rect.height-size-8);
+  var x=8+Math.random()*maxX;
+  var y=8+Math.random()*maxY;
+  var isBomb = Math.random()<cfg.bombChance;
+
+  var node=document.createElement("button");
+  node.className="target "+(isBomb?"bomb":"good");
+  node.style.width=size+"px";
+  node.style.height=size+"px";
+  node.style.left=Math.round(x)+"px";
+  node.style.top=Math.round(y)+"px";
+  node.style.fontSize=Math.round(size*0.52)+"px";
+  node.setAttribute("type","button");
+  if(isBomb){
+    node.textContent="💣";
+    node.setAttribute("aria-label","Bomb. Do not tap.");
+  } else {
+    var em=cfg.emojis[Math.floor(Math.random()*cfg.emojis.length)];
+    node.textContent=em;
+    node.setAttribute("aria-label","Friendly target. Tap it!");
+  }
+
+  // shrinking ring shows remaining time
+  var ring=document.createElement("span");
+  ring.className="ring";
+  ring.style.animationDuration=cfg.life+"ms";
+  node.appendChild(ring);
+
+  var obj={ node:node, isBomb:isBomb, born:performance.now(), size:size, timeout:null, dead:false };
+
+  function onHit(ev){
+    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+    handleHit(obj);
+  }
+  node.addEventListener("pointerdown", onHit);
+  // keyboard accessibility: Enter/Space activates the button -> click
+  node.addEventListener("click", function(ev){
+    // avoid double fire: pointerdown already handled real taps; click only from keyboard
+    if(ev.detail===0){ onHit(ev); }
+  });
+
+  obj.timeout=setTimeout(function(){ expireTarget(obj); }, cfg.life);
+
+  playArea.appendChild(node);
+  targets.push(obj);
+}
+
+function removeTarget(obj){
+  if(obj.dead) return;
+  obj.dead=true;
+  clearTimeout(obj.timeout);
+  var i=targets.indexOf(obj);
+  if(i>=0) targets.splice(i,1);
+  if(obj.node.parentNode) obj.node.parentNode.removeChild(obj.node);
+}
+
+function expireTarget(obj){
+  if(obj.dead) return;
+  if(!obj.isBomb){
+    // friendly target vanished: reset combo, no harsh penalty
+    state.combo=0;
+  }
+  removeTarget(obj);
+}
+
+function targetCenter(obj){
+  var pr=playArea.getBoundingClientRect();
+  var br=obj.node.getBoundingClientRect();
+  return { x: br.left-pr.left+br.width/2, y: br.top-pr.top+br.height/2 };
+}
+
+function handleHit(obj){
+  if(!state.running||state.paused||obj.dead) return;
+  var c=targetCenter(obj);
+
+  if(obj.isBomb){
+    // tapping a bomb: lose points, bad sound, reset combo
+    Sound.bad();
+    state.combo=0;
+    var penalty=Math.min(state.score, 10);
+    state.score-=penalty;
+    if(state.score<0) state.score=0;
+    floatText(c.x-14, c.y-10, "💥 -"+penalty, "#ff8585");
+    obj.node.textContent="💥";
+    removeTarget(obj);
+    updateHud();
+    return;
+  }
+
+  // friendly hit
+  var rt=performance.now()-obj.born; // reaction time in ms
+  state.hits++;
+  state.reactionSum+=rt;
+
+  // combo logic
+  var now=performance.now();
+  if(now-state.lastHitTime<=COMBO_WINDOW){ state.combo++; } else { state.combo=1; }
+  state.lastHitTime=now;
+  var mult=Math.min(5, state.combo); // cap multiplier x5
+
+  // speed bonus: faster reaction => more base points
+  var base=10;
+  var speedBonus=Math.max(0, Math.round((DIFF[state.diff].life - rt)/100));
+  var gained=(base+speedBonus)*mult;
+  state.score+=gained;
+
+  Sound.good();
+  floatText(c.x-18, c.y-10, "+"+gained, "#bff7e3");
+  if(mult>=2){ showCombo(mult); }
+
+  removeTarget(obj);
+  updateHud();
+}
+
+/* ===================== Main loop ===================== */
+function scheduleSpawn(){
+  if(!state.running||state.paused) return;
+  var cfg=DIFF[state.diff];
+  // a little jitter for natural feel
+  var jitter=cfg.spawn*0.4;
+  var delay=cfg.spawn - jitter/2 + Math.random()*jitter;
+  spawnTimer=setTimeout(function(){
+    spawnOne();
+    scheduleSpawn();
+  }, delay);
+}
+
+function tick(ts){
+  if(!state.running) return;
+  if(state.paused){ lastTick=ts; tickTimer=requestAnimationFrame(tick); return; }
+  if(!lastTick) lastTick=ts;
+  var dt=ts-lastTick;
+  lastTick=ts;
+  state.timeLeft-=dt;
+  if(state.timeLeft<=0){
+    state.timeLeft=0;
+    updateHud();
+    endGame();
+    return;
+  }
+  updateHud();
+  tickTimer=requestAnimationFrame(tick);
+}
+
+/* ===================== Countdown + start ===================== */
+function runCountdown(cb){
+  var seq=["3","2","1","GO!"];
+  var i=0;
+  countdownEl.classList.remove("hidden");
+  function step(){
+    if(i>=seq.length){
+      countdownEl.classList.add("hidden");
+      cb();
+      return;
+    }
+    countdownEl.textContent=seq[i];
+    countdownEl.classList.remove("cdpop");
+    void countdownEl.offsetWidth; // restart animation
+    countdownEl.classList.add("cdpop");
+    Sound.tone(i<3?440+i*120:880, 0.12, "triangle", 0.18);
+    i++;
+    setTimeout(step, 700);
+  }
+  step();
+}
+
+function beginRound(){
+  // reset run state
+  state.running=true;
+  state.paused=false;
+  state.score=0;
+  state.hits=0;
+  state.misses=0;
+  state.reactionSum=0;
+  state.combo=0;
+  state.lastHitTime=0;
+  state.timeLeft=DIFF[state.diff].roundMs;
+  clearTargets();
+  updateHud();
+  lastTick=0;
+  scheduleSpawn();
+  tickTimer=requestAnimationFrame(tick);
+}
+
+function startGame(){
+  Sound.resume();
+  hide(startOverlay);
+  hide(pauseOverlay);
+  hide(overOverlay);
+  clearTargets();
+  updateHud();
+  // brief ready/countdown for fairness
+  state.running=false;
+  runCountdown(beginRound);
+}
+
+/* ===================== Pause ===================== */
+function pauseGame(){
+  if(!state.running||state.paused) return;
+  state.paused=true;
+  clearTimeout(spawnTimer);
+  // freeze remaining time on active targets by pausing their CSS rings + timeouts
+  var now=performance.now();
+  targets.forEach(function(t){
+    var elapsed=now-t.born;
+    t._remain=Math.max(0, DIFF[state.diff].life-elapsed);
+    clearTimeout(t.timeout);
+    t.node.querySelector(".ring").style.animationPlayState="paused";
+  });
+  show(pauseOverlay);
+  Sound.click();
+}
+function resumeGame(){
+  if(!state.running||!state.paused) return;
+  state.paused=false;
+  hide(pauseOverlay);
+  var now=performance.now();
+  targets.forEach(function(t){
+    // shift born so remaining time is preserved
+    t.born=now-(DIFF[state.diff].life-(t._remain||DIFF[state.diff].life));
+    t.timeout=setTimeout((function(obj){ return function(){ expireTarget(obj); }; })(t), t._remain||DIFF[state.diff].life);
+    t.node.querySelector(".ring").style.animationPlayState="running";
+  });
+  lastTick=0;
+  scheduleSpawn();
+  tickTimer=requestAnimationFrame(tick);
+  Sound.click();
+}
+
+/* ===================== End game ===================== */
+function stopAll(){
+  state.running=false;
+  state.paused=false;
+  clearTimeout(spawnTimer);
+  if(tickTimer) cancelAnimationFrame(tickTimer);
+  clearTargets();
+}
+
+function confettiBurst(){
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var ems=["🎉","⭐","🌟","✨","🎊","💫","🟢","🟣"];
+  for(var i=0;i<26;i++){
+    (function(i){
+      var c=document.createElement("div");
+      c.className="confetti";
+      c.textContent=ems[Math.floor(Math.random()*ems.length)];
+      c.style.left=Math.random()*100+"%";
+      c.style.animationDuration=(1.6+Math.random()*1.4)+"s";
+      c.style.animationDelay=(Math.random()*0.3)+"s";
+      c.style.fontSize=(16+Math.random()*16)+"px";
+      playArea.appendChild(c);
+      setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },3400);
+    })(i);
+  }
+}
+
+function endGame(){
+  stopAll();
+  var avg= state.hits>0 ? Math.round(state.reactionSum/state.hits) : null;
+
+  var isNewBest=false;
+  if(state.hits>state.bestHits){
+    state.bestHits=state.hits;
+    state.bestAvg=avg;
+    if(state.hits>0) isNewBest=true;
+  }
+
+  el("resHits").textContent=state.hits;
+  el("resAvg").textContent= avg!=null ? avg : "—";
+  el("resScore").textContent=state.score;
+
+  var bestLine=el("bestLine");
+  var bestTxt="🏆 Best run: "+state.bestHits+" hit"+(state.bestHits===1?"":"s");
+  if(state.bestAvg!=null) bestTxt+=" · "+state.bestAvg+"ms avg";
+  bestLine.textContent=bestTxt;
+
+  var title=el("overTitle"), emoji=el("overEmoji"), msg=el("overMsg");
+  bestLine.classList.remove("newbest");
+  if(isNewBest){
+    title.textContent="New Best! 🏆";
+    emoji.textContent="🥳";
+    msg.textContent="Your fastest run yet — amazing!";
+    bestLine.classList.add("newbest");
+    Sound.win();
+    confettiBurst();
+  } else if(state.hits===0){
+    title.textContent="Good try! 🌱";
+    emoji.textContent="🙂";
+    msg.textContent="Tap the smileys quick. You've got this!";
+    Sound.tone(523,0.16,"triangle",0.18);
+  } else {
+    title.textContent="Great run! 🌟";
+    emoji.textContent="🎉";
+    var lines=["Awesome reflexes!","Super speedy! ⚡","Nice tapping! 👏","You're getting faster!"];
+    msg.textContent=lines[Math.floor(Math.random()*lines.length)];
+    Sound.win();
+    confettiBurst();
+  }
+  show(overOverlay);
+}
+
+/* ===================== Buttons ===================== */
+el("playBtn").addEventListener("click", function(){ Sound.resume(); startGame(); });
+el("againBtn").addEventListener("click", function(){ Sound.click(); startGame(); });
+el("changeBtn").addEventListener("click", function(){ Sound.click(); stopAll(); hide(overOverlay); show(startOverlay); });
+el("resumeBtn").addEventListener("click", resumeGame);
+el("pauseRestartBtn").addEventListener("click", function(){ Sound.click(); hide(pauseOverlay); startGame(); });
+
+el("pauseBtn").addEventListener("click", function(){
+  if(!state.running) return;
+  if(state.paused) resumeGame(); else pauseGame();
+});
+el("restartBtn").addEventListener("click", function(){
+  Sound.click();
+  startGame();
+});
+
+var muteBtn=el("muteBtn");
+muteBtn.addEventListener("click", function(){
+  var m=Sound.toggleMute();
+  muteBtn.textContent= m ? "🔇" : "🔊";
+  muteBtn.setAttribute("aria-label", m ? "Unmute sound" : "Mute sound");
+  if(!m) Sound.click();
+});
+
+/* keyboard: Esc / P toggles pause; Space on play */
+document.addEventListener("keydown", function(e){
+  if((e.key==="p"||e.key==="P"||e.key==="Escape") && state.running){
+    if(state.paused) resumeGame(); else pauseGame();
+  }
+});
+
+/* prevent page scroll/zoom from gestures inside play area */
+playArea.addEventListener("touchmove", function(e){ if(state.running && !state.paused) e.preventDefault(); }, {passive:false});
+
+/* keep targets inside on resize: nothing persistent needed; new spawns use fresh rect.
+   But clamp any active targets so they don't sit off-screen. */
+window.addEventListener("resize", function(){
+  var rect=playArea.getBoundingClientRect();
+  targets.forEach(function(t){
+    var x=parseFloat(t.node.style.left), y=parseFloat(t.node.style.top);
+    var nx=Math.min(x, Math.max(8, rect.width-t.size-8));
+    var ny=Math.min(y, Math.max(8, rect.height-t.size-8));
+    t.node.style.left=Math.round(nx)+"px";
+    t.node.style.top=Math.round(ny)+"px";
+  });
+});
+
+/* init */
+selectDiff("medium");
+updateHud();
+</script>
+</body>
+</html>

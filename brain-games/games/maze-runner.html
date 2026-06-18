@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Maze Runner 🐭🧀</title>
+<style>
+  :root{
+    --bg-grad: linear-gradient(160deg,#2b1e66 0%, #3b2fb0 45%, #1f6feb 100%);
+    --paper:#ffffff; --ink:#13183a; --ink-soft:#5b6488;
+    --c-blue:#3a86ff; --c-orange:#fb8500; --c-green:#06d6a0; --c-pink:#ff5d8f; --c-yellow:#ffd166; --c-purple:#9b5de5;
+    --ok:#06d6a0; --warn:#ff6b6b; --radius:20px;
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:var(--font); color:var(--ink);
+    background:var(--bg-grad) fixed; background-attachment:fixed;
+    min-height:100%; overflow-x:hidden;
+    display:flex; flex-direction:column; align-items:center;
+    -webkit-user-select:none; user-select:none; touch-action:manipulation;
+  }
+  h1,h2,h3{font-weight:800; margin:0;}
+
+  /* ---------- App shell ---------- */
+  #app{
+    width:100%; max-width:760px; margin:0 auto; padding:10px;
+    display:flex; flex-direction:column; gap:10px; flex:1;
+  }
+
+  /* ---------- Top bar ---------- */
+  #topbar{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    background:rgba(255,255,255,.14); border-radius:var(--radius);
+    padding:8px 10px; backdrop-filter:blur(4px);
+  }
+  .iconbtn{
+    border:none; cursor:pointer; font-family:var(--font);
+    background:var(--paper); color:var(--ink); font-weight:800;
+    min-width:48px; min-height:48px; border-radius:999px; font-size:20px;
+    box-shadow:0 4px 0 rgba(0,0,0,.18); transition:transform .07s ease;
+    display:inline-flex; align-items:center; justify-content:center; padding:0 12px;
+  }
+  .iconbtn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.18);}
+  .iconbtn:focus-visible{outline:4px solid var(--c-yellow); outline-offset:2px;}
+  .stat{
+    background:rgba(255,255,255,.92); color:var(--ink); border-radius:14px;
+    padding:6px 12px; font-weight:800; font-size:16px; min-height:44px;
+    display:flex; align-items:center; gap:6px; line-height:1;
+  }
+  .stat small{display:block; font-size:11px; color:var(--ink-soft); font-weight:700;}
+  .stat .big{font-size:18px;}
+  #spacer{flex:1;}
+  #topbar a.hub{
+    text-decoration:none;
+  }
+
+  /* ---------- Play area / canvas ---------- */
+  #stage{
+    position:relative; width:100%;
+    background:rgba(255,255,255,.10); border-radius:var(--radius);
+    padding:10px; display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  #mazeWrap{
+    position:relative; width:100%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  canvas#maze{
+    width:min(92vw, 520px); height:min(92vw, 520px);
+    max-width:520px; max-height:70vh;
+    background:#0e1330; border-radius:16px; display:block;
+    touch-action:none; box-shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+
+  /* ---------- D-pad ---------- */
+  #dpad{
+    display:grid; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(3,64px);
+    gap:8px; margin:2px auto;
+  }
+  #dpad .pad{
+    border:none; cursor:pointer; font-size:28px; border-radius:18px;
+    background:var(--paper); color:var(--ink); font-weight:800;
+    box-shadow:0 5px 0 rgba(0,0,0,.2); transition:transform .06s ease;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #dpad .pad:active{transform:translateY(4px); box-shadow:0 1px 0 rgba(0,0,0,.2);}
+  #dpad .pad:focus-visible{outline:4px solid var(--c-yellow); outline-offset:2px;}
+  #dpad .empty{visibility:hidden;}
+  .padUp{grid-column:2; grid-row:1;}
+  .padLeft{grid-column:1; grid-row:2;}
+  .padDown{grid-column:2; grid-row:3;}
+  .padRight{grid-column:3; grid-row:2;}
+
+  .hint{color:#eef1ff; font-size:13px; text-align:center; opacity:.92; line-height:1.3;}
+
+  /* ---------- Overlays ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:30;
+    background:rgba(12,12,40,.62); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .overlay[hidden]{display:none;}
+  .panel{
+    background:var(--paper); color:var(--ink); border-radius:var(--radius);
+    width:100%; max-width:440px; padding:22px 20px; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.45);
+    max-height:94vh; overflow:auto;
+  }
+  .panel .emoji{font-size:54px; line-height:1;}
+  .panel h1{font-size:30px; margin:6px 0 2px;}
+  .panel h2{font-size:24px; margin:2px 0 8px;}
+  .howto{font-size:16px; color:var(--ink-soft); font-weight:700; margin:6px 0 14px;}
+  .badges{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:10px 0 16px;}
+  .badge{
+    border-radius:999px; padding:8px 14px; font-weight:800; font-size:13px;
+    display:inline-flex; align-items:center; gap:6px; color:#fff;
+  }
+  .badge.age{background:var(--c-purple);}
+  .badge.skill{background:var(--c-blue);}
+
+  .difflabel{font-weight:800; color:var(--ink-soft); margin:6px 0 8px; font-size:14px;}
+  .diffrow{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:16px;}
+  .diffbtn{
+    flex:1 1 110px; min-width:104px; min-height:60px; cursor:pointer; border:3px solid transparent;
+    border-radius:18px; font-family:var(--font); font-weight:800; font-size:16px;
+    background:#f0f2ff; color:var(--ink); box-shadow:0 4px 0 rgba(0,0,0,.12);
+    transition:transform .07s ease; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px;
+  }
+  .diffbtn small{font-weight:700; color:var(--ink-soft); font-size:11px;}
+  .diffbtn[aria-pressed="true"]{border-color:var(--c-purple); background:#efe7ff; transform:translateY(2px);}
+  .diffbtn:active{transform:translateY(3px);}
+  .diffbtn:focus-visible{outline:4px solid var(--c-yellow); outline-offset:2px;}
+
+  .bigbtn{
+    border:none; cursor:pointer; font-family:var(--font); font-weight:800;
+    border-radius:999px; padding:16px 26px; font-size:20px; color:#fff;
+    background:linear-gradient(180deg,#06d6a0,#04b487);
+    box-shadow:0 6px 0 #038a67; transition:transform .07s ease;
+    width:100%; margin-top:4px;
+  }
+  .bigbtn:active{transform:translateY(4px); box-shadow:0 2px 0 #038a67;}
+  .bigbtn:focus-visible{outline:4px solid var(--c-yellow); outline-offset:3px;}
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;}
+  .btnrow .midbtn{flex:1 1 120px;}
+  .midbtn{
+    border:none; cursor:pointer; font-family:var(--font); font-weight:800;
+    border-radius:999px; padding:14px 16px; font-size:16px; color:#fff;
+    background:var(--c-blue); box-shadow:0 5px 0 rgba(0,0,0,.22);
+    transition:transform .07s ease; min-height:50px;
+  }
+  .midbtn.alt{background:var(--c-orange); box-shadow:0 5px 0 #b85f00;}
+  .midbtn.ghost{background:#6b73a6;}
+  .midbtn:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.22);}
+  .midbtn:focus-visible{outline:4px solid var(--c-yellow); outline-offset:2px;}
+
+  .scoreline{font-size:18px; font-weight:800; margin:6px 0;}
+  .scoreline .num{font-size:26px; color:var(--c-purple);}
+  .bestline{font-size:16px; font-weight:800; color:var(--c-orange); margin-bottom:6px;}
+
+  /* ---------- Confetti ---------- */
+  #confetti{position:fixed; inset:0; pointer-events:none; z-index:40;}
+  #confetti[hidden]{display:none;}
+
+  @media (max-width:430px){
+    .panel h1{font-size:26px;}
+    #dpad{grid-template-columns:repeat(3,58px); grid-template-rows:repeat(3,58px);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .iconbtn,.bigbtn,.midbtn,.diffbtn,#dpad .pad{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Top bar -->
+  <div id="topbar">
+    <a class="iconbtn hub" href="../index.html" title="Back to Hub" aria-label="Back to Hub">←🏠</a>
+    <div class="stat"><span>⏱️</span><span><small>Time</small><span class="big" id="uiTime">0</span></span></div>
+    <div class="stat"><span>⭐</span><span><small>Stars</small><span class="big" id="uiStars">0/0</span></span></div>
+    <div class="stat"><span>🎚️</span><span><small>Level</small><span class="big" id="uiLevel">—</span></span></div>
+    <div id="spacer"></div>
+    <button class="iconbtn" id="btnPause" title="Pause" aria-label="Pause">⏸</button>
+    <button class="iconbtn" id="btnRestart" title="Restart level" aria-label="Restart level">↻</button>
+    <button class="iconbtn" id="btnMute" title="Mute sound" aria-label="Mute sound">🔊</button>
+  </div>
+
+  <!-- Stage -->
+  <div id="stage">
+    <div id="mazeWrap">
+      <canvas id="maze" width="520" height="520" aria-label="Maze. Guide the mouse to the cheese."></canvas>
+    </div>
+    <div class="hint">Swipe the maze, use Arrow/WASD keys, or tap the buttons 👇</div>
+    <div id="dpad" role="group" aria-label="Direction pad">
+      <button class="pad padUp" data-dir="up" aria-label="Move up">⬆️</button>
+      <button class="pad padLeft" data-dir="left" aria-label="Move left">⬅️</button>
+      <button class="pad padDown" data-dir="down" aria-label="Move down">⬇️</button>
+      <button class="pad padRight" data-dir="right" aria-label="Move right">➡️</button>
+    </div>
+  </div>
+</div>
+
+<!-- START overlay -->
+<div class="overlay" id="startOverlay">
+  <div class="panel">
+    <div class="emoji">🐭🧀</div>
+    <h1>Maze Runner</h1>
+    <p class="howto">🐭 Find the 🧀 — grab all ⭐ first!</p>
+    <div class="badges">
+      <span class="badge age">👧 Core (9-11)</span>
+      <span class="badge skill">🧠 Spatial reasoning + planning</span>
+    </div>
+    <div class="difflabel">Pick a level</div>
+    <div class="diffrow" id="diffRow">
+      <button class="diffbtn" data-diff="easy" aria-pressed="false">🟢 EASY<small>9×9 · 1⭐ · lots of time</small></button>
+      <button class="diffbtn" data-diff="medium" aria-pressed="true">🟡 MEDIUM<small>13×13 · 2⭐ · tighter</small></button>
+      <button class="diffbtn" data-diff="hard" aria-pressed="false">🔴 HARD<small>19×19 · 3⭐ · speedy!</small></button>
+    </div>
+    <button class="bigbtn" id="btnPlay">Play ▶</button>
+  </div>
+</div>
+
+<!-- PAUSE overlay -->
+<div class="overlay" id="pauseOverlay" hidden>
+  <div class="panel">
+    <div class="emoji">⏸️</div>
+    <h2>Paused</h2>
+    <p class="howto">Take a breath. Ready when you are! 🌿</p>
+    <button class="bigbtn" id="btnResume">Resume ▶</button>
+    <div class="btnrow">
+      <button class="midbtn alt" id="btnPauseRestart">Restart ↻</button>
+      <button class="midbtn ghost" id="btnPauseHub">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME OVER / WIN overlay -->
+<div class="overlay" id="endOverlay" hidden>
+  <div class="panel">
+    <div class="emoji" id="endEmoji">🌟</div>
+    <h2 id="endTitle">Great run!</h2>
+    <p class="howto" id="endMsg">You did it! 🎉</p>
+    <div class="scoreline">Score: <span class="num" id="endScore">0</span></div>
+    <div class="bestline">🏆 Best: <span id="endBest">0</span></div>
+    <button class="bigbtn" id="btnAgain">Play Again 🔄</button>
+    <div class="btnrow">
+      <button class="midbtn" id="btnChange">Change Level</button>
+      <button class="midbtn ghost" id="btnEndHub">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti" hidden></canvas>
+
+<script>
+"use strict";
+
+/* ===================== SOUND ===================== */
+const Sound=(()=>{let ctx,muted=false;function ac(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx;}
+function tone(freq,dur,type,vol){if(muted)return;dur=dur||0.12;type=type||"sine";vol=vol||0.2;var c=ac();var o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);var t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur+0.03);}
+return{resume:function(){try{ac().resume();}catch(e){}},tone:tone,click:function(){tone(420,0.06,"square",0.15);},good:function(){tone(660,0.1);setTimeout(function(){tone(880,0.12);},90);},bad:function(){tone(160,0.18,"sawtooth",0.15);},win:function(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.16,"triangle",0.18);},i*120);});},toggleMute:function(){muted=!muted;return muted;},isMuted:function(){return muted;}};})();
+
+/* ===================== CONFIG ===================== */
+var DIFF = {
+  easy:   { cells:9,  time:75, stars:1, label:"Easy 🟢",   step:0.18 },
+  medium: { cells:13, time:60, stars:2, label:"Medium 🟡", step:0.15 },
+  hard:   { cells:19, time:45, stars:3, label:"Hard 🔴",   step:0.12 }
+};
+
+/* ===================== STATE ===================== */
+var state = {
+  diff:"medium",
+  cfg:null,
+  grid:null,        // grid[y][x] = {walls:{N,E,S,W}}
+  n:0,              // cells per side
+  px:0, py:0,       // mouse cell position
+  goal:{x:0,y:0},
+  stars:[],         // {x,y,got}
+  starsTotal:0, starsGot:0,
+  timeLeft:0,
+  running:false, paused:false, ended:false,
+  best:0,
+  // smooth animation of mouse
+  drawX:0, drawY:0, // pixel-in-cells fractional position
+  moving:false, mFromX:0, mFromY:0, mToX:0, mToY:0, mT:0, mDur:0.13,
+  bob:0
+};
+
+/* ===================== DOM ===================== */
+var $ = function(id){return document.getElementById(id);};
+var canvas = $("maze"), ctx = canvas.getContext("2d");
+var startOverlay=$("startOverlay"), pauseOverlay=$("pauseOverlay"), endOverlay=$("endOverlay");
+var uiTime=$("uiTime"), uiStars=$("uiStars"), uiLevel=$("uiLevel");
+
+/* ===================== CANVAS SIZING ===================== */
+var DPR = Math.max(1, Math.min(3, window.devicePixelRatio||1));
+function fitCanvas(){
+  var rect = canvas.getBoundingClientRect();
+  var w = Math.max(120, Math.round(rect.width));
+  var h = Math.max(120, Math.round(rect.height));
+  canvas.width = Math.round(w*DPR);
+  canvas.height = Math.round(h*DPR);
+  draw();
+}
+window.addEventListener("resize", fitCanvas);
+window.addEventListener("orientationchange", function(){ setTimeout(fitCanvas, 200); });
+
+/* ===================== MAZE GENERATION (recursive backtracker / DFS) ===================== */
+function makeGrid(n){
+  var g = [];
+  for(var y=0;y<n;y++){
+    var row=[];
+    for(var x=0;x<n;x++){ row.push({walls:{N:true,E:true,S:true,W:true}, visited:false}); }
+    g.push(row);
+  }
+  return g;
+}
+function carve(g,n){
+  // iterative DFS to avoid stack limits on big mazes
+  var stack=[];
+  var sx=0, sy=0;
+  g[sy][sx].visited=true;
+  stack.push([sx,sy]);
+  var DX={N:0,E:1,S:0,W:-1}, DY={N:-1,E:0,S:1,W:0}, OPP={N:"S",E:"W",S:"N",W:"E"};
+  while(stack.length){
+    var cur=stack[stack.length-1];
+    var cx=cur[0], cy=cur[1];
+    var dirs=["N","E","S","W"];
+    // shuffle
+    for(var i=dirs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=dirs[i];dirs[i]=dirs[j];dirs[j]=t;}
+    var moved=false;
+    for(var d=0; d<dirs.length; d++){
+      var dir=dirs[d];
+      var nx=cx+DX[dir], ny=cy+DY[dir];
+      if(nx<0||ny<0||nx>=n||ny>=n) continue;
+      if(g[ny][nx].visited) continue;
+      // knock down walls between cur and neighbour
+      g[cy][cx].walls[dir]=false;
+      g[ny][nx].walls[OPP[dir]]=false;
+      g[ny][nx].visited=true;
+      stack.push([nx,ny]);
+      moved=true;
+      break;
+    }
+    if(!moved) stack.pop();
+  }
+  return g;
+}
+
+/* BFS to find distances from a cell (used to place far goal + spread stars) */
+function bfsDist(g,n,sx,sy){
+  var dist=[]; for(var y=0;y<n;y++){dist.push(new Array(n).fill(-1));}
+  var q=[[sx,sy]]; dist[sy][sx]=0; var head=0;
+  var DX={N:0,E:1,S:0,W:-1}, DY={N:-1,E:0,S:1,W:0};
+  while(head<q.length){
+    var c=q[head++]; var cx=c[0], cy=c[1];
+    var dirs=["N","E","S","W"];
+    for(var i=0;i<4;i++){
+      var dir=dirs[i];
+      if(g[cy][cx].walls[dir]) continue;
+      var nx=cx+DX[dir], ny=cy+DY[dir];
+      if(nx<0||ny<0||nx>=n||ny>=n) continue;
+      if(dist[ny][nx]!==-1) continue;
+      dist[ny][nx]=dist[cy][cx]+1;
+      q.push([nx,ny]);
+    }
+  }
+  return dist;
+}
+
+/* ===================== LEVEL SETUP ===================== */
+function newLevel(){
+  var cfg = state.cfg = DIFF[state.diff];
+  var n = state.n = cfg.cells;
+  var g = makeGrid(n);
+  carve(g,n);
+  state.grid = g;
+
+  // Start at top-left
+  state.px=0; state.py=0;
+  state.drawX=0; state.drawY=0;
+  state.moving=false; state.mT=0;
+
+  // Goal = farthest cell from start
+  var dist = bfsDist(g,n,0,0);
+  var best=-1, gx=n-1, gy=n-1;
+  for(var y=0;y<n;y++) for(var x=0;x<n;x++){
+    if(dist[y][x]>best){ best=dist[y][x]; gx=x; gy=y; }
+  }
+  state.goal={x:gx,y:gy};
+
+  // Place stars on cells reasonably far from start, not on start/goal, spread out
+  var candidates=[];
+  for(var y2=0;y2<n;y2++) for(var x2=0;x2<n;x2++){
+    if(x2===0&&y2===0) continue;
+    if(x2===gx&&y2===gy) continue;
+    if(dist[y2][x2] < Math.floor(best*0.25)) continue; // not too close to start
+    candidates.push({x:x2,y:y2,d:dist[y2][x2]});
+  }
+  // shuffle candidates
+  for(var i=candidates.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=candidates[i];candidates[i]=candidates[j];candidates[j]=t;}
+  var stars=[];
+  var minSep = Math.max(2, Math.floor(n/4));
+  for(var c=0;c<candidates.length && stars.length<cfg.stars;c++){
+    var cand=candidates[c];
+    var ok=true;
+    for(var s=0;s<stars.length;s++){
+      var dd=Math.abs(stars[s].x-cand.x)+Math.abs(stars[s].y-cand.y);
+      if(dd<minSep){ ok=false; break; }
+    }
+    if(ok) stars.push({x:cand.x,y:cand.y,got:false});
+  }
+  // fallback: if not enough separated, just fill from candidates
+  for(var c2=0;c2<candidates.length && stars.length<cfg.stars;c2++){
+    var cand2=candidates[c2];
+    var dup=false;
+    for(var s2=0;s2<stars.length;s2++){ if(stars[s2].x===cand2.x&&stars[s2].y===cand2.y){dup=true;break;} }
+    if(!dup) stars.push({x:cand2.x,y:cand2.y,got:false});
+  }
+  state.stars=stars;
+  state.starsTotal=stars.length;
+  state.starsGot=0;
+
+  state.timeLeft=cfg.time;
+  state.ended=false;
+
+  uiLevel.textContent = cfg.label;
+  updateHUD();
+  fitCanvas();
+}
+
+/* ===================== HUD ===================== */
+function updateHUD(){
+  uiTime.textContent = Math.ceil(Math.max(0,state.timeLeft));
+  uiStars.textContent = state.starsGot + "/" + state.starsTotal;
+}
+
+/* ===================== MOVEMENT ===================== */
+function canMove(dir){
+  var x=state.px, y=state.py, g=state.grid;
+  var w=g[y][x].walls;
+  if(dir==="up") return !w.N;
+  if(dir==="down") return !w.S;
+  if(dir==="left") return !w.W;
+  if(dir==="right") return !w.E;
+  return false;
+}
+function tryMove(dir){
+  if(!state.running || state.paused || state.ended) return;
+  if(state.moving) return; // wait for current tween to finish (keeps it snappy & smooth)
+  if(!canMove(dir)){ Sound.tone(220,0.05,"square",0.07); return; }
+  var nx=state.px, ny=state.py;
+  if(dir==="up") ny--; else if(dir==="down") ny++; else if(dir==="left") nx--; else if(dir==="right") nx++;
+  // start tween
+  state.mFromX=state.px; state.mFromY=state.py;
+  state.mToX=nx; state.mToY=ny;
+  state.mT=0; state.mDur=state.cfg.step; state.moving=true;
+  state.px=nx; state.py=ny;
+  Sound.tone(520,0.04,"sine",0.06);
+}
+function onArrive(){
+  // collect star?
+  for(var i=0;i<state.stars.length;i++){
+    var s=state.stars[i];
+    if(!s.got && s.x===state.px && s.y===state.py){
+      s.got=true; state.starsGot++;
+      Sound.good(); flash("star"); updateHUD();
+    }
+  }
+  // reach goal?
+  if(state.px===state.goal.x && state.py===state.goal.y){
+    if(state.starsGot>=state.starsTotal){
+      winGame();
+    } else {
+      // remind: need stars
+      Sound.tone(300,0.12,"triangle",0.12);
+      flash("needstar");
+    }
+  }
+}
+
+/* small visual flash overlay on canvas */
+var flashTimer=0, flashKind="";
+function flash(kind){ flashKind=kind; flashTimer=0.45; }
+
+/* ===================== GAME LIFECYCLE ===================== */
+function startGame(diff){
+  state.diff = diff || state.diff;
+  hide(startOverlay); hide(pauseOverlay); hide(endOverlay);
+  newLevel();
+  state.running=true; state.paused=false; state.ended=false;
+  lastT = performance.now();
+  if(!rafOn){ rafOn=true; requestAnimationFrame(loop); }
+}
+function pauseGame(){
+  if(!state.running || state.ended) return;
+  state.paused=true; show(pauseOverlay); Sound.click();
+}
+function resumeGame(){
+  if(state.ended) return;
+  state.paused=false; hide(pauseOverlay); lastT=performance.now(); Sound.click();
+}
+function restartLevel(){
+  hide(pauseOverlay); hide(endOverlay);
+  newLevel();
+  state.running=true; state.paused=false; state.ended=false;
+  lastT=performance.now(); Sound.click();
+  if(!rafOn){ rafOn=true; requestAnimationFrame(loop); }
+}
+function backToStart(){
+  state.running=false; state.paused=false; state.ended=true;
+  hide(pauseOverlay); hide(endOverlay); show(startOverlay); Sound.click();
+}
+
+function winGame(){
+  state.ended=true; state.running=false;
+  var timeBonus = Math.round(state.timeLeft*10);
+  var starBonus = state.starsTotal * 120;
+  var levelBonus = state.n * 5;
+  var score = timeBonus + starBonus + levelBonus;
+  finishEnd(true, score);
+  Sound.win();
+  burstConfetti();
+}
+function loseGame(){
+  state.ended=true; state.running=false;
+  // friendly partial score: stars they got still count
+  var score = state.starsGot * 60;
+  finishEnd(false, score);
+  Sound.bad();
+}
+function finishEnd(won, score){
+  if(score>state.best) state.best=score;
+  $("endScore").textContent = score;
+  $("endBest").textContent = state.best;
+  if(won){
+    $("endEmoji").textContent = "🏆🧀";
+    $("endTitle").textContent = "You found the cheese!";
+    $("endMsg").textContent = "Brilliant planning! 🌟🎉";
+  } else {
+    $("endEmoji").textContent = "🐭⏰";
+    $("endTitle").textContent = "Great try!";
+    $("endMsg").textContent = "Time's up — you're getting faster! 💪 Try again!";
+  }
+  show(endOverlay);
+}
+
+/* ===================== GAME LOOP ===================== */
+var rafOn=false, lastT=0;
+function loop(now){
+  var dt = Math.min(0.05, (now-lastT)/1000); lastT=now;
+  if(state.running && !state.paused && !state.ended){
+    // timer
+    state.timeLeft -= dt;
+    if(state.timeLeft<=0){ state.timeLeft=0; updateHUD(); loseGame(); }
+    else updateHUD();
+
+    // movement tween
+    if(state.moving){
+      state.mT += dt;
+      var t = Math.min(1, state.mT/state.mDur);
+      var e = t<0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in/out
+      state.drawX = state.mFromX + (state.mToX-state.mFromX)*e;
+      state.drawY = state.mFromY + (state.mToY-state.mFromY)*e;
+      if(t>=1){ state.moving=false; state.drawX=state.px; state.drawY=state.py; onArrive(); }
+    } else {
+      state.drawX=state.px; state.drawY=state.py;
+    }
+    state.bob += dt*6;
+    if(flashTimer>0) flashTimer -= dt;
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ===================== DRAWING ===================== */
+function draw(){
+  var W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  // background
+  ctx.fillStyle="#0e1330";
+  roundRectFill(0,0,W,H, 16*DPR);
+
+  if(!state.grid){ return; }
+
+  var n=state.n;
+  var pad = 8*DPR;
+  var size = Math.min(W,H) - pad*2;
+  var cell = size/n;
+  var ox = (W-size)/2, oy=(H-size)/2;
+
+  // path cells background (subtle)
+  ctx.fillStyle="#171f47";
+  ctx.fillRect(ox,oy,size,size);
+
+  // highlight current cell
+  var cx = ox + state.px*cell, cy = oy + state.py*cell;
+  ctx.fillStyle="rgba(155,93,229,0.30)";
+  ctx.fillRect(cx,cy,cell,cell);
+
+  // goal cell glow background
+  var gx=ox+state.goal.x*cell, gy=oy+state.goal.y*cell;
+  ctx.fillStyle="rgba(255,209,102,0.20)";
+  ctx.fillRect(gx,gy,cell,cell);
+
+  // walls
+  ctx.strokeStyle="#e9ecff";
+  ctx.lineWidth=Math.max(2, cell*0.14);
+  ctx.lineCap="round";
+  ctx.beginPath();
+  for(var y=0;y<n;y++){
+    for(var x=0;x<n;x++){
+      var w=state.grid[y][x].walls;
+      var lx=ox+x*cell, ly=oy+y*cell;
+      if(w.N){ ctx.moveTo(lx,ly); ctx.lineTo(lx+cell,ly); }
+      if(w.W){ ctx.moveTo(lx,ly); ctx.lineTo(lx,ly+cell); }
+      if(w.E){ ctx.moveTo(lx+cell,ly); ctx.lineTo(lx+cell,ly+cell); }
+      if(w.S){ ctx.moveTo(lx,ly+cell); ctx.lineTo(lx+cell,ly+cell); }
+    }
+  }
+  ctx.stroke();
+
+  // stars
+  for(var i=0;i<state.stars.length;i++){
+    var s=state.stars[i];
+    if(s.got) continue;
+    var sxp=ox+s.x*cell+cell/2, syp=oy+s.y*cell+cell/2;
+    drawEmoji("⭐", sxp, syp, cell*0.62);
+  }
+
+  // goal (cheese) — pair color with emoji + "GOAL" marker so it's colorblind safe
+  var gxp=ox+state.goal.x*cell+cell/2, gyp=oy+state.goal.y*cell+cell/2;
+  drawEmoji("🧀", gxp, gyp, cell*0.7);
+
+  // mouse player with bob
+  var bob = Math.sin(state.bob)* (cell*0.04);
+  var mxp = ox + state.drawX*cell + cell/2;
+  var myp = oy + state.drawY*cell + cell/2 + bob;
+  drawEmoji("🐭", mxp, myp, cell*0.74);
+
+  // flash overlay text feedback
+  if(flashTimer>0){
+    var alpha = Math.max(0, flashTimer/0.45);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if(flashKind==="star"){
+      ctx.fillStyle="#ffd166";
+      ctx.font="800 "+(size*0.13)+"px "+CSSFONT;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("+⭐", W/2, oy-2*DPR < 0 ? H*0.12 : oy+size*0.5);
+    } else if(flashKind==="needstar"){
+      ctx.fillStyle="#ff5d8f";
+      ctx.font="800 "+(size*0.085)+"px "+CSSFONT;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("Grab the ⭐ first!", W/2, oy+size*0.5);
+    }
+    ctx.restore();
+  }
+}
+
+var CSSFONT = 'system-ui,-apple-system,"Segoe UI Emoji",sans-serif';
+function drawEmoji(ch, x, y, sz){
+  ctx.font = sz+"px "+CSSFONT;
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(ch, x, y);
+}
+function roundRectFill(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/* ===================== CONFETTI ===================== */
+var confCanvas=$("confetti"), confCtx=confCanvas.getContext("2d");
+var confParts=[], confRAF=null;
+var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function burstConfetti(){
+  if(reduceMotion){ return; }
+  confCanvas.hidden=false;
+  confCanvas.width = window.innerWidth*DPR;
+  confCanvas.height = window.innerHeight*DPR;
+  var emojis=["🎉","⭐","🧀","🌟","✨","🎊","🟣","🟡"];
+  confParts=[];
+  for(var i=0;i<90;i++){
+    confParts.push({
+      x:Math.random()*confCanvas.width,
+      y:-Math.random()*confCanvas.height*0.3,
+      vx:(Math.random()-0.5)*4*DPR,
+      vy:(2+Math.random()*4)*DPR,
+      ch:emojis[Math.floor(Math.random()*emojis.length)],
+      sz:(16+Math.random()*22)*DPR,
+      rot:Math.random()*6.28, vr:(Math.random()-0.5)*0.2,
+      life:1.2+Math.random()*1.0
+    });
+  }
+  if(confRAF) cancelAnimationFrame(confRAF);
+  var last=performance.now();
+  function step(now){
+    var dt=Math.min(0.05,(now-last)/1000); last=now;
+    confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+    var alive=false;
+    for(var i=0;i<confParts.length;i++){
+      var p=confParts[i];
+      p.life-=dt; if(p.life<=0) continue;
+      alive=true;
+      p.vy+=8*DPR*dt; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+      confCtx.save();
+      confCtx.globalAlpha=Math.max(0,Math.min(1,p.life));
+      confCtx.translate(p.x,p.y); confCtx.rotate(p.rot);
+      confCtx.font=p.sz+"px "+CSSFONT; confCtx.textAlign="center"; confCtx.textBaseline="middle";
+      confCtx.fillText(p.ch,0,0);
+      confCtx.restore();
+    }
+    if(alive){ confRAF=requestAnimationFrame(step); }
+    else { confCanvas.hidden=true; confCtx.clearRect(0,0,confCanvas.width,confCanvas.height); }
+  }
+  confRAF=requestAnimationFrame(step);
+}
+
+/* ===================== OVERLAY HELPERS ===================== */
+function show(el){ el.hidden=false; }
+function hide(el){ el.hidden=true; }
+
+/* ===================== INPUT: keyboard ===================== */
+window.addEventListener("keydown", function(e){
+  var k=e.key.toLowerCase();
+  if(k==="arrowup"||k==="w"){ tryMove("up"); e.preventDefault(); }
+  else if(k==="arrowdown"||k==="s"){ tryMove("down"); e.preventDefault(); }
+  else if(k==="arrowleft"||k==="a"){ tryMove("left"); e.preventDefault(); }
+  else if(k==="arrowright"||k==="d"){ tryMove("right"); e.preventDefault(); }
+  else if(k==="p"){ if(state.paused) resumeGame(); else pauseGame(); }
+  else if(k==="escape"){ if(state.running && !state.paused && !state.ended) pauseGame(); }
+});
+
+/* ===================== INPUT: D-pad ===================== */
+var pads=document.querySelectorAll("#dpad .pad");
+pads.forEach(function(btn){
+  var dir=btn.getAttribute("data-dir");
+  function go(e){ e.preventDefault(); tryMove(dir); }
+  btn.addEventListener("pointerdown", go);
+});
+
+/* ===================== INPUT: swipe on canvas ===================== */
+var sw={active:false, x:0, y:0};
+canvas.addEventListener("pointerdown", function(e){
+  sw.active=true; sw.x=e.clientX; sw.y=e.clientY; e.preventDefault();
+});
+canvas.addEventListener("pointermove", function(e){
+  if(!sw.active) return;
+  var dx=e.clientX-sw.x, dy=e.clientY-sw.y;
+  var thresh=24;
+  if(Math.abs(dx)<thresh && Math.abs(dy)<thresh) return;
+  if(Math.abs(dx)>Math.abs(dy)){ tryMove(dx>0?"right":"left"); }
+  else { tryMove(dy>0?"down":"up"); }
+  // reset anchor so a continuous drag steps cell-by-cell
+  sw.x=e.clientX; sw.y=e.clientY;
+  e.preventDefault();
+});
+function endSwipe(e){ sw.active=false; }
+canvas.addEventListener("pointerup", endSwipe);
+canvas.addEventListener("pointercancel", endSwipe);
+canvas.addEventListener("pointerleave", endSwipe);
+
+/* ===================== BUTTONS ===================== */
+// difficulty selection
+var diffBtns=document.querySelectorAll("#diffRow .diffbtn");
+diffBtns.forEach(function(b){
+  b.addEventListener("click", function(){
+    state.diff=b.getAttribute("data-diff");
+    diffBtns.forEach(function(x){ x.setAttribute("aria-pressed", x===b ? "true":"false"); });
+    Sound.click();
+  });
+});
+
+$("btnPlay").addEventListener("click", function(){
+  Sound.resume(); Sound.click();
+  startGame(state.diff);
+});
+$("btnPause").addEventListener("click", function(){ pauseGame(); });
+$("btnRestart").addEventListener("click", function(){ restartLevel(); });
+$("btnMute").addEventListener("click", function(){
+  var m=Sound.toggleMute();
+  $("btnMute").textContent = m ? "🔇" : "🔊";
+  $("btnMute").setAttribute("aria-label", m ? "Unmute sound" : "Mute sound");
+});
+
+$("btnResume").addEventListener("click", resumeGame);
+$("btnPauseRestart").addEventListener("click", restartLevel);
+$("btnPauseHub").addEventListener("click", function(){ window.location.href="../index.html"; });
+
+$("btnAgain").addEventListener("click", function(){ Sound.click(); restartLevel(); });
+$("btnChange").addEventListener("click", function(){ backToStart(); });
+$("btnEndHub").addEventListener("click", function(){ window.location.href="../index.html"; });
+
+/* ===================== INIT ===================== */
+uiLevel.textContent="—";
+fitCanvas();
+draw();
+</script>
+</body>
+</html>

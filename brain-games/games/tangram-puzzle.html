@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Block Puzzle 🧩</title>
+<style>
+  :root{
+    --bg-grad: linear-gradient(160deg,#2b1e66 0%, #3b2fb0 45%, #1f6feb 100%);
+    --paper:#ffffff; --ink:#13183a; --ink-soft:#5b6488;
+    --c-blue:#3a86ff; --c-orange:#fb8500; --c-green:#06d6a0; --c-pink:#ff5d8f; --c-yellow:#ffd166; --c-purple:#9b5de5;
+    --ok:#06d6a0; --warn:#ff6b6b; --radius:20px;
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:var(--font);
+    background:var(--bg-grad) fixed;
+    color:var(--ink);
+    min-height:100%;
+    overflow-x:hidden;
+    touch-action:manipulation;
+  }
+  h1,h2,h3{font-weight:800;margin:0;}
+  button{font-family:var(--font);cursor:pointer;border:none;}
+  button:focus-visible, a:focus-visible{outline:4px solid var(--c-yellow);outline-offset:3px;}
+
+  /* ---------- App shell ---------- */
+  #app{
+    max-width:760px;margin:0 auto;padding:8px;
+    min-height:100vh;display:flex;flex-direction:column;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 4px;flex-wrap:wrap;
+  }
+  .hub-link{
+    background:var(--paper);color:var(--ink);text-decoration:none;
+    font-weight:800;padding:10px 14px;border-radius:999px;font-size:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);display:inline-flex;align-items:center;gap:6px;
+    min-height:48px;
+  }
+  .stat-pills{display:flex;gap:6px;flex:1;justify-content:center;flex-wrap:wrap;}
+  .pill{
+    background:rgba(255,255,255,.92);color:var(--ink);
+    font-weight:800;padding:8px 12px;border-radius:999px;font-size:15px;
+    box-shadow:0 3px 8px rgba(0,0,0,.2);white-space:nowrap;min-height:40px;display:flex;align-items:center;gap:5px;
+  }
+  .topbtns{display:flex;gap:6px;}
+  .iconbtn{
+    background:var(--paper);color:var(--ink);
+    width:48px;height:48px;border-radius:999px;font-size:22px;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;
+    transition:transform .08s;
+  }
+  .iconbtn:active{transform:scale(.9);}
+
+  /* ---------- Play area ---------- */
+  .playwrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 0 16px;}
+
+  .board-card{
+    background:var(--paper);border-radius:var(--radius);
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+    padding:12px;width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .section-label{font-weight:800;color:var(--ink-soft);font-size:14px;align-self:flex-start;margin-left:4px;display:flex;align-items:center;gap:6px;}
+
+  #stage{position:relative;width:100%;display:flex;justify-content:center;}
+  canvas{display:block;touch-action:none;border-radius:14px;max-width:100%;}
+
+  .action-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%;}
+  .act{
+    background:var(--c-blue);color:#fff;font-weight:800;font-size:16px;
+    padding:12px 18px;border-radius:999px;box-shadow:0 5px 0 rgba(0,0,0,.18);
+    min-height:48px;transition:transform .07s, box-shadow .07s;flex:1;min-width:120px;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .act:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18);}
+  .act.rotate{background:var(--c-purple);}
+  .act.flip{background:var(--c-orange);}
+  .act.hint{background:var(--c-green);}
+  .act.reset{background:var(--c-pink);}
+  .act:disabled{opacity:.45;cursor:not-allowed;}
+
+  .tip{color:#fff;text-align:center;font-weight:700;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.4);max-width:520px;padding:0 8px;}
+
+  /* ---------- Overlays ---------- */
+  .overlay{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(20,16,52,.72);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;padding:16px;
+  }
+  .overlay.hidden{display:none;}
+  .panel{
+    background:var(--paper);color:var(--ink);border-radius:var(--radius);
+    box-shadow:0 18px 50px rgba(0,0,0,.4);
+    padding:22px 20px;max-width:440px;width:100%;text-align:center;
+    max-height:94vh;overflow-y:auto;
+  }
+  .big-emoji{font-size:60px;line-height:1;}
+  .panel h1{font-size:30px;margin:6px 0 2px;}
+  .panel h2{font-size:26px;margin:4px 0;}
+  .howto{font-size:16px;color:var(--ink-soft);font-weight:700;margin:8px 0 14px;}
+
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0 16px;}
+  .badge{
+    border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;
+    display:inline-flex;align-items:center;gap:6px;color:#fff;
+  }
+  .badge.age{background:var(--c-purple);}
+  .badge.skill{background:var(--c-green);color:#08323f;}
+
+  .diff-row{display:flex;gap:10px;justify-content:center;margin:6px 0 16px;flex-wrap:wrap;}
+  .diff{
+    background:#eef1ff;color:var(--ink);font-weight:800;font-size:16px;
+    padding:14px 10px;border-radius:16px;border:4px solid transparent;
+    min-width:96px;flex:1;min-height:64px;display:flex;flex-direction:column;align-items:center;gap:2px;
+    transition:transform .08s;
+  }
+  .diff small{font-weight:700;color:var(--ink-soft);font-size:12px;}
+  .diff:active{transform:scale(.95);}
+  .diff.sel{border-color:var(--c-blue);background:#dde6ff;}
+  .diff.easy.sel{border-color:var(--c-green);}
+  .diff.med.sel{border-color:var(--c-yellow);}
+  .diff.hard.sel{border-color:var(--warn);}
+
+  .play-btn{
+    background:linear-gradient(135deg,var(--c-green),#04b487);color:#053b30;
+    font-size:24px;font-weight:800;padding:16px 26px;border-radius:999px;width:100%;
+    box-shadow:0 7px 0 rgba(0,0,0,.18);min-height:60px;transition:transform .08s, box-shadow .08s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .play-btn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.18);}
+
+  .ovbtns{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .ovbtn{
+    font-size:18px;font-weight:800;padding:14px;border-radius:999px;width:100%;
+    box-shadow:0 5px 0 rgba(0,0,0,.16);min-height:54px;transition:transform .07s, box-shadow .07s;
+    display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;
+  }
+  .ovbtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.16);}
+  .ovbtn.primary{background:linear-gradient(135deg,var(--c-green),#04b487);color:#053b30;}
+  .ovbtn.blue{background:var(--c-blue);}
+  .ovbtn.purple{background:var(--c-purple);}
+  .ovbtn.grey{background:#6a73a0;}
+
+  .score-line{font-size:18px;font-weight:800;margin:6px 0;}
+  .best-line{font-size:18px;font-weight:800;color:var(--c-orange);margin:2px 0 10px;}
+
+  /* ---------- Confetti ---------- */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:60;}
+
+  @media (max-width:430px){
+    .panel h1{font-size:26px;}
+    .big-emoji{font-size:50px;}
+    .act{font-size:15px;padding:11px 12px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <a class="hub-link" href="../index.html" aria-label="Back to Hub">← Hub</a>
+    <div class="stat-pills">
+      <span class="pill" id="pillTime" aria-live="polite">⏱️ 0.0s</span>
+      <span class="pill" id="pillMoves">🔀 0</span>
+      <span class="pill" id="pillLevel">📐 4×4</span>
+    </div>
+    <div class="topbtns">
+      <button class="iconbtn" id="btnPause" aria-label="Pause">⏸</button>
+      <button class="iconbtn" id="btnRestart" aria-label="Restart">↻</button>
+      <button class="iconbtn" id="btnMute" aria-label="Mute sound">🔊</button>
+    </div>
+  </div>
+
+  <div class="playwrap">
+    <div class="board-card">
+      <div class="section-label">🎯 Fill the frame</div>
+      <div id="stage">
+        <canvas id="cv"></canvas>
+      </div>
+      <div class="action-row">
+        <button class="act rotate" id="btnRotate">🔄 Rotate</button>
+        <button class="act flip" id="btnFlip">🪞 Flip</button>
+        <button class="act hint" id="btnHint">💡 Hint</button>
+        <button class="act reset" id="btnReset">♻️ Reset</button>
+      </div>
+    </div>
+    <p class="tip">👆 Drag a block in. Tap it to spin 🔄, double-tap to flip 🪞.</p>
+  </div>
+</div>
+
+<!-- START overlay -->
+<div class="overlay" id="ovStart">
+  <div class="panel">
+    <div class="big-emoji">🧩</div>
+    <h1>Block Puzzle</h1>
+    <p class="howto">🎯 Drag blocks to fill the whole frame!</p>
+    <div class="badges">
+      <span class="badge age">🎓 Advanced (11-13)</span>
+      <span class="badge skill">🧠 Spatial reasoning</span>
+    </div>
+    <h3 style="color:var(--ink-soft);font-size:15px;margin-bottom:4px;">Pick a level</h3>
+    <div class="diff-row">
+      <button class="diff easy" data-diff="easy">🟢 Easy<small>4×4 frame</small></button>
+      <button class="diff med sel" data-diff="med">🟡 Medium<small>5×5 frame</small></button>
+      <button class="diff hard" data-diff="hard">🔴 Hard<small>6×6 frame</small></button>
+    </div>
+    <button class="play-btn" id="btnPlay">Play ▶</button>
+  </div>
+</div>
+
+<!-- PAUSE overlay -->
+<div class="overlay hidden" id="ovPause">
+  <div class="panel">
+    <div class="big-emoji">⏸️</div>
+    <h1>Paused</h1>
+    <p class="howto">Take a break — your puzzle is safe. 😌</p>
+    <div class="ovbtns">
+      <button class="ovbtn primary" id="btnResume">Resume ▶</button>
+      <button class="ovbtn blue" id="btnPauseRestart">Restart ↻</button>
+      <button class="ovbtn grey" id="btnPauseHub">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN overlay -->
+<div class="overlay hidden" id="ovWin">
+  <div class="panel">
+    <div class="big-emoji">🌟</div>
+    <h1 id="winTitle">Great run! 🎉</h1>
+    <p class="score-line" id="winScore">Time: 0.0s</p>
+    <p class="best-line" id="winBest">🏆 Best: --</p>
+    <div class="ovbtns">
+      <button class="ovbtn primary" id="btnAgain">Play Again 🔄</button>
+      <button class="ovbtn purple" id="btnChange">Change Level</button>
+      <button class="ovbtn grey" id="btnWinHub">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ============================================================
+   Block Puzzle — polyomino fitting game
+   Self-contained, offline, mouse + touch.
+   ============================================================ */
+
+/* ---------- Sound helper (mute-aware) ---------- */
+const Sound=(()=>{let ctx,muted=false;function ac(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx;}
+function tone(freq,dur,type,vol){if(muted)return;dur=dur||0.12;type=type||"sine";vol=vol||0.2;var c=ac();var o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);var t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur+0.03);}
+return{resume:function(){try{ac().resume();}catch(e){}},tone:tone,click:function(){tone(420,0.06,"square",0.15);},good:function(){tone(660,0.1);setTimeout(function(){tone(880,0.12);},90);},bad:function(){tone(160,0.18,"sawtooth",0.15);},win:function(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.16,"triangle",0.18);},i*120);});},toggleMute:function(){muted=!muted;return muted;},isMuted:function(){return muted;}};})();
+
+/* ---------- DOM refs ---------- */
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+const stage=document.getElementById('stage');
+const confettiCv=document.getElementById('confetti');
+const cctx=confettiCv.getContext('2d');
+
+const pillTime=document.getElementById('pillTime');
+const pillMoves=document.getElementById('pillMoves');
+const pillLevel=document.getElementById('pillLevel');
+
+/* ---------- Difficulty config ---------- */
+const CONFIG={
+  easy:{cols:4,rows:4,pieces:4,label:'4×4',marker:'🟢'},
+  med :{cols:5,rows:5,pieces:5,label:'5×5',marker:'🟡'},
+  hard:{cols:6,rows:6,pieces:7,label:'6×6',marker:'🔴'}
+};
+let diff='med';
+
+/* ---------- Piece palette (color + emoji symbol for colorblind safety) ---------- */
+const PALETTE=[
+  {fill:'#3a86ff',edge:'#1f5fd0',sym:'🔷'},
+  {fill:'#fb8500',edge:'#c96900',sym:'🔶'},
+  {fill:'#06d6a0',edge:'#04a87d',sym:'🟢'},
+  {fill:'#ff5d8f',edge:'#d63d6e',sym:'🌸'},
+  {fill:'#ffd166',edge:'#d6a93c',sym:'⭐'},
+  {fill:'#9b5de5',edge:'#7a3fc4',sym:'🟣'},
+  {fill:'#4cc9f0',edge:'#2aa7cf',sym:'❄️'},
+  {fill:'#f15bb5',edge:'#c93f93',sym:'🩷'}
+];
+
+/* ============================================================
+   Geometry helpers — pieces are arrays of {x,y} cells (offsets)
+   ============================================================ */
+function normalize(cells){
+  let minx=Infinity,miny=Infinity;
+  for(const c of cells){if(c.x<minx)minx=c.x;if(c.y<miny)miny=c.y;}
+  return cells.map(c=>({x:c.x-minx,y:c.y-miny}));
+}
+function rotateCW(cells){ // (x,y) -> (-y, x)
+  return normalize(cells.map(c=>({x:-c.y,y:c.x})));
+}
+function flipH(cells){
+  return normalize(cells.map(c=>({x:-c.x,y:c.y})));
+}
+function cellsKey(cells){
+  const n=normalize(cells).slice().sort((a,b)=>a.y-b.y||a.x-b.x);
+  return n.map(c=>c.x+','+c.y).join(';');
+}
+function bbox(cells){
+  let w=0,h=0;
+  for(const c of cells){if(c.x+1>w)w=c.x+1;if(c.y+1>h)h=c.y+1;}
+  return {w,h};
+}
+
+/* ============================================================
+   Puzzle generation:
+   1) Build a full grid.
+   2) Randomly grow polyomino regions until grid is tiled.
+   This GUARANTEES a perfect-fit solution exists.
+   ============================================================ */
+function generateSolvedTiling(cols,rows,targetPieces){
+  const total=cols*rows;
+  // aim for piece sizes that divide reasonably; allow 3..6 cells each
+  for(let attempt=0;attempt<400;attempt++){
+    const grid=new Array(total).fill(-1); // -1 empty, else piece index
+    const idx=(x,y)=>y*cols+x;
+    // sizes: distribute total across targetPieces, each 3..6
+    const sizes=makeSizes(total,targetPieces);
+    if(!sizes){continue;}
+    let ok=true;
+    const regions=[];
+    for(let p=0;p<sizes.length;p++){
+      const want=sizes[p];
+      // find a random empty seed
+      let seed=-1;
+      const empties=[];
+      for(let i=0;i<total;i++)if(grid[i]===-1)empties.push(i);
+      if(empties.length===0){ok=false;break;}
+      seed=empties[(Math.random()*empties.length)|0];
+      const region=[seed];
+      grid[seed]=p;
+      let grew=true;
+      while(region.length<want&&grew){
+        grew=false;
+        // collect frontier
+        const frontier=[];
+        for(const cell of region){
+          const cx=cell%cols, cy=(cell/cols)|0;
+          const nb=[[cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]];
+          for(const [nx,ny] of nb){
+            if(nx<0||ny<0||nx>=cols||ny>=rows)continue;
+            const ni=idx(nx,ny);
+            if(grid[ni]===-1)frontier.push(ni);
+          }
+        }
+        if(frontier.length){
+          const pick=frontier[(Math.random()*frontier.length)|0];
+          grid[pick]=p;
+          region.push(pick);
+          grew=true;
+        }
+      }
+      if(region.length<want){ok=false;break;}
+      regions.push(region);
+    }
+    if(!ok)continue;
+    // ensure no empty cells remain
+    if(grid.indexOf(-1)!==-1)continue;
+    // build piece definitions (absolute cells -> normalized offsets + solution pos)
+    const pieces=regions.map((region,pi)=>{
+      const cells=region.map(i=>({x:i%cols,y:(i/cols)|0}));
+      let minx=Infinity,miny=Infinity;
+      for(const c of cells){if(c.x<minx)minx=c.x;if(c.y<miny)miny=c.y;}
+      const norm=cells.map(c=>({x:c.x-minx,y:c.y-miny}));
+      return {cells:norm, solX:minx, solY:miny};
+    });
+    // reject if any piece is a duplicate-trivial degenerate (all good actually)
+    return pieces;
+  }
+  return null;
+}
+
+function makeSizes(total,n){
+  // produce n sizes each in [3,6] summing to total, else null
+  const minS=3,maxS=6;
+  if(total< n*minS || total> n*maxS)return adjustN(total);
+  const sizes=new Array(n).fill(minS);
+  let rem=total-n*minS;
+  // distribute remainder randomly up to maxS-minS per piece
+  const order=[...Array(n).keys()];
+  // shuffle order
+  for(let i=order.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[order[i],order[j]]=[order[j],order[i]];}
+  let oi=0;
+  while(rem>0){
+    const k=order[oi%n];
+    if(sizes[k]<maxS){sizes[k]++;rem--;}
+    oi++;
+    if(oi> n*20)break;
+  }
+  if(rem!==0)return null;
+  return sizes;
+  function adjustN(){ return null; }
+}
+
+/* ============================================================
+   Game state
+   ============================================================ */
+let state={
+  cols:5,rows:5,
+  pieces:[],        // {id, baseCells, cells(current orient), color, placed, gridX, gridY, trayX, trayY (px), homeTray:{x,y}}
+  cell:48,          // px per grid cell
+  boardX:0, boardY:0, // top-left of frame in canvas px
+  trayY:0,
+  running:false,
+  paused:false,
+  startTime:0,
+  elapsed:0,
+  moves:0,
+  selected:null,    // piece id currently 'active' for rotate/flip buttons
+  hintsUsed:0,
+  won:false
+};
+let sessionBest={easy:null,med:null,hard:null};
+let raf=null;
+let dpr=1;
+
+/* ---------- Layout / sizing ---------- */
+function fitCanvas(){
+  // Stage width drives sizing
+  const wrapW=stage.clientWidth || 320;
+  const cssW=Math.min(wrapW, 540);
+  // Board grid + tray below. Tray needs space; we lay tray pieces in a region.
+  // total grid drawing width = cols*cell. tray region height ~ 3 grid rows.
+  const cols=state.cols, rows=state.rows;
+  // choose cell so frame fits in width with margins; reserve tray below
+  const margin=10;
+  const cellByW=(cssW - margin*2)/cols;
+  // limit cell so total height is reasonable
+  const maxBoardH=Math.min(window.innerHeight*0.42, 360);
+  const cellByH=(maxBoardH)/rows;
+  let cell=Math.floor(Math.min(cellByW,cellByH));
+  cell=Math.max(28,cell);
+  state.cell=cell;
+  const boardW=cols*cell;
+  const boardH=rows*cell;
+  state.boardX=Math.floor((cssW-boardW)/2);
+  state.boardY=margin;
+  state.trayY=state.boardY+boardH+margin+16; // gap + label band
+  state.cssW=cssW;
+
+  // Lay the tray out first, then size the canvas to actually contain every
+  // unplaced piece. If we hard-coded a small tray height, pieces flowing past
+  // it would be drawn below the canvas and become unreachable (unwinnable).
+  const trayBottom=layoutTray();
+  const minTrayH=Math.max(cell*3+24, 150);
+  const trayH=Math.max(minTrayH, (trayBottom-state.trayY)+12);
+  const cssH=state.trayY+trayH+margin;
+  state.trayH=trayH;
+
+  dpr=Math.min(window.devicePixelRatio||1, 2.5);
+  cv.style.width=cssW+'px';
+  cv.style.height=cssH+'px';
+  cv.width=Math.round(cssW*dpr);
+  cv.height=Math.round(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  state.cssH=cssH;
+  draw();
+}
+
+/* Arrange unplaced pieces into the tray area in a tidy flow.
+   Returns the maximum bottom y reached so the canvas can be sized to fit. */
+function layoutTray(){
+  const cell=state.cell;
+  const pad=8;
+  const startX=8;
+  let x=startX, y=state.trayY+8;
+  let rowH=0;
+  let maxBottom=y;
+  const maxX=state.cssW-8;
+  for(const p of state.pieces){
+    if(p.placed)continue;
+    if(p.dragging)continue;
+    const bb=bbox(p.cells);
+    const w=bb.w*cell, h=bb.h*cell;
+    if(x+w>maxX && x>startX){ x=startX; y+=rowH+pad; rowH=0; }
+    p.trayX=x; p.trayY=y;
+    p.px=x; p.py=y;
+    x+=w+pad;
+    if(h>rowH)rowH=h;
+    if(y+h>maxBottom)maxBottom=y+h;
+  }
+  return maxBottom;
+}
+
+/* Re-flow the tray AND grow the canvas height if the (re-oriented) pieces now
+   need more room, so nothing is ever drawn below the canvas and lost. */
+function relayoutTray(){
+  const trayBottom=layoutTray();
+  const minTrayH=Math.max(state.cell*3+24, 150);
+  const trayH=Math.max(minTrayH, (trayBottom-state.trayY)+12);
+  const cssH=state.trayY+trayH+state.boardY; // boardY == margin
+  if(Math.round(cssH)!==Math.round(state.cssH)){
+    state.trayH=trayH;
+    state.cssH=cssH;
+    cv.style.height=cssH+'px';
+    cv.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+}
+
+/* ============================================================
+   Build a new puzzle for current difficulty
+   ============================================================ */
+function newPuzzle(){
+  const cfg=CONFIG[diff];
+  state.cols=cfg.cols;
+  state.rows=cfg.rows;
+  let tiling=null;
+  for(let t=0;t<8 && !tiling;t++){
+    tiling=generateSolvedTiling(cfg.cols,cfg.rows,cfg.pieces);
+  }
+  if(!tiling){
+    // fallback: simpler piece count
+    tiling=generateSolvedTiling(cfg.cols,cfg.rows,Math.max(3,Math.floor(cfg.cols*cfg.rows/4)));
+  }
+  state.pieces=tiling.map((pc,i)=>{
+    const color=PALETTE[i%PALETTE.length];
+    // random initial orientation for the tray (scramble)
+    let cells=pc.cells.map(c=>({x:c.x,y:c.y}));
+    const rot=(Math.random()*4)|0;
+    for(let r=0;r<rot;r++)cells=rotateCW(cells);
+    if(Math.random()<0.5)cells=flipH(cells);
+    return {
+      id:i,
+      solCells:pc.cells,        // canonical solution orientation
+      solX:pc.solX, solY:pc.solY,
+      cells:normalize(cells),   // current orientation in tray
+      color,
+      placed:false,
+      gridX:0, gridY:0,
+      px:0, py:0,
+      dragging:false
+    };
+  });
+  state.moves=0;
+  state.hintsUsed=0;
+  state.won=false;
+  state.selected=null;
+  state.elapsed=0;
+  pillLevel.textContent='📐 '+cfg.label;
+  fitCanvas();
+}
+
+/* ============================================================
+   Coordinate helpers
+   ============================================================ */
+function pointToGrid(px,py){
+  const gx=Math.round((px-state.boardX)/state.cell);
+  const gy=Math.round((py-state.boardY)/state.cell);
+  return {gx,gy};
+}
+function inBoardArea(px,py){
+  return px>=state.boardX-state.cell && px<=state.boardX+state.cols*state.cell+state.cell &&
+         py>=state.boardY-state.cell && py<=state.boardY+state.rows*state.cell+state.cell;
+}
+
+/* Can piece p (current cells) be placed at grid (gx,gy)? checks bounds + overlaps */
+function canPlace(p,gx,gy,ignoreSelf){
+  for(const c of p.cells){
+    const x=gx+c.x, y=gy+c.y;
+    if(x<0||y<0||x>=state.cols||y>=state.rows)return false;
+  }
+  // overlap check
+  const occ=occupancy(ignoreSelf?p.id:null);
+  for(const c of p.cells){
+    const x=gx+c.x, y=gy+c.y;
+    if(occ[y*state.cols+x]!==-1)return false;
+  }
+  return true;
+}
+function occupancy(skipId){
+  const occ=new Array(state.cols*state.rows).fill(-1);
+  for(const p of state.pieces){
+    if(!p.placed)continue;
+    if(skipId!==null&&p.id===skipId)continue;
+    for(const c of p.cells){
+      const x=p.gridX+c.x, y=p.gridY+c.y;
+      if(x>=0&&y>=0&&x<state.cols&&y<state.rows)occ[y*state.cols+x]=p.id;
+    }
+  }
+  return occ;
+}
+
+/* ============================================================
+   Drawing
+   ============================================================ */
+function roundRect(c,x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+}
+
+function drawCellBlock(c,x,y,size,color,symOn){
+  const pad=2;
+  roundRect(c,x+pad,y+pad,size-pad*2,size-pad*2,Math.max(5,size*0.18));
+  c.fillStyle=color.fill;
+  c.fill();
+  c.lineWidth=Math.max(2,size*0.07);
+  c.strokeStyle=color.edge;
+  c.stroke();
+  // subtle top highlight
+  c.save();
+  roundRect(c,x+pad,y+pad,size-pad*2,(size-pad*2)*0.5,Math.max(5,size*0.18));
+  c.fillStyle='rgba(255,255,255,0.18)';
+  c.fill();
+  c.restore();
+}
+
+/* draw the symbol once per piece (on its first cell) */
+function drawPiece(c,p,originX,originY,size,alpha){
+  c.save();
+  if(alpha!==undefined)c.globalAlpha=alpha;
+  for(const cell of p.cells){
+    drawCellBlock(c,originX+cell.x*size,originY+cell.y*size,size,p.color);
+  }
+  // symbol on centroid cell for colorblind cue
+  let sx=0,sy=0;
+  for(const cell of p.cells){sx+=cell.x;sy+=cell.y;}
+  sx/=p.cells.length; sy/=p.cells.length;
+  // find nearest actual cell to centroid
+  let best=p.cells[0], bd=1e9;
+  for(const cell of p.cells){const d=(cell.x-sx)*(cell.x-sx)+(cell.y-sy)*(cell.y-sy);if(d<bd){bd=d;best=cell;}}
+  c.font=Math.floor(size*0.5)+'px '+getComputedStyle(document.body).fontFamily;
+  c.textAlign='center';c.textBaseline='middle';
+  c.fillText(p.color.sym, originX+best.x*size+size/2, originY+best.y*size+size/2);
+  c.restore();
+}
+
+function draw(){
+  const c=ctx;
+  c.clearRect(0,0,state.cssW,state.cssH);
+
+  // ----- frame background -----
+  const bx=state.boardX, by=state.boardY, cell=state.cell;
+  const bw=state.cols*cell, bh=state.rows*cell;
+  roundRect(c,bx-4,by-4,bw+8,bh+8,16);
+  c.fillStyle='#eef1fb';
+  c.fill();
+  c.lineWidth=4;c.strokeStyle='#c5cbe6';c.stroke();
+
+  // grid cells
+  for(let y=0;y<state.rows;y++){
+    for(let x=0;x<state.cols;x++){
+      roundRect(c,bx+x*cell+2,by+y*cell+2,cell-4,cell-4,6);
+      c.fillStyle=((x+y)%2===0)?'#ffffff':'#f4f6ff';
+      c.fill();
+      c.lineWidth=1.5;c.strokeStyle='#dfe3f5';c.stroke();
+    }
+  }
+
+  // ----- placed pieces -----
+  for(const p of state.pieces){
+    if(p.placed && !p.dragging){
+      drawPiece(c,p,bx+p.gridX*cell,by+p.gridY*cell,cell);
+    }
+  }
+
+  // ----- tray divider / label -----
+  c.save();
+  c.fillStyle='#c9d0ee';
+  c.font='700 13px '+getComputedStyle(document.body).fontFamily;
+  c.textAlign='left';c.textBaseline='alphabetic';
+  c.fillText('🧩 Your blocks', 8, state.trayY+2);
+  c.restore();
+
+  // ----- tray pieces (unplaced, not dragging) -----
+  for(const p of state.pieces){
+    if(!p.placed && !p.dragging){
+      drawPiece(c,p,p.px,p.py,cell);
+      // highlight selected piece outline
+      if(state.selected===p.id){
+        c.save();
+        c.strokeStyle='#13183a';
+        c.lineWidth=3;
+        c.setLineDash([6,4]);
+        const bb=bbox(p.cells);
+        roundRect(c,p.px-2,p.py-2,bb.w*cell+4,bb.h*cell+4,8);
+        c.stroke();
+        c.restore();
+      }
+    }
+  }
+
+  // ----- dragging piece + snap preview -----
+  if(drag.piece){
+    const p=drag.piece;
+    // ghost snap preview if over a valid board slot
+    const gp=pointToGrid(p.px,p.py);
+    if(canPlace(p,gp.gx,gp.gy,true)){
+      c.save();c.globalAlpha=0.35;
+      for(const cell2 of p.cells){
+        roundRect(c,bx+(gp.gx+cell2.x)*cell+2,by+(gp.gy+cell2.y)*cell+2,cell-4,cell-4,6);
+        c.fillStyle=p.color.fill;c.fill();
+      }
+      c.restore();
+    }
+    drawPiece(c,p,p.px,p.py,cell,0.92);
+  }
+}
+
+/* ============================================================
+   Dragging (pointer events)
+   ============================================================ */
+const drag={piece:null, offx:0, offy:0, moved:false, startX:0, startY:0, downTime:0};
+let lastTapTime=0, lastTapId=-1;
+
+function canvasPoint(e){
+  const r=cv.getBoundingClientRect();
+  const cx=(e.clientX!==undefined)?e.clientX:(e.touches&&e.touches[0]?e.touches[0].clientX:0);
+  const cy=(e.clientY!==undefined)?e.clientY:(e.touches&&e.touches[0]?e.touches[0].clientY:0);
+  return {x:cx-r.left, y:cy-r.top};
+}
+
+/* find topmost piece under a point (tray or placed) */
+function pieceAt(px,py){
+  const cell=state.cell;
+  // check tray pieces first (they sit lower visually), then placed
+  for(let i=state.pieces.length-1;i>=0;i--){
+    const p=state.pieces[i];
+    if(p.placed){
+      for(const c of p.cells){
+        const x=state.boardX+(p.gridX+c.x)*cell, y=state.boardY+(p.gridY+c.y)*cell;
+        if(px>=x&&px<x+cell&&py>=y&&py<y+cell)return p;
+      }
+    }else{
+      for(const c of p.cells){
+        const x=p.px+c.x*cell, y=p.py+c.y*cell;
+        if(px>=x&&px<x+cell&&py>=y&&py<y+cell)return p;
+      }
+    }
+  }
+  return null;
+}
+
+function onDown(e){
+  if(!state.running||state.paused||state.won)return;
+  const pt=canvasPoint(e);
+  const p=pieceAt(pt.x,pt.y);
+  if(!p)return;
+  e.preventDefault();
+  Sound.resume();
+  state.selected=p.id;
+  // lift piece: if placed, remove from board to drag.
+  // Sync px/py to its on-board pixel position so the drag offset is correct
+  // (otherwise it jumps to its stale tray slot on first move).
+  if(p.placed){
+    p.px=state.boardX+p.gridX*state.cell;
+    p.py=state.boardY+p.gridY*state.cell;
+    p.placed=false;
+  }
+  p.dragging=true;
+  drag.piece=p;
+  drag.moved=false;
+  drag.startX=pt.x; drag.startY=pt.y;
+  drag.downTime=performance.now();
+  // offset from piece origin (so it follows finger nicely)
+  drag.offx=pt.x-p.px;
+  drag.offy=pt.y-p.py;
+  draw();
+}
+function onMove(e){
+  if(!drag.piece)return;
+  e.preventDefault();
+  const pt=canvasPoint(e);
+  const p=drag.piece;
+  p.px=pt.x-drag.offx;
+  p.py=pt.y-drag.offy;
+  if(Math.abs(pt.x-drag.startX)>6||Math.abs(pt.y-drag.startY)>6)drag.moved=true;
+  draw();
+}
+function onUp(e){
+  if(!drag.piece)return;
+  e.preventDefault();
+  const p=drag.piece;
+  const now=performance.now();
+  const wasTap=!drag.moved && (now-drag.downTime<350);
+  p.dragging=false;
+  drag.piece=null;
+
+  if(wasTap){
+    // double-tap -> flip, single tap -> rotate
+    if(lastTapId===p.id && (now-lastTapTime)<320){
+      flipPiece(p);
+      lastTapId=-1; lastTapTime=0;
+    }else{
+      rotatePiece(p);
+      lastTapId=p.id; lastTapTime=now;
+    }
+    // return piece to tray spot if it had been lifted off board
+    relayoutTray();
+    draw();
+    return;
+  }
+
+  // try to snap to board
+  const gp=pointToGrid(p.px,p.py);
+  if(canPlace(p,gp.gx,gp.gy,true)){
+    p.placed=true;
+    p.gridX=gp.gx; p.gridY=gp.gy;
+    state.moves++;
+    updateHUD();
+    Sound.click();
+    relayoutTray();
+    draw();
+    checkWin();
+  }else{
+    // snap back to tray
+    Sound.bad();
+    relayoutTray();
+    draw();
+  }
+}
+
+/* ---------- rotate / flip ---------- */
+function rotatePiece(p){
+  p.cells=rotateCW(p.cells);
+  Sound.tone(520,0.06,'square',0.12);
+  state.moves++;
+  updateHUD();
+}
+function flipPiece(p){
+  p.cells=flipH(p.cells);
+  Sound.tone(360,0.07,'square',0.12);
+  state.moves++;
+  updateHUD();
+}
+
+/* ============================================================
+   Win check
+   ============================================================ */
+function checkWin(){
+  // every cell must be filled by exactly one placed piece
+  const occ=new Array(state.cols*state.rows).fill(0);
+  let allPlaced=true;
+  for(const p of state.pieces){
+    if(!p.placed){allPlaced=false;continue;}
+    for(const c of p.cells){
+      const x=p.gridX+c.x, y=p.gridY+c.y;
+      if(x<0||y<0||x>=state.cols||y>=state.rows)return;
+      occ[y*state.cols+x]++;
+    }
+  }
+  if(!allPlaced)return;
+  for(let i=0;i<occ.length;i++)if(occ[i]!==1)return;
+  // WIN!
+  winGame();
+}
+
+/* ============================================================
+   Hint — auto-place one correct piece in solution orientation/pos
+   ============================================================ */
+function findUnsolvedPiece(){
+  // a piece counts as correctly placed if at its solution pos with canonical cells
+  for(const p of state.pieces){
+    const correct = p.placed &&
+      p.gridX===p.solX && p.gridY===p.solY &&
+      cellsKey(p.cells)===cellsKey(p.solCells);
+    if(!correct)return p;
+  }
+  return null;
+}
+function doHint(){
+  if(!state.running||state.paused||state.won)return;
+  const p=findUnsolvedPiece();
+  if(!p)return;
+  // set to solution orientation & position. Clear anything occupying those cells first.
+  p.cells=p.solCells.map(c=>({x:c.x,y:c.y}));
+  // remove pieces currently overlapping its solution cells (bump them to tray)
+  const target=new Set(p.solCells.map(c=>((p.solY+c.y)*state.cols+(p.solX+c.x))));
+  for(const q of state.pieces){
+    if(q.id===p.id)continue;
+    if(!q.placed)continue;
+    let overlap=false;
+    for(const c of q.cells){
+      const key=(q.gridY+c.y)*state.cols+(q.gridX+c.x);
+      if(target.has(key)){overlap=true;break;}
+    }
+    if(overlap)q.placed=false;
+  }
+  p.placed=true;
+  p.gridX=p.solX; p.gridY=p.solY;
+  state.hintsUsed++;
+  state.moves++;
+  Sound.good();
+  updateHUD();
+  relayoutTray();
+  draw();
+  checkWin();
+}
+
+/* ============================================================
+   Reset board (return all pieces to tray, keep same puzzle)
+   ============================================================ */
+function resetBoard(){
+  for(const p of state.pieces){
+    p.placed=false;
+    p.dragging=false;
+  }
+  drag.piece=null;
+  state.selected=null;
+  // re-scramble orientation a touch so reset feels fresh but solvable
+  relayoutTray();
+  draw();
+  Sound.click();
+}
+
+/* ============================================================
+   Timer / HUD
+   ============================================================ */
+function updateHUD(){
+  pillMoves.textContent='🔀 '+state.moves;
+}
+function tick(){
+  if(state.running&&!state.paused&&!state.won){
+    state.elapsed=(performance.now()-state.startTime)/1000;
+    pillTime.textContent='⏱️ '+state.elapsed.toFixed(1)+'s';
+  }
+  raf=requestAnimationFrame(tick);
+}
+
+/* ============================================================
+   Game flow
+   ============================================================ */
+function startGame(){
+  hideAll();
+  state.running=true;
+  state.paused=false;
+  state.won=false;
+  newPuzzle();
+  state.startTime=performance.now();
+  state.elapsed=0;
+  updateHUD();
+  pillTime.textContent='⏱️ 0.0s';
+  draw();
+}
+
+function pauseGame(){
+  if(!state.running||state.won)return;
+  state.paused=true;
+  state.pauseStamp=performance.now();
+  show('ovPause');
+}
+function resumeGame(){
+  if(!state.paused)return;
+  // shift startTime so elapsed continues smoothly
+  const pausedFor=performance.now()-state.pauseStamp;
+  state.startTime+=pausedFor;
+  state.paused=false;
+  hide('ovPause');
+}
+
+function winGame(){
+  state.won=true;
+  state.running=false;
+  const t=state.elapsed;
+  // session best (lowest time wins)
+  let isBest=false;
+  if(sessionBest[diff]===null || t<sessionBest[diff]){
+    sessionBest[diff]=t; isBest=true;
+  }
+  document.getElementById('winTitle').textContent= isBest ? 'New best! 🏆✨' : 'Great run! 🌟';
+  document.getElementById('winScore').textContent='⏱️ Time: '+t.toFixed(1)+'s   •   🔀 Moves: '+state.moves;
+  const b=sessionBest[diff];
+  document.getElementById('winBest').textContent='🏆 Best ('+CONFIG[diff].marker+' '+CONFIG[diff].label+'): '+(b!==null?b.toFixed(1)+'s':'--');
+  Sound.win();
+  burstConfetti();
+  show('ovWin');
+}
+
+/* ============================================================
+   Overlay helpers
+   ============================================================ */
+function show(id){document.getElementById(id).classList.remove('hidden');}
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function hideAll(){['ovStart','ovPause','ovWin'].forEach(hide);}
+
+/* ============================================================
+   Confetti 🎉
+   ============================================================ */
+let confettiParts=[], confettiRaf=null;
+function resizeConfetti(){
+  confettiCv.width=window.innerWidth;
+  confettiCv.height=window.innerHeight;
+}
+function burstConfetti(){
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  resizeConfetti();
+  const emojis=['🎉','⭐','🟢','🔷','🩷','💜','🟡','✨','🧩'];
+  const count=reduce?18:90;
+  confettiParts=[];
+  for(let i=0;i<count;i++){
+    confettiParts.push({
+      x:Math.random()*confettiCv.width,
+      y:-20-Math.random()*confettiCv.height*0.4,
+      vx:(Math.random()-0.5)*4,
+      vy:2+Math.random()*4,
+      r:14+Math.random()*16,
+      e:emojis[(Math.random()*emojis.length)|0],
+      rot:Math.random()*6.28, vr:(Math.random()-0.5)*0.3,
+      life:0, max:120+Math.random()*60
+    });
+  }
+  if(confettiRaf)cancelAnimationFrame(confettiRaf);
+  if(reduce){
+    // single static-ish puff then clear
+    let frames=0;
+    const step=()=>{
+      cctx.clearRect(0,0,confettiCv.width,confettiCv.height);
+      for(const p of confettiParts){
+        cctx.font=p.r+'px serif';cctx.textAlign='center';cctx.textBaseline='middle';
+        cctx.fillText(p.e,p.x,p.y+frames*2);
+      }
+      frames++;
+      if(frames<30)confettiRaf=requestAnimationFrame(step);
+      else cctx.clearRect(0,0,confettiCv.width,confettiCv.height);
+    };
+    step();
+    return;
+  }
+  const animate=()=>{
+    cctx.clearRect(0,0,confettiCv.width,confettiCv.height);
+    let alive=false;
+    for(const p of confettiParts){
+      p.life++;
+      if(p.life>p.max)continue;
+      alive=true;
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.rot+=p.vr;
+      cctx.save();
+      cctx.translate(p.x,p.y);
+      cctx.rotate(p.rot);
+      cctx.globalAlpha=Math.max(0,1-p.life/p.max);
+      cctx.font=p.r+'px serif';cctx.textAlign='center';cctx.textBaseline='middle';
+      cctx.fillText(p.e,0,0);
+      cctx.restore();
+    }
+    if(alive)confettiRaf=requestAnimationFrame(animate);
+    else cctx.clearRect(0,0,confettiCv.width,confettiCv.height);
+  };
+  animate();
+}
+
+/* ============================================================
+   Wire up controls
+   ============================================================ */
+// Difficulty selection
+document.querySelectorAll('.diff').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.diff').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    diff=btn.dataset.diff;
+    Sound.click();
+  });
+});
+
+// Play
+document.getElementById('btnPlay').addEventListener('click',()=>{
+  Sound.resume();
+  Sound.click();
+  startGame();
+});
+
+// Top bar
+document.getElementById('btnPause').addEventListener('click',()=>{Sound.click();pauseGame();});
+document.getElementById('btnRestart').addEventListener('click',()=>{
+  Sound.click();
+  if(state.running||state.won){startGame();}
+});
+document.getElementById('btnMute').addEventListener('click',()=>{
+  const m=Sound.toggleMute();
+  document.getElementById('btnMute').textContent=m?'🔇':'🔊';
+  document.getElementById('btnMute').setAttribute('aria-label', m?'Unmute sound':'Mute sound');
+});
+
+// Action buttons (rotate/flip apply to selected piece, else first unplaced)
+function targetPiece(){
+  if(state.selected!==null){
+    const p=state.pieces.find(x=>x.id===state.selected);
+    if(p)return p;
+  }
+  return state.pieces.find(x=>!x.placed) || state.pieces[0];
+}
+document.getElementById('btnRotate').addEventListener('click',()=>{
+  if(!state.running||state.paused||state.won)return;
+  const p=targetPiece(); if(!p)return;
+  rotatePiece(p);
+  if(p.placed){ // if placed and rotation breaks fit, pop it out
+    if(!canPlace(p,p.gridX,p.gridY,true))p.placed=false;
+  }
+  relayoutTray();draw();
+});
+document.getElementById('btnFlip').addEventListener('click',()=>{
+  if(!state.running||state.paused||state.won)return;
+  const p=targetPiece(); if(!p)return;
+  flipPiece(p);
+  if(p.placed){ if(!canPlace(p,p.gridX,p.gridY,true))p.placed=false; }
+  relayoutTray();draw();
+});
+document.getElementById('btnHint').addEventListener('click',()=>{Sound.click();doHint();});
+document.getElementById('btnReset').addEventListener('click',resetBoard);
+
+// Pause overlay buttons
+document.getElementById('btnResume').addEventListener('click',()=>{Sound.click();resumeGame();});
+document.getElementById('btnPauseRestart').addEventListener('click',()=>{Sound.click();hide('ovPause');startGame();});
+document.getElementById('btnPauseHub').addEventListener('click',()=>{location.href='../index.html';});
+
+// Win overlay buttons
+document.getElementById('btnAgain').addEventListener('click',()=>{Sound.click();startGame();});
+document.getElementById('btnChange').addEventListener('click',()=>{Sound.click();hide('ovWin');state.running=false;show('ovStart');});
+document.getElementById('btnWinHub').addEventListener('click',()=>{location.href='../index.html';});
+
+// Canvas pointer events (mouse + touch unified)
+cv.addEventListener('pointerdown',onDown);
+window.addEventListener('pointermove',onMove);
+window.addEventListener('pointerup',onUp);
+window.addEventListener('pointercancel',onUp);
+// also block touch scrolling on canvas
+cv.addEventListener('touchstart',e=>{if(state.running&&!state.paused&&!state.won){const pt=canvasPoint(e);if(drag.piece||pieceAt(pt.x,pt.y))e.preventDefault();}},{passive:false});
+cv.addEventListener('touchmove',e=>{if(drag.piece)e.preventDefault();},{passive:false});
+
+// Keyboard support
+window.addEventListener('keydown',e=>{
+  if(!state.running||state.won)return;
+  if(e.key==='r'||e.key==='R'){const p=targetPiece();if(p){rotatePiece(p);if(p.placed&&!canPlace(p,p.gridX,p.gridY,true))p.placed=false;relayoutTray();draw();}}
+  else if(e.key==='f'||e.key==='F'){const p=targetPiece();if(p){flipPiece(p);if(p.placed&&!canPlace(p,p.gridX,p.gridY,true))p.placed=false;relayoutTray();draw();}}
+  else if(e.key==='h'||e.key==='H'){doHint();}
+  else if(e.key==='Escape'||e.key==='p'||e.key==='P'){state.paused?resumeGame():pauseGame();}
+});
+
+// Resize
+let resizeTO=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTO);
+  resizeTO=setTimeout(()=>{ if(state.running||state.won) fitCanvas(); resizeConfetti(); },120);
+});
+window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(state.running||state.won)fitCanvas();resizeConfetti();},250);});
+
+// Init
+resizeConfetti();
+tick();
+// pre-size canvas using med default so it's not blank behind start overlay
+state.cols=CONFIG[diff].cols; state.rows=CONFIG[diff].rows;
+fitCanvas();
+</script>
+</body>
+</html>

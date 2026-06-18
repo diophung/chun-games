@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Quiz Battle ⚔️</title>
+<style>
+  :root{
+    --bg-grad: linear-gradient(160deg,#2b1e66 0%, #3b2fb0 45%, #1f6feb 100%);
+    --paper:#ffffff; --ink:#13183a; --ink-soft:#5b6488;
+    --c-blue:#3a86ff; --c-orange:#fb8500; --c-green:#06d6a0; --c-pink:#ff5d8f; --c-yellow:#ffd166; --c-purple:#9b5de5;
+    --ok:#06d6a0; --warn:#ff6b6b; --radius:20px;
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; min-height:100%;}
+  body{
+    min-height:100vh;
+    font-family:var(--font);
+    color:var(--ink);
+    background:var(--bg-grad) fixed;
+    background-attachment:fixed;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+  }
+  @supports (height:100dvh){ body{ min-height:100dvh; } }
+
+  #app{
+    width:100%;
+    max-width:680px;
+    min-height:100vh;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    position:relative;
+  }
+  @supports (height:100dvh){ #app{ min-height:100dvh; } }
+
+  button{ font-family:var(--font); cursor:pointer; border:none; }
+  button:focus-visible{ outline:4px solid #fff; outline-offset:2px; }
+  a:focus-visible{ outline:4px solid #fff; outline-offset:2px; }
+
+  .pill{
+    border-radius:999px;
+    font-weight:800;
+    box-shadow:0 6px 0 rgba(0,0,0,.18), 0 8px 18px rgba(0,0,0,.18);
+    transition:transform .08s ease, box-shadow .08s ease, filter .12s ease;
+    color:#fff;
+  }
+  .pill:active{ transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.18), 0 4px 10px rgba(0,0,0,.18); }
+  .pill[disabled]{ filter:grayscale(.4) opacity(.6); cursor:default; }
+
+  /* ===== Top chrome row (hub + mute) ===== */
+  .chrome{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+  }
+  .chrome a, .chrome button{
+    background:rgba(255,255,255,.16);
+    color:#fff;
+    border-radius:999px;
+    padding:10px 16px;
+    font-weight:800;
+    font-size:16px;
+    text-decoration:none;
+    min-height:48px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border:2px solid rgba(255,255,255,.35);
+  }
+  .chrome button{ cursor:pointer; }
+
+  /* ===== Panels / overlays ===== */
+  .panel{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+  }
+
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(20,16,50,.72);
+    backdrop-filter:blur(3px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px;
+    z-index:40;
+  }
+  .overlay .card{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:24px;
+    padding:22px 18px;
+    width:100%;
+    max-width:480px;
+    text-align:center;
+    box-shadow:0 18px 50px rgba(0,0,0,.4);
+    max-height:94vh;
+    overflow:auto;
+  }
+  .hidden{ display:none !important; }
+
+  h1.title{
+    font-weight:800;
+    font-size:clamp(30px,8vw,46px);
+    margin:6px 0 2px;
+    line-height:1.05;
+  }
+  .subtitle{ color:var(--ink-soft); font-weight:700; margin:0 0 12px; font-size:16px; }
+
+  .badges{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0 4px; }
+  .badge{
+    background:#eef1ff;
+    color:#2c2f6b;
+    border:2px solid #c9cffb;
+    border-radius:999px;
+    padding:7px 12px;
+    font-weight:800;
+    font-size:13px;
+  }
+  .badge.skill{ background:#fff2e0; border-color:#ffd9a8; color:#8a4d00; }
+
+  .howto{
+    background:#f3f6ff;
+    border:2px dashed #b9c4ff;
+    border-radius:16px;
+    padding:12px;
+    font-weight:700;
+    font-size:17px;
+    margin:12px 0;
+  }
+
+  .seclabel{ font-weight:800; font-size:14px; color:var(--ink-soft); margin:14px 0 6px; text-align:left; }
+
+  .diffrow{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .diffbtn{
+    background:var(--paper);
+    color:var(--ink);
+    border:3px solid #d8ddf5;
+    border-radius:16px;
+    padding:12px 6px;
+    font-weight:800;
+    font-size:15px;
+    min-height:64px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    cursor:pointer;
+    transition:transform .08s ease, border-color .12s ease, background .12s ease;
+  }
+  .diffbtn .dot{ font-size:20px; }
+  .diffbtn small{ color:var(--ink-soft); font-weight:700; font-size:12px; }
+  .diffbtn.sel{ border-color:var(--c-purple); background:#f6efff; transform:translateY(-2px); }
+  .diffbtn:active{ transform:translateY(2px); }
+
+  /* name inputs */
+  .names{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px; }
+  .names label{ font-weight:800; font-size:13px; color:var(--ink-soft); display:block; text-align:left; margin-bottom:4px; }
+  .names .p1 label{ color:var(--c-blue); }
+  .names .p2 label{ color:var(--c-pink); }
+  .names input{
+    width:100%;
+    font-family:var(--font);
+    font-size:16px;
+    font-weight:800;
+    padding:11px 12px;
+    border-radius:14px;
+    border:3px solid #d8ddf5;
+    color:var(--ink);
+    background:#fff;
+  }
+  .names .p1 input:focus{ outline:none; border-color:var(--c-blue); }
+  .names .p2 input:focus{ outline:none; border-color:var(--c-pink); }
+
+  .bigbtn{
+    background:linear-gradient(180deg,#ffd166,#fb8500);
+    color:#3a2400;
+    font-size:24px;
+    padding:16px 22px;
+    width:100%;
+    margin-top:16px;
+    min-height:60px;
+  }
+
+  /* ===== Play: top bar ===== */
+  #topbar{ display:flex; gap:8px; align-items:stretch; }
+  .scorecard{
+    flex:1;
+    border-radius:16px;
+    padding:8px 10px;
+    color:#fff;
+    text-align:center;
+    box-shadow:0 6px 16px rgba(0,0,0,.2);
+    border:3px solid transparent;
+    position:relative;
+    overflow:hidden;
+  }
+  .scorecard .who{ font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .scorecard .sc{ font-weight:800; font-size:30px; line-height:1; margin-top:2px; }
+  .scorecard.p1{ background:linear-gradient(180deg,#5b9bff,#2f6fe0); }
+  .scorecard.p2{ background:linear-gradient(180deg,#ff7fae,#e8447d); }
+  .scorecard.active{ border-color:#fff; box-shadow:0 0 0 3px rgba(255,255,255,.5), 0 6px 16px rgba(0,0,0,.25); }
+  .scorecard.dim{ filter:saturate(.55) brightness(.9); }
+  .turnflag{ font-size:11px; font-weight:800; margin-top:2px; min-height:14px; }
+
+  .ctrlcol{ display:flex; flex-direction:column; gap:6px; }
+  .ctrlbtn{
+    background:rgba(255,255,255,.18);
+    color:#fff;
+    border:2px solid rgba(255,255,255,.4);
+    border-radius:14px;
+    font-size:20px;
+    min-width:50px;
+    min-height:46px;
+    font-weight:800;
+  }
+  .ctrlbtn:active{ transform:translateY(2px); }
+
+  #meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:#fff;
+    font-weight:800;
+    font-size:14px;
+    padding:0 4px;
+    gap:8px;
+  }
+  #timerWrap{ display:flex; align-items:center; gap:6px; }
+  #timerBarOuter{ width:120px; height:12px; background:rgba(255,255,255,.25); border-radius:999px; overflow:hidden; }
+  #timerBar{ height:100%; width:100%; background:var(--c-green); border-radius:999px; transition:width .25s linear; }
+  #timerBar.low{ background:var(--warn); }
+
+  /* ===== Question card ===== */
+  #qpanel{ display:flex; flex-direction:column; gap:10px; flex:1; }
+  #qcat{
+    align-self:center;
+    background:#eef1ff;
+    border:2px solid #c9cffb;
+    color:#2c2f6b;
+    font-weight:800;
+    font-size:13px;
+    padding:6px 12px;
+    border-radius:999px;
+  }
+  #qturn{
+    align-self:center;
+    font-weight:800;
+    font-size:16px;
+    padding:4px 0;
+  }
+  #qtext{
+    font-weight:800;
+    font-size:clamp(20px,5.5vw,28px);
+    text-align:center;
+    line-height:1.25;
+    margin:4px 0 6px;
+    min-height:1.5em;
+  }
+  #answers{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ans{
+    background:#f3f6ff;
+    color:var(--ink);
+    border:3px solid #d8ddf5;
+    border-radius:16px;
+    padding:14px 10px;
+    font-weight:800;
+    font-size:18px;
+    min-height:64px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    text-align:left;
+    touch-action:manipulation;
+    transition:transform .08s ease, background .12s ease, border-color .12s ease;
+  }
+  .ans .key{
+    flex:0 0 auto;
+    width:28px; height:28px;
+    border-radius:8px;
+    background:#fff;
+    border:2px solid #c5cdf0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:800;
+    color:var(--ink-soft);
+  }
+  .ans .txt{ flex:1; }
+  .ans:active{ transform:scale(.98); }
+  .ans.correct{ background:#dcfff3; border-color:var(--ok); }
+  .ans.correct .key{ background:var(--ok); color:#fff; border-color:var(--ok); }
+  .ans.wrong{ background:#ffe2e2; border-color:var(--warn); }
+  .ans.wrong .key{ background:var(--warn); color:#fff; border-color:var(--warn); }
+  .ans[disabled]{ cursor:default; }
+  .ans .mark{ font-size:20px; margin-left:auto; }
+
+  #progress{ display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-top:2px; }
+  .pip{ width:11px; height:11px; border-radius:50%; background:rgba(255,255,255,.35); border:2px solid rgba(255,255,255,.6); }
+  .pip.done{ background:var(--c-yellow); border-color:#fff; }
+  .pip.now{ box-shadow:0 0 0 3px rgba(255,255,255,.55); }
+
+  #feedback{
+    text-align:center;
+    font-weight:800;
+    font-size:18px;
+    min-height:26px;
+    color:#fff;
+    text-shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+
+  /* overlay action buttons */
+  .obtns{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .obtn{ font-size:19px; padding:14px; width:100%; min-height:56px; }
+  .obtn.primary{ background:linear-gradient(180deg,#3ad79a,#06b885); color:#053b2c; }
+  .obtn.blue{ background:linear-gradient(180deg,#5b9bff,#2f6fe0); }
+  .obtn.gray{ background:linear-gradient(180deg,#8b93b8,#5b6488); }
+
+  .scoreLine{ font-size:20px; font-weight:800; margin:8px 0; }
+  .scoreLine .p1n{ color:var(--c-blue); }
+  .scoreLine .p2n{ color:var(--c-pink); }
+  .bestLine{ font-weight:800; color:var(--ink-soft); margin:4px 0 0; }
+  .winemoji{ font-size:60px; line-height:1; margin:4px 0; }
+
+  /* confetti */
+  #confetti{ position:fixed; inset:0; pointer-events:none; z-index:60; overflow:hidden; }
+  .conf{ position:absolute; font-size:24px; will-change:transform; animation:fall linear forwards; }
+  @keyframes fall{
+    0%{ transform:translateY(-10vh) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(110vh) rotate(540deg); opacity:.9; }
+  }
+
+  .pop{ animation:pop .3s ease; }
+  @keyframes pop{ 0%{transform:scale(.85);} 60%{transform:scale(1.06);} 100%{transform:scale(1);} }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001s !important; transition-duration:.001s !important; }
+  }
+
+  @media (max-width:420px){
+    #answers{ grid-template-columns:1fr; }
+    .ans{ font-size:17px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- top chrome -->
+  <div class="chrome">
+    <a href="../index.html" id="hubTop">← Hub</a>
+    <button id="muteBtn" aria-label="Toggle sound">🔊</button>
+  </div>
+
+  <!-- ===== PLAY VIEW ===== -->
+  <div id="playView" class="hidden" style="flex:1; display:flex; flex-direction:column; gap:10px;">
+    <div id="topbar">
+      <div class="scorecard p1" id="card1">
+        <div class="who"><span id="p1emoji">🔵</span><span id="p1name">Player 1</span></div>
+        <div class="sc" id="p1score">0</div>
+        <div class="turnflag" id="p1flag"></div>
+      </div>
+      <div class="ctrlcol">
+        <button class="ctrlbtn" id="pauseBtn" aria-label="Pause">⏸</button>
+        <button class="ctrlbtn" id="restartBtn" aria-label="Restart">↻</button>
+      </div>
+      <div class="scorecard p2" id="card2">
+        <div class="who"><span id="p2emoji">🔴</span><span id="p2name">Player 2</span></div>
+        <div class="sc" id="p2score">0</div>
+        <div class="turnflag" id="p2flag"></div>
+      </div>
+    </div>
+
+    <div id="meta">
+      <span id="roundLabel">Round 1 / 6</span>
+      <span id="timerWrap" class="hidden">
+        <span id="timerNum">15</span>s
+        <span id="timerBarOuter"><span id="timerBar"></span></span>
+      </span>
+    </div>
+
+    <div class="panel" id="qpanel" style="flex:1;">
+      <div id="qcat">🎲 Category</div>
+      <div id="qturn">Player 1 turn</div>
+      <div id="qtext">Question…</div>
+      <div id="answers"></div>
+      <div id="progress"></div>
+    </div>
+
+    <div id="feedback"></div>
+  </div>
+
+  <!-- ===== START OVERLAY ===== -->
+  <div class="overlay" id="startOverlay">
+    <div class="card">
+      <div style="font-size:58px; line-height:1;">⚔️🧠</div>
+      <h1 class="title">Quiz Battle</h1>
+      <p class="subtitle">Two players · one device · brain duel!</p>
+
+      <div class="badges">
+        <span class="badge">👦 Advanced (11-13)</span>
+        <span class="badge skill">🎯 Knowledge: numeracy, vocabulary &amp; logic</span>
+      </div>
+
+      <div class="howto">📱 Take turns! Tap the right answer to score. 🏆</div>
+
+      <div class="seclabel">Player names</div>
+      <div class="names">
+        <div class="p1">
+          <label for="in1">🔵 Player 1</label>
+          <input id="in1" type="text" maxlength="10" value="Blue" autocomplete="off">
+        </div>
+        <div class="p2">
+          <label for="in2">🔴 Player 2</label>
+          <input id="in2" type="text" maxlength="10" value="Red" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="seclabel">Pick a level</div>
+      <div class="diffrow" id="diffRow">
+        <button class="diffbtn sel" data-diff="easy">
+          <span class="dot">🟢</span>EASY<small>No timer · 5 each</small>
+        </button>
+        <button class="diffbtn" data-diff="medium">
+          <span class="dot">🟡</span>MEDIUM<small>15s · 6 each</small>
+        </button>
+        <button class="diffbtn" data-diff="hard">
+          <span class="dot">🔴</span>HARD<small>10s · 7 each</small>
+        </button>
+      </div>
+
+      <button class="pill bigbtn" id="playBtn">Play ▶</button>
+    </div>
+  </div>
+
+  <!-- ===== PAUSE OVERLAY ===== -->
+  <div class="overlay hidden" id="pauseOverlay">
+    <div class="card">
+      <div style="font-size:48px;">⏸️</div>
+      <h1 class="title" style="font-size:32px;">Paused</h1>
+      <p class="subtitle">Take a breath — your battle is saved.</p>
+      <div class="obtns">
+        <button class="pill obtn primary" id="resumeBtn">Resume ▶</button>
+        <button class="pill obtn blue" id="pauseRestartBtn">Restart ↻</button>
+        <a class="pill obtn gray" href="../index.html" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">← Back to Hub</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAME OVER OVERLAY ===== -->
+  <div class="overlay hidden" id="overOverlay">
+    <div class="card">
+      <div class="winemoji" id="overEmoji">🌟</div>
+      <h1 class="title" id="overTitle" style="font-size:32px;">Great game!</h1>
+      <p class="subtitle" id="overMsg">Well played, both of you!</p>
+      <div class="scoreLine" id="overScores"></div>
+      <p class="bestLine" id="overBest">🏆 Session best: —</p>
+      <div class="obtns">
+        <button class="pill obtn primary" id="againBtn">Play Again 🔄</button>
+        <button class="pill obtn blue" id="changeBtn">Change Level</button>
+        <a class="pill obtn gray" href="../index.html" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">← Hub</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="confetti" aria-hidden="true"></div>
+
+<script>
+/* ============================================================
+   Quiz Battle — 2-player local mixed-subject quiz
+   Single file, no external resources, no localStorage.
+   ============================================================ */
+
+/* ---------- Sound ---------- */
+const Sound=(()=>{let ctx,muted=false;function ac(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx;}
+function tone(freq,dur,type,vol){if(muted)return;dur=dur||0.12;type=type||"sine";vol=vol||0.2;var c=ac();var o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);var t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur+0.03);}
+return{resume:function(){try{ac().resume();}catch(e){}},tone:tone,click:function(){tone(420,0.06,"square",0.15);},good:function(){tone(660,0.1);setTimeout(function(){tone(880,0.12);},90);},bad:function(){tone(160,0.18,"sawtooth",0.15);},win:function(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.16,"triangle",0.18);},i*120);});},toggleMute:function(){muted=!muted;return muted;},isMuted:function(){return muted;}};})();
+
+/* ---------- Utility ---------- */
+function $(id){return document.getElementById(id);}
+function rint(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ---------- Difficulty config ---------- */
+const CONFIG={
+  easy:   { label:"Easy",   dot:"🟢", qPerPlayer:5, timer:0,  base:10, speedBonusMax:0 },
+  medium: { label:"Medium", dot:"🟡", qPerPlayer:6, timer:15, base:10, speedBonusMax:5 },
+  hard:   { label:"Hard",   dot:"🔴", qPerPlayer:7, timer:10, base:10, speedBonusMax:8 }
+};
+
+/* ============================================================
+   QUESTION GENERATORS / BANKS
+   Each returns { cat, emoji, q, answer (string), options[4] }
+   ============================================================ */
+
+/* ----- MATH (programmatic) ----- */
+function uniqOptions(correct, makeWrong){
+  var opts=[String(correct)];
+  var guard=0;
+  while(opts.length<4 && guard<200){
+    var w=makeWrong();
+    var s=String(w);
+    if(opts.indexOf(s)===-1) opts.push(s);
+    guard++;
+  }
+  // safety fill if generator stalls
+  var n=correct+1;
+  while(opts.length<4){ if(opts.indexOf(String(n))===-1) opts.push(String(n)); n++; }
+  return shuffle(opts);
+}
+function mathEasy(){
+  var type=rint(0,2), a,b,ans,q;
+  if(type===0){ a=rint(2,20); b=rint(2,20); ans=a+b; q=a+" + "+b+" = ?"; }
+  else if(type===1){ a=rint(10,30); b=rint(1,a); ans=a-b; q=a+" − "+b+" = ?"; }
+  else { a=rint(2,9); b=rint(2,9); ans=a*b; q=a+" × "+b+" = ?"; }
+  var opts=uniqOptions(ans, function(){ return Math.max(0, ans + rint(-6,6)); });
+  return { cat:"Math", emoji:"➗", q:q, answer:String(ans), options:opts };
+}
+function mathMedium(){
+  var type=rint(0,3), a,b,ans,q;
+  if(type===0){ a=rint(11,49); b=rint(11,49); ans=a+b; q=a+" + "+b+" = ?"; }
+  else if(type===1){ a=rint(6,12); b=rint(6,12); ans=a*b; q=a+" × "+b+" = ?"; }
+  else if(type===2){ b=rint(3,12); ans=rint(2,12); a=b*ans; q=a+" ÷ "+b+" = ?"; }
+  else { a=rint(20,80); b=rint(5,a-1); ans=a-b; q=a+" − "+b+" = ?"; }
+  var opts=uniqOptions(ans, function(){ return Math.max(0, ans + rint(-9,9)); });
+  return { cat:"Math", emoji:"➗", q:q, answer:String(ans), options:opts };
+}
+function mathHard(){
+  var type=rint(0,4), a,b,c,ans,q;
+  if(type===0){ a=rint(11,19); b=rint(11,19); ans=a*b; q=a+" × "+b+" = ?"; }
+  else if(type===1){ b=rint(6,15); ans=rint(6,15); a=b*ans; q=a+" ÷ "+b+" = ?"; }
+  else if(type===2){ a=rint(2,12); b=rint(2,12); c=rint(2,9); ans=a*b+c; q=a+" × "+b+" + "+c+" = ?"; }
+  else if(type===3){ a=rint(40,120); b=rint(20,a-1); c=rint(5,30); ans=a-b+c; q=a+" − "+b+" + "+c+" = ?"; }
+  else { var p=rint(10,40); var pct=pick([10,25,50,20]); ans=Math.round(p*pct/100); q=pct+"% of "+p+" = ?"; }
+  var opts=uniqOptions(ans, function(){ return Math.max(0, ans + rint(-12,12)); });
+  return { cat:"Math", emoji:"➗", q:q, answer:String(ans), options:opts };
+}
+
+/* ----- VOCABULARY / WORD ----- */
+/* Each entry: q, answer, distractors[] (>=3). Built-in, kid-safe. */
+const VOCAB={
+  easy:[
+    {q:"Which word means 'happy'? 😊", a:"Glad", d:["Sad","Angry","Tired"]},
+    {q:"Which word means 'big'? 🐘", a:"Huge", d:["Tiny","Small","Short"]},
+    {q:"What is the opposite of 'hot'? 🧊", a:"Cold", d:["Warm","Spicy","Sunny"]},
+    {q:"What is the opposite of 'up'? ⬆️", a:"Down", d:["Over","Side","Top"]},
+    {q:"Which word means 'fast'? 🏃", a:"Quick", d:["Slow","Calm","Late"]},
+    {q:"A baby dog is called a… 🐶", a:"Puppy", d:["Kitten","Cub","Foal"]},
+    {q:"A baby cat is called a… 🐱", a:"Kitten", d:["Puppy","Chick","Calf"]},
+    {q:"Which word means 'pretty'? 🌸", a:"Lovely", d:["Ugly","Messy","Dull"]},
+    {q:"What is the opposite of 'open'? 🚪", a:"Closed", d:["Wide","Empty","Loud"]},
+    {q:"Which word rhymes with 'cat'? 🐈", a:"Hat", d:["Dog","Cup","Run"]},
+    {q:"Which word means 'smart'? 🧠", a:"Clever", d:["Silly","Sleepy","Slow"]},
+    {q:"What is the opposite of 'day'? 🌙", a:"Night", d:["Noon","Week","Hour"]},
+    {q:"Many sheep together are a… 🐑", a:"Flock", d:["Pack","School","Swarm"]},
+    {q:"Which word means 'tasty'? 🍪", a:"Yummy", d:["Yucky","Plain","Sour"]},
+    {q:"What is the opposite of 'wet'? 💧", a:"Dry", d:["Damp","Cool","Soft"]}
+  ],
+  medium:[
+    {q:"Which word means 'brave'? 🦁", a:"Courageous", d:["Fearful","Lazy","Shy"]},
+    {q:"Which word means 'tired'? 😴", a:"Weary", d:["Eager","Cheerful","Strong"]},
+    {q:"What is a synonym for 'begin'?", a:"Start", d:["Finish","Stop","Pause"]},
+    {q:"What is the opposite of 'ancient'?", a:"Modern", d:["Old","Antique","Past"]},
+    {q:"A person who studies stars is an… 🔭", a:"Astronomer", d:["Astronaut","Geologist","Botanist"]},
+    {q:"Which word means 'very surprised'?", a:"Amazed", d:["Bored","Calm","Annoyed"]},
+    {q:"Many fish together are a… 🐟", a:"School", d:["Herd","Flock","Pride"]},
+    {q:"Which word means 'to make smaller'?", a:"Shrink", d:["Expand","Grow","Stretch"]},
+    {q:"What is a synonym for 'rich'? 💰", a:"Wealthy", d:["Poor","Broke","Plain"]},
+    {q:"Which word means 'a loud sound'? 🔊", a:"Noise", d:["Silence","Whisper","Hush"]},
+    {q:"What is the opposite of 'generous'?", a:"Selfish", d:["Kind","Giving","Caring"]},
+    {q:"A baby kangaroo is called a… 🦘", a:"Joey", d:["Cub","Calf","Pup"]},
+    {q:"Which word means 'to find out'? 🔍", a:"Discover", d:["Hide","Forget","Lose"]},
+    {q:"What is a synonym for 'angry'? 😠", a:"Furious", d:["Joyful","Sleepy","Polite"]},
+    {q:"A group of wolves is a… 🐺", a:"Pack", d:["Swarm","School","Flock"]},
+    {q:"Which word means 'almost the same'?", a:"Similar", d:["Opposite","Different","Unique"]}
+  ],
+  hard:[
+    {q:"What does 'benevolent' mean?", a:"Kind", d:["Cruel","Quiet","Wealthy"]},
+    {q:"What does 'abundant' mean?", a:"Plentiful", d:["Scarce","Empty","Tiny"]},
+    {q:"What does 'reluctant' mean?", a:"Unwilling", d:["Eager","Bold","Quick"]},
+    {q:"What is a synonym for 'fragile'?", a:"Delicate", d:["Sturdy","Heavy","Tough"]},
+    {q:"What does 'enormous' mean?", a:"Very large", d:["Very small","Average","Narrow"]},
+    {q:"What does 'transparent' mean?", a:"See-through", d:["Solid","Dark","Colorful"]},
+    {q:"What is the opposite of 'expand'?", a:"Contract", d:["Stretch","Inflate","Widen"]},
+    {q:"What does 'curious' mean?", a:"Eager to learn", d:["Bored","Angry","Sleepy"]},
+    {q:"What is a synonym for 'brief'?", a:"Short", d:["Lengthy","Endless","Wide"]},
+    {q:"What does 'ancient' mean?", a:"Very old", d:["Brand new","Future","Modern"]},
+    {q:"What does 'vivid' mean? 🎨", a:"Bright & clear", d:["Faded","Dull","Blurry"]},
+    {q:"What is the opposite of 'humble'?", a:"Boastful", d:["Modest","Shy","Gentle"]},
+    {q:"What does 'frequent' mean?", a:"Often", d:["Rare","Never","Once"]},
+    {q:"What is a synonym for 'mimic'?", a:"Imitate", d:["Ignore","Invent","Destroy"]},
+    {q:"What does 'gigantic' mean?", a:"Huge", d:["Tiny","Medium","Thin"]},
+    {q:"What is the opposite of 'victory'?", a:"Defeat", d:["Triumph","Prize","Win"]}
+  ]
+};
+
+/* ----- LOGIC / PATTERNS ----- */
+function logicEasy(){
+  var bank=[
+    function(){var s=rint(1,5);var seq=[s,s+1,s+2,s+3];return {q:"Next number: "+seq[0]+", "+seq[1]+", "+seq[2]+", ?",a:s+4,d:[s+5,s+3,s+6]};},
+    function(){var s=rint(2,8);var seq=[s,s*2,s*3];return {q:"Next number: "+seq[0]+", "+seq[1]+", "+seq[2]+", ?",a:s*4,d:[s*5,s*3+1,s*2]};},
+    function(){var s=rint(10,20);return {q:"Count down: "+s+", "+(s-1)+", "+(s-2)+", ?",a:s-3,d:[s-2,s-4,s+1]};},
+    function(){return {q:"🔺🔵🔺🔵🔺 — what comes next?",a:"🔵",d:["🔺","🟩","⭐"]};},
+    function(){return {q:"🍎🍎🍌🍎🍎🍌 — what comes next?",a:"🍎",d:["🍌","🍇","🍊"]};},
+    function(){var even=rint(1,5)*2;return {q:"Next even number: "+even+", "+(even+2)+", "+(even+4)+", ?",a:even+6,d:[even+5,even+7,even+8]};}
+  ];
+  var r=pick(bank)();
+  var opts=shuffle([String(r.a)].concat(r.d.map(String)));
+  return { cat:"Logic", emoji:"🧩", q:r.q, answer:String(r.a), options:opts };
+}
+function logicMedium(){
+  var bank=[
+    function(){var s=rint(2,6);var seq=[s,s+s,s+s+s];return {q:"Pattern: "+s+", "+(s+3)+", "+(s+6)+", ? (add 3)",a:s+9,d:[s+12,s+8,s+10]};},
+    function(){var s=rint(1,4);return {q:"Doubling: "+s+", "+(s*2)+", "+(s*4)+", "+(s*8)+", ?",a:s*16,d:[s*12,s*10,s*14]};},
+    function(){return {q:"If 🐶=4 legs, how many legs do 3 🐶 have?",a:12,d:[8,6,16]};},
+    function(){return {q:"Sara is taller than Mia. Mia is taller than Joe. Who is tallest?",a:"Sara",d:["Mia","Joe","Same"]};},
+    function(){var s=rint(3,7);return {q:"Squares: "+(s*s)+", "+((s+1)*(s+1))+", ? (next square)",a:(s+2)*(s+2),d:[(s+2)*(s+2)-2,(s+1)*(s+1)+s,(s+2)*(s+2)+1]};},
+    function(){return {q:"Odd one out: 2, 4, 7, 8",a:"7",d:["2","4","8"]};},
+    function(){return {q:"🌗 follows 🌑 follows 🌕… Moon order — what's missing: 🌑, 🌓, 🌕, ?",a:"🌗",d:["🌑","🌓","🌕"]};}
+  ];
+  var r=pick(bank)();
+  var opts=shuffle([String(r.a)].concat(r.d.map(String)));
+  return { cat:"Logic", emoji:"🧩", q:r.q, answer:String(r.a), options:opts };
+}
+function logicHard(){
+  var bank=[
+    function(){var s=rint(1,3);return {q:"Fibonacci-style: "+s+", "+s+", "+(2*s)+", "+(3*s)+", "+(5*s)+", ?",a:8*s,d:[7*s,6*s,9*s]};},
+    function(){var s=rint(2,4);return {q:"Triple it: "+s+", "+(s*3)+", "+(s*9)+", ?",a:s*27,d:[s*24,s*18,s*30]};},
+    function(){return {q:"Odd one out: 9, 16, 24, 25 (perfect squares?)",a:"24",d:["9","16","25"]};},
+    function(){return {q:"All cats are animals. Tom is a cat. So Tom is a…",a:"Animal",d:["Dog","Bird","Plant"]};},
+    function(){var n=rint(3,6);return {q:"A train has "+n+" cars, each holds 8 people. Total seats?",a:n*8,d:[n*8-8,n*8+8,n*7]};},
+    function(){return {q:"Pattern: 1, 4, 9, 16, ? (square numbers)",a:"25",d:["20","24","30"]};},
+    function(){return {q:"If TODAY is Wednesday, what day is 4 days later?",a:"Sunday",d:["Saturday","Monday","Friday"]};},
+    function(){return {q:"Decode +2: A=C, B=D, so F = ?",a:"H",d:["G","I","E"]};}
+  ];
+  var r=pick(bank)();
+  var opts=shuffle([String(r.a)].concat(r.d.map(String)));
+  return { cat:"Logic", emoji:"🧩", q:r.q, answer:String(r.a), options:opts };
+}
+
+/* ----- GENERAL KNOWLEDGE (curated, kid-safe) ----- */
+const GK={
+  easy:[
+    {q:"What color do you get mixing blue + yellow? 🎨", a:"Green", d:["Purple","Orange","Pink"]},
+    {q:"How many legs does a spider have? 🕷️", a:"8", d:["6","4","10"]},
+    {q:"Which planet do we live on? 🌍", a:"Earth", d:["Mars","Moon","Sun"]},
+    {q:"What do bees make? 🐝", a:"Honey", d:["Milk","Bread","Silk"]},
+    {q:"Which animal says 'moo'? 🐮", a:"Cow", d:["Duck","Cat","Frog"]},
+    {q:"How many days are in a week? 📅", a:"7", d:["5","10","12"]},
+    {q:"What do we call frozen water? 🧊", a:"Ice", d:["Steam","Snowman","Cloud"]},
+    {q:"Which is a fruit? 🍓", a:"Strawberry", d:["Carrot","Potato","Onion"]},
+    {q:"What gives us light in the day? ☀️", a:"The Sun", d:["The Moon","A lamp","Stars"]},
+    {q:"How many colors are in a rainbow? 🌈", a:"7", d:["5","9","3"]},
+    {q:"Which animal lives in water? 🐠", a:"Fish", d:["Lion","Eagle","Camel"]},
+    {q:"What do plants need to grow? 🌱", a:"Sunlight & water", d:["Candy","Music","Toys"]},
+    {q:"Which season is the coldest? ❄️", a:"Winter", d:["Summer","Spring","Autumn"]},
+    {q:"What shape has 3 sides? 🔺", a:"Triangle", d:["Square","Circle","Star"]},
+    {q:"Baby frogs are called… 🐸", a:"Tadpoles", d:["Chicks","Cubs","Kits"]}
+  ],
+  medium:[
+    {q:"What is the largest planet? 🪐", a:"Jupiter", d:["Earth","Mars","Saturn"]},
+    {q:"Which ocean is the biggest? 🌊", a:"Pacific", d:["Atlantic","Indian","Arctic"]},
+    {q:"How many continents are there? 🗺️", a:"7", d:["5","6","8"]},
+    {q:"What is the fastest land animal? 🐆", a:"Cheetah", d:["Lion","Horse","Tiger"]},
+    {q:"Which gas do plants breathe in? 🌳", a:"Carbon dioxide", d:["Oxygen","Helium","Nitrogen"]},
+    {q:"What is H2O better known as? 💧", a:"Water", d:["Salt","Air","Sugar"]},
+    {q:"How many sides does a hexagon have? ⬡", a:"6", d:["5","7","8"]},
+    {q:"Which animal is the tallest? 🦒", a:"Giraffe", d:["Elephant","Horse","Camel"]},
+    {q:"What is the capital of France? 🇫🇷", a:"Paris", d:["Rome","London","Madrid"]},
+    {q:"Which is a mammal? 🐬", a:"Dolphin", d:["Shark","Octopus","Crab"]},
+    {q:"What do we call animals that eat only plants? 🥬", a:"Herbivores", d:["Carnivores","Omnivores","Insects"]},
+    {q:"Which is the smallest prime number?", a:"2", d:["1","3","0"]},
+    {q:"What is frozen rain called? 🌨️", a:"Hail", d:["Fog","Dew","Mist"]},
+    {q:"Which planet is known as the Red Planet? 🔴", a:"Mars", d:["Venus","Mercury","Neptune"]},
+    {q:"How many minutes are in an hour? ⏰", a:"60", d:["100","30","24"]},
+    {q:"Which bird cannot fly? 🐧", a:"Penguin", d:["Eagle","Sparrow","Owl"]}
+  ],
+  hard:[
+    {q:"What is the powerhouse of the cell? 🔬", a:"Mitochondria", d:["Nucleus","Ribosome","Membrane"]},
+    {q:"How many bones are in the adult human body? 🦴", a:"206", d:["106","306","256"]},
+    {q:"What is the hardest natural substance? 💎", a:"Diamond", d:["Gold","Iron","Quartz"]},
+    {q:"Which planet is closest to the Sun? ☀️", a:"Mercury", d:["Venus","Earth","Mars"]},
+    {q:"What is the chemical symbol for gold?", a:"Au", d:["Go","Gd","Ag"]},
+    {q:"Who painted the Mona Lisa? 🖼️", a:"Da Vinci", d:["Picasso","Van Gogh","Monet"]},
+    {q:"What is the largest desert on Earth?", a:"Antarctic", d:["Sahara","Gobi","Arabian"]},
+    {q:"Which is the longest river in the world?", a:"Nile", d:["Amazon","Yangtze","Danube"]},
+    {q:"How many degrees in a right angle? 📐", a:"90", d:["45","180","360"]},
+    {q:"What force pulls objects toward Earth? 🍎", a:"Gravity", d:["Friction","Magnetism","Tension"]},
+    {q:"Which country has the most people? 🌏", a:"India", d:["USA","Russia","Brazil"]},
+    {q:"What is the speed of light fastest in? ⚡", a:"Vacuum/space", d:["Water","Glass","Air"]},
+    {q:"Which blood cells fight infection? 🩸", a:"White cells", d:["Red cells","Platelets","Plasma"]},
+    {q:"What is the capital of Japan? 🇯🇵", a:"Tokyo", d:["Kyoto","Osaka","Seoul"]},
+    {q:"How many strings does a violin have? 🎻", a:"4", d:["6","5","3"]},
+    {q:"Which metal is liquid at room temperature?", a:"Mercury", d:["Iron","Copper","Lead"]}
+  ]
+};
+
+function bankToQ(entry, catName, emoji){
+  var opts=shuffle([entry.a].concat(entry.d));
+  return { cat:catName, emoji:emoji, q:entry.q, answer:entry.a, options:opts };
+}
+
+/* ============================================================
+   QUESTION QUEUE — avoids immediate repeats per category bank
+   ============================================================ */
+function makeBag(arr){
+  // returns a function giving items in shuffled passes (no repeat within a pass)
+  var order=shuffle(arr), i=0;
+  return function(){
+    if(i>=order.length){ order=shuffle(arr); i=0; }
+    return order[i++];
+  };
+}
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+var state=null;
+var sessionBest={ name:"", score:0 };  // best single-player score this session (in-memory)
+
+var DIFF="easy";
+
+function buildQuestionFactory(diff){
+  // category bags so we don't repeat within a pass
+  var vocabBag=makeBag(VOCAB[diff]);
+  var gkBag=makeBag(GK[diff]);
+  var logicFn = diff==="easy"?logicEasy : diff==="medium"?logicMedium : logicHard;
+  var mathFn  = diff==="easy"?mathEasy  : diff==="medium"?mathMedium  : mathHard;
+
+  // weighted category sequence: ensure good mix
+  var cats=["math","vocab","logic","gk"];
+  return function(){
+    var c=pick(cats);
+    if(c==="math") return mathFn();
+    if(c==="vocab") return bankToQ(vocabBag(),"Vocabulary","📖");
+    if(c==="logic") return logicFn();
+    return bankToQ(gkBag(),"Knowledge","🌍");
+  };
+}
+
+/* ============================================================
+   FLOW
+   ============================================================ */
+var els={};
+function cacheEls(){
+  els.playView=$("playView");
+  els.startOverlay=$("startOverlay");
+  els.pauseOverlay=$("pauseOverlay");
+  els.overOverlay=$("overOverlay");
+  els.card1=$("card1"); els.card2=$("card2");
+  els.p1score=$("p1score"); els.p2score=$("p2score");
+  els.p1name=$("p1name"); els.p2name=$("p2name");
+  els.p1flag=$("p1flag"); els.p2flag=$("p2flag");
+  els.roundLabel=$("roundLabel");
+  els.timerWrap=$("timerWrap"); els.timerNum=$("timerNum"); els.timerBar=$("timerBar");
+  els.qcat=$("qcat"); els.qturn=$("qturn"); els.qtext=$("qtext");
+  els.answers=$("answers"); els.progress=$("progress"); els.feedback=$("feedback");
+}
+
+function startGame(diff){
+  var cfg=CONFIG[diff];
+  var n1=($("in1").value||"").trim()||"Blue";
+  var n2=($("in2").value||"").trim()||"Red";
+  // keep names short
+  n1=n1.slice(0,10); n2=n2.slice(0,10);
+
+  // cancel any pending flow timeout / running timer from a previous game so a
+  // stale nextQuestion()/evaluate step cannot fire into the freshly-built state
+  clearFlowTimeout();
+  stopTimer();
+
+  state={
+    diff:diff,
+    cfg:cfg,
+    factory:buildQuestionFactory(diff),
+    players:[
+      {name:n1, emoji:"🔵", score:0, answered:0},
+      {name:n2, emoji:"🔴", score:0, answered:0}
+    ],
+    turn:0,            // 0 -> player1, 1 -> player2
+    totalPerPlayer:cfg.qPerPlayer,
+    qIndex:0,          // overall question count
+    current:null,
+    locked:false,
+    paused:false,
+    suddenDeath:false,
+    sdAnswers:[null,null], // sudden death recorded results
+    flowTimeout:null,  // pending setTimeout id for nextQuestion/evaluate steps
+    flowPending:null,  // the pending step callback (so pause can defer it)
+    flowDeferred:null, // step deferred by pause, re-run on resume
+    timer:{id:null, remain:0, raf:null, startTs:0, dur:0}
+  };
+
+  // header names
+  els.p1name.textContent=n1;
+  els.p2name.textContent=n2;
+  els.p1score.textContent="0";
+  els.p2score.textContent="0";
+
+  els.startOverlay.classList.add("hidden");
+  els.pauseOverlay.classList.add("hidden");
+  els.overOverlay.classList.add("hidden");
+  els.playView.classList.remove("hidden");
+
+  buildProgressPips();
+  nextQuestion();
+}
+
+function buildProgressPips(){
+  els.progress.innerHTML="";
+  var total=state.totalPerPlayer*2;
+  for(var i=0;i<total;i++){
+    var p=document.createElement("span");
+    p.className="pip";
+    els.progress.appendChild(p);
+  }
+}
+function updatePips(){
+  var pips=els.progress.querySelectorAll(".pip");
+  for(var i=0;i<pips.length;i++){
+    pips[i].classList.remove("now");
+    if(i<state.qIndex) pips[i].classList.add("done");
+    else pips[i].classList.remove("done");
+  }
+  if(state.qIndex<pips.length) pips[state.qIndex].classList.add("now");
+}
+
+function setActiveCard(){
+  var p1=state.turn===0;
+  els.card1.classList.toggle("active",p1);
+  els.card1.classList.toggle("dim",!p1);
+  els.card2.classList.toggle("active",!p1);
+  els.card2.classList.toggle("dim",p1);
+  els.p1flag.textContent=p1?"▶ Your turn":"";
+  els.p2flag.textContent=!p1?"▶ Your turn":"";
+}
+
+function currentPlayer(){ return state.players[state.turn]; }
+
+/* ---------- Flow timeout helpers ----------
+   Single tracked pending timeout for the post-answer / sudden-death steps so
+   restart and pause can cancel it (otherwise a stale step desyncs state).
+   The pending callback is remembered so pause can defer it and resume re-run it
+   instead of dropping the step (which would stall the game). */
+function clearFlowTimeout(){
+  if(state){
+    if(state.flowTimeout!=null){ clearTimeout(state.flowTimeout); state.flowTimeout=null; }
+    state.flowPending=null;
+    state.flowDeferred=null;
+  }
+}
+function scheduleFlow(fn, ms){
+  clearFlowTimeout();
+  if(!state) return;
+  state.flowPending=fn;
+  state.flowTimeout=setTimeout(function(){
+    if(!state) return;
+    state.flowTimeout=null;
+    state.flowPending=null;
+    fn();
+  }, ms);
+}
+
+function nextQuestion(){
+  // never advance while paused (a pending step may fire after pause began)
+  if(!state || state.paused) return;
+  // check end condition for regular play
+  if(!state.suddenDeath){
+    var totalQ=state.totalPerPlayer*2;
+    if(state.qIndex>=totalQ){ finishOrSuddenDeath(); return; }
+  }
+  state.locked=false;
+  state.current=state.factory();
+
+  var p=currentPlayer();
+  els.qcat.textContent=state.current.emoji+" "+state.current.cat;
+  els.qturn.innerHTML="<span style='color:"+(state.turn===0?"#2f6fe0":"#e8447d")+"'>"+p.emoji+" "+escapeHtml(p.name)+"</span>'s turn";
+  els.qtext.textContent=state.current.q;
+  els.qtext.classList.remove("pop"); void els.qtext.offsetWidth; els.qtext.classList.add("pop");
+  els.feedback.textContent="";
+
+  // round label
+  if(state.suddenDeath){
+    els.roundLabel.textContent="⚡ Sudden Death";
+  }else{
+    var roundNum=Math.floor(state.qIndex/2)+1;
+    els.roundLabel.textContent="Round "+roundNum+" / "+state.totalPerPlayer;
+  }
+
+  setActiveCard();
+  renderAnswers();
+  updatePips();
+
+  // timer
+  if(state.cfg.timer>0){
+    startTimer(state.cfg.timer);
+  }else{
+    els.timerWrap.classList.add("hidden");
+  }
+}
+
+function renderAnswers(){
+  els.answers.innerHTML="";
+  var keys=["1","2","3","4"];
+  state.current.options.forEach(function(opt,i){
+    var b=document.createElement("button");
+    b.className="ans";
+    b.type="button";
+    b.dataset.opt=opt;
+    b.setAttribute("aria-label","Answer "+(i+1)+": "+opt);
+    b.innerHTML="<span class='key'>"+keys[i]+"</span><span class='txt'>"+escapeHtml(opt)+"</span><span class='mark'></span>";
+    bindAnswerTap(b, opt);
+    els.answers.appendChild(b);
+  });
+}
+
+/* Robust tap binding for tablets/phones AND mouse/keyboard.
+   Prefer Pointer Events (covers touch + mouse + pen with one path); fall back
+   to touchend + click on older browsers. A short guard prevents the synthetic
+   click that follows touchend from firing onAnswer twice. */
+function bindAnswerTap(btn, opt){
+  function fire(e){
+    if(e && e.cancelable) e.preventDefault();
+    if(btn.disabled) return;
+    onAnswer(opt, btn);
+  }
+  if(window.PointerEvent){
+    btn.addEventListener("pointerup",function(e){
+      // primary button / touch / pen only
+      if(e.button!=null && e.button>0) return;
+      fire(e);
+    });
+  }else{
+    var touched=false;
+    btn.addEventListener("touchend",function(e){
+      touched=true;
+      fire(e);
+      // clear the guard after the synthesized click would have fired
+      setTimeout(function(){ touched=false; }, 600);
+    },{passive:false});
+    btn.addEventListener("click",function(e){
+      if(touched) return; // already handled by touchend
+      fire(e);
+    });
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+
+/* ---------- Timer ----------
+   `fullDur` is the full configured duration for the current question (constant
+   across pause/resume); `endTs` is the performance.now() time at which the bar
+   hits 0. timerRemainPct() reads these so the speed bonus reflects the exact
+   answer instant rather than the last rendered bar frame. */
+function startTimer(seconds){
+  stopTimer();
+  els.timerWrap.classList.remove("hidden");
+  state.timer.dur=seconds;
+  state.timer.fullDur=seconds;
+  state.timer.startTs=performance.now();
+  state.timer.endTs=state.timer.startTs+seconds*1000;
+  els.timerBar.classList.remove("low");
+  els.timerBar.style.width="100%";
+  els.timerNum.textContent=seconds;
+
+  function loop(now){
+    // pause is handled by pauseGame() cancelling this RAF; no in-loop branch needed
+    var elapsed=(now-state.timer.startTs)/1000;
+    var remain=Math.max(0, seconds-elapsed);
+    var pctRemain=remain/seconds;
+    els.timerBar.style.width=(pctRemain*100)+"%";
+    els.timerNum.textContent=Math.ceil(remain);
+    if(remain<=seconds*0.34) els.timerBar.classList.add("low");
+    if(remain<=0){
+      state.timer.raf=null;
+      onTimeout();
+      return;
+    }
+    state.timer.raf=requestAnimationFrame(loop);
+  }
+  state.timer.raf=requestAnimationFrame(loop);
+}
+function stopTimer(){
+  if(state && state.timer && state.timer.raf){ cancelAnimationFrame(state.timer.raf); state.timer.raf=null; }
+}
+function timerRemainPct(){
+  if(state.cfg.timer<=0) return 1;
+  var full=state.timer.fullDur||state.cfg.timer;
+  // remaining fraction of the FULL question time, measured at this instant
+  var remainMs=state.timer.endTs-performance.now();
+  var pct=remainMs/(full*1000);
+  if(pct<0) pct=0; if(pct>1) pct=1;
+  return pct;
+}
+
+function onTimeout(){
+  if(state.locked) return;
+  state.locked=true;
+  Sound.bad();
+  revealCorrect(null);
+  els.feedback.textContent="⏰ Time up! Correct: "+state.current.answer;
+  // a timeout counts as a wrong answer; record it for sudden death so the
+  // tie-breaker evaluator sees an explicit "wrong" (not a stale null) and can
+  // correctly detect both-wrong -> another round vs one-right -> decisive win
+  if(state.suddenDeath) state.sdAnswers[state.turn]=false;
+  afterAnswer(false);
+}
+
+/* ---------- Answer handling ---------- */
+function onAnswer(opt, btn){
+  if(state.locked||state.paused) return;
+  state.locked=true;
+  // capture remaining-time fraction at the exact answer instant, BEFORE
+  // stopTimer(), so the speed bonus reflects when the player actually tapped
+  var remainPctAtAnswer=timerRemainPct();
+  stopTimer();
+
+  var correct = opt===state.current.answer;
+  revealCorrect(opt);
+
+  var p=currentPlayer();
+  if(correct){
+    var gained=state.cfg.base;
+    var bonus=0;
+    if(state.cfg.speedBonusMax>0){
+      bonus=Math.round(state.cfg.speedBonusMax*remainPctAtAnswer);
+    }
+    gained+=bonus;
+    p.score+=gained;
+    Sound.good();
+    els.feedback.textContent="✅ Correct! +"+gained+(bonus>0?" (⚡"+bonus+" speed)":"");
+    if(state.suddenDeath) state.sdAnswers[state.turn]=true;
+  }else{
+    Sound.bad();
+    els.feedback.textContent="❌ Not quite. Correct: "+state.current.answer;
+    if(state.suddenDeath) state.sdAnswers[state.turn]=false;
+  }
+  updateScores();
+  afterAnswer(correct);
+}
+
+function revealCorrect(chosen){
+  var btns=els.answers.querySelectorAll(".ans");
+  btns.forEach(function(b){
+    b.disabled=true;
+    var opt=b.dataset.opt;
+    var mark=b.querySelector(".mark");
+    if(opt===state.current.answer){
+      b.classList.add("correct");
+      mark.textContent="✔️";
+    }else if(chosen!==null && opt===chosen){
+      b.classList.add("wrong");
+      mark.textContent="✖️";
+    }
+  });
+}
+
+function updateScores(){
+  els.p1score.textContent=state.players[0].score;
+  els.p2score.textContent=state.players[1].score;
+  var card= state.turn===0?els.card1:els.card2;
+  card.classList.remove("pop"); void card.offsetWidth; card.classList.add("pop");
+}
+
+function afterAnswer(correct){
+  currentPlayer().answered++;
+
+  // SUDDEN DEATH logic
+  if(state.suddenDeath){
+    // each player answers one SD question; if both done, evaluate
+    if(state.turn===0){
+      // pass to player 2
+      state.turn=1;
+      scheduleFlow(nextQuestion, 1500);
+      return;
+    }else{
+      // both answered -> evaluate
+      scheduleFlow(evaluateSuddenDeath, 1500);
+      return;
+    }
+  }
+
+  // normal: advance
+  state.qIndex++;
+  // alternate turn
+  state.turn = state.qIndex % 2;
+  scheduleFlow(nextQuestion, 1500);
+}
+
+/* ---------- End / sudden death ---------- */
+function finishOrSuddenDeath(){
+  var s1=state.players[0].score, s2=state.players[1].score;
+  if(s1===s2){
+    // start sudden death round
+    state.suddenDeath=true;
+    state.sdAnswers=[null,null];
+    state.turn=0;
+    els.feedback.textContent="";
+    startSuddenDeath();
+  }else{
+    endGame();
+  }
+}
+function startSuddenDeath(){
+  // small announce, then question for player 1
+  showSuddenDeathBanner(function(){
+    nextQuestion();
+  });
+}
+function showSuddenDeathBanner(cb){
+  els.qcat.textContent="⚡ Tie-Breaker";
+  els.qturn.textContent="Sudden Death!";
+  els.qtext.textContent="It's a tie! One question each. ⚡";
+  els.answers.innerHTML="";
+  els.feedback.textContent="Get ready…";
+  scheduleFlow(cb, 1400);
+}
+function evaluateSuddenDeath(){
+  var a=state.sdAnswers[0], b=state.sdAnswers[1];
+  if(a===b){
+    // both right or both wrong -> another sudden death round
+    state.sdAnswers=[null,null];
+    state.turn=0;
+    els.feedback.textContent="Still tied! ⚡ Another round!";
+    scheduleFlow(function(){ showSuddenDeathBanner(nextQuestion); }, 1200);
+  }else{
+    // someone won by SD: give SD winner +5 to break tie
+    var winnerIdx = a===true?0:1;
+    state.players[winnerIdx].score+=5;
+    updateScores();
+    scheduleFlow(endGame, 700);
+  }
+}
+
+function endGame(){
+  clearFlowTimeout();
+  stopTimer();
+  var p1=state.players[0], p2=state.players[1];
+
+  // update session best (highest single score this session)
+  [p1,p2].forEach(function(p){
+    if(p.score>sessionBest.score){ sessionBest={name:p.name, score:p.score}; }
+  });
+
+  var winner, loser, tie=false;
+  if(p1.score>p2.score){ winner=p1; loser=p2; }
+  else if(p2.score>p1.score){ winner=p2; loser=p1; }
+  else { tie=true; }
+
+  if(tie){
+    $("overEmoji").textContent="🤝";
+    $("overTitle").textContent="It's a tie!";
+    $("overMsg").textContent="Amazing — you're perfectly matched! 🌟";
+  }else{
+    $("overEmoji").textContent="🏆";
+    $("overTitle").textContent=winner.emoji+" "+winner.name+" wins!";
+    $("overMsg").textContent="Great battle, both of you! 👏 "+loser.name+" played hard too!";
+  }
+
+  $("overScores").innerHTML=
+    "<span class='p1n'>🔵 "+escapeHtml(p1.name)+": "+p1.score+"</span><br>"+
+    "<span class='p2n'>🔴 "+escapeHtml(p2.name)+": "+p2.score+"</span>";
+
+  $("overBest").textContent= sessionBest.score>0
+    ? "🏆 Session best: "+sessionBest.name+" — "+sessionBest.score
+    : "🏆 Session best: —";
+
+  els.overOverlay.classList.remove("hidden");
+
+  if(!tie){
+    Sound.win();
+    confettiBurst();
+  }else{
+    Sound.good();
+  }
+}
+
+/* ---------- Confetti ---------- */
+function confettiBurst(){
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var box=$("confetti");
+  var emojis=["🎉","⭐","🎊","🌟","✨","🏆","💛","💙"];
+  for(var i=0;i<36;i++){
+    (function(i){
+      var s=document.createElement("span");
+      s.className="conf";
+      s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      s.style.left=(Math.random()*100)+"vw";
+      s.style.fontSize=(18+Math.random()*22)+"px";
+      var dur=2.2+Math.random()*1.6;
+      s.style.animationDuration=dur+"s";
+      s.style.animationDelay=(Math.random()*0.5)+"s";
+      box.appendChild(s);
+      setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); }, (dur+0.7)*1000);
+    })(i);
+  }
+}
+
+/* ---------- Pause ---------- */
+function pauseGame(){
+  if(!state||state.paused) return;
+  state.paused=true;
+  // freeze timer: remember elapsed
+  if(state.timer.raf){
+    state.timer.elapsedAtPause=performance.now()-state.timer.startTs;
+    cancelAnimationFrame(state.timer.raf);
+    state.timer.raf=null;
+  }
+  // defer any pending flow step (e.g. the post-answer advance) so it cannot run
+  // while paused; remember it so resume re-runs it instead of dropping it.
+  if(state.flowTimeout!=null){
+    clearTimeout(state.flowTimeout);
+    state.flowTimeout=null;
+    state.flowDeferred=state.flowPending; // may be null
+    state.flowPending=null;
+  }else{
+    state.flowDeferred=null;
+  }
+  els.pauseOverlay.classList.remove("hidden");
+}
+function resumeGame(){
+  if(!state||!state.paused) return;
+  state.paused=false;
+  els.pauseOverlay.classList.add("hidden");
+  // resume timer if it was running and question not locked
+  if(state.cfg.timer>0 && !state.locked && state.timer.elapsedAtPause!=null){
+    var seconds=state.cfg.timer;
+    var remain=Math.max(0, seconds-(state.timer.elapsedAtPause/1000));
+    // restart timer with remaining time
+    restartTimerWith(remain, seconds);
+    state.timer.elapsedAtPause=null;
+  }
+  // re-run any flow step that was deferred by pause (post-answer advance, etc.)
+  if(state.flowDeferred){
+    var step=state.flowDeferred;
+    state.flowDeferred=null;
+    scheduleFlow(step, 700);
+  }
+}
+function restartTimerWith(remain, fullSeconds){
+  stopTimer();
+  if(remain<=0){ onTimeout(); return; }
+  els.timerWrap.classList.remove("hidden");
+  state.timer.startTs=performance.now();
+  state.timer.fullDur=fullSeconds;          // keep full duration for speed bonus
+  state.timer.endTs=state.timer.startTs+remain*1000;
+  var seconds=remain;
+  els.timerBar.classList.remove("low");
+  function loop(now){
+    if(state.paused){ return; }
+    var elapsed=(now-state.timer.startTs)/1000;
+    var rem=Math.max(0, seconds-elapsed);
+    var pctRemain=rem/fullSeconds;
+    els.timerBar.style.width=(pctRemain*100)+"%";
+    els.timerNum.textContent=Math.ceil(rem);
+    if(rem<=fullSeconds*0.34) els.timerBar.classList.add("low");
+    if(rem<=0){ state.timer.raf=null; onTimeout(); return; }
+    state.timer.raf=requestAnimationFrame(loop);
+  }
+  state.timer.raf=requestAnimationFrame(loop);
+}
+
+/* ---------- Restart / change level ---------- */
+function restartSame(){
+  els.pauseOverlay.classList.add("hidden");
+  els.overOverlay.classList.add("hidden");
+  startGame(state?state.diff:DIFF);
+}
+function backToStart(){
+  clearFlowTimeout();
+  stopTimer();
+  els.overOverlay.classList.add("hidden");
+  els.pauseOverlay.classList.add("hidden");
+  els.playView.classList.add("hidden");
+  els.startOverlay.classList.remove("hidden");
+}
+
+/* ============================================================
+   WIRING
+   ============================================================ */
+function init(){
+  cacheEls();
+
+  // difficulty buttons
+  var diffBtns=document.querySelectorAll(".diffbtn");
+  diffBtns.forEach(function(b){
+    b.addEventListener("click",function(){
+      diffBtns.forEach(function(x){x.classList.remove("sel");});
+      b.classList.add("sel");
+      DIFF=b.dataset.diff;
+      Sound.click();
+    });
+  });
+
+  // play
+  $("playBtn").addEventListener("click",function(){
+    Sound.resume();
+    Sound.click();
+    startGame(DIFF);
+  });
+
+  // mute
+  $("muteBtn").addEventListener("click",function(){
+    Sound.resume();
+    var m=Sound.toggleMute();
+    $("muteBtn").textContent=m?"🔇":"🔊";
+    if(!m) Sound.click();
+  });
+
+  // pause / restart top bar
+  $("pauseBtn").addEventListener("click",function(){ Sound.click(); pauseGame(); });
+  $("restartBtn").addEventListener("click",function(){ Sound.click(); restartSame(); });
+
+  // pause overlay
+  $("resumeBtn").addEventListener("click",function(){ Sound.click(); resumeGame(); });
+  $("pauseRestartBtn").addEventListener("click",function(){ Sound.click(); restartSame(); });
+
+  // over overlay
+  $("againBtn").addEventListener("click",function(){ Sound.click(); restartSame(); });
+  $("changeBtn").addEventListener("click",function(){ Sound.click(); backToStart(); });
+
+  // keyboard: 1-4 to answer, P pause, R restart
+  document.addEventListener("keydown",function(e){
+    if(els.playView.classList.contains("hidden")) return;
+    if(!state||state.paused){
+      if(e.key==="Escape" && state && state.paused){ resumeGame(); }
+      return;
+    }
+    if(["1","2","3","4"].indexOf(e.key)!==-1){
+      var idx=parseInt(e.key,10)-1;
+      var btns=els.answers.querySelectorAll(".ans");
+      var tgt=btns[idx];
+      if(tgt && !tgt.disabled){
+        e.preventDefault();
+        // call onAnswer directly so this works regardless of which tap path
+        // (pointerup vs click) is bound on the button
+        onAnswer(tgt.dataset.opt, tgt);
+      }
+    }else if(e.key==="p"||e.key==="P"||e.key==="Escape"){
+      e.preventDefault();
+      if(state.paused) resumeGame(); else pauseGame();
+    }else if(e.key==="r"||e.key==="R"){
+      e.preventDefault();
+      restartSame();
+    }
+  });
+
+  // Answer taps are bound per-button (pointerup / touchend) in bindAnswerTap;
+  // `touch-action:manipulation` on `.ans` keeps taps fast (no double-tap zoom)
+  // without suppressing the tap the way a container touchstart preventDefault did.
+}
+
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",init);
+}else{ init(); }
+</script>
+</body>
+</html>

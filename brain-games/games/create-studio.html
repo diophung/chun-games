@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Create Studio 🎨</title>
+<style>
+  :root{
+    --bg-grad: linear-gradient(160deg,#2b1e66 0%, #3b2fb0 45%, #1f6feb 100%);
+    --paper:#ffffff; --ink:#13183a; --ink-soft:#5b6488;
+    --c-blue:#3a86ff; --c-orange:#fb8500; --c-green:#06d6a0; --c-pink:#ff5d8f; --c-yellow:#ffd166; --c-purple:#9b5de5;
+    --ok:#06d6a0; --warn:#ff6b6b; --radius:20px;
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:var(--font);
+    background:var(--bg-grad) fixed;
+    color:var(--ink);
+    min-height:100%;
+    overflow:hidden;
+    touch-action:none;
+  }
+  h1,h2,h3{font-weight:800;margin:0;}
+  button{font-family:var(--font);cursor:pointer;border:none;}
+  button:focus-visible, .focusable:focus-visible, input:focus-visible{
+    outline:4px solid #ffd166; outline-offset:2px;
+  }
+
+  /* ---------- App layout ---------- */
+  #app{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    padding:6px;
+    gap:6px;
+  }
+
+  /* ---------- Top bar ---------- */
+  #topbar{
+    display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.14);
+    border-radius:999px;
+    padding:5px 8px;
+    backdrop-filter:blur(6px);
+    flex:0 0 auto;
+  }
+  .chip{
+    display:inline-flex; align-items:center; justify-content:center;
+    gap:5px;
+    min-height:48px; min-width:48px;
+    padding:0 12px;
+    border-radius:999px;
+    background:#fff; color:var(--ink);
+    font-weight:800; font-size:15px;
+    box-shadow:0 3px 0 rgba(0,0,0,.18);
+    user-select:none;
+    text-decoration:none;
+  }
+  .chip.ghost{background:rgba(255,255,255,.92);}
+  .chip:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.18);}
+  #topbar .grow{flex:1 1 auto;}
+  #title-mini{color:#fff; font-size:18px; font-weight:800; letter-spacing:.3px; text-shadow:0 2px 6px rgba(0,0,0,.35);}
+  #title-mini .em{font-size:22px;}
+
+  /* ---------- Toolbar ---------- */
+  #toolbar{
+    flex:0 0 auto;
+    background:var(--paper);
+    border-radius:var(--radius);
+    padding:8px;
+    box-shadow:0 8px 22px rgba(0,0,0,.25);
+    display:flex; flex-direction:column; gap:8px;
+    max-height:42vh; overflow:auto;
+  }
+  .row{display:flex; flex-wrap:wrap; align-items:center; gap:6px;}
+  .row .label{font-size:13px; font-weight:800; color:var(--ink-soft); min-width:54px;}
+
+  .swatch{
+    width:48px; height:48px; border-radius:50%;
+    border:3px solid #fff;
+    box-shadow:0 3px 7px rgba(0,0,0,.22);
+    position:relative;
+    flex:0 0 auto;
+  }
+  .swatch.sel::after{
+    content:"✓"; position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:900; font-size:22px;
+    text-shadow:0 1px 3px rgba(0,0,0,.6);
+  }
+  .swatch:active{transform:scale(.92);}
+
+  .tool{
+    min-height:48px; min-width:48px;
+    padding:0 10px;
+    border-radius:14px;
+    background:#eef1ff; color:var(--ink);
+    font-weight:800; font-size:15px;
+    display:inline-flex; align-items:center; justify-content:center; gap:5px;
+    box-shadow:0 3px 0 rgba(0,0,0,.12);
+  }
+  .tool:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.12);}
+  .tool.on{background:var(--c-purple); color:#fff;}
+  .tool.warn{background:#ffe3e3;}
+  .tool.warn.on, .tool.warnbtn{background:var(--warn); color:#fff;}
+
+  .emoji-tool{
+    min-height:48px; min-width:48px;
+    font-size:24px;
+    border-radius:12px;
+    background:#f3f0ff;
+    display:inline-flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 0 rgba(0,0,0,.1);
+  }
+  .emoji-tool:active{transform:translateY(2px);}
+  .emoji-tool.on{background:var(--c-yellow); box-shadow:0 0 0 3px var(--c-orange);}
+
+  input[type="range"]{
+    -webkit-appearance:none; appearance:none;
+    height:14px; border-radius:999px;
+    background:linear-gradient(90deg,var(--c-blue),var(--c-pink));
+    flex:1 1 120px; min-width:120px; max-width:220px;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:30px; height:30px; border-radius:50%;
+    background:#fff; border:3px solid var(--c-purple);
+    box-shadow:0 2px 5px rgba(0,0,0,.3); cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:30px; height:30px; border-radius:50%;
+    background:#fff; border:3px solid var(--c-purple);
+    box-shadow:0 2px 5px rgba(0,0,0,.3); cursor:pointer;
+  }
+  input[type="color"]{
+    width:48px; height:48px; padding:0; border:none; border-radius:50%;
+    background:none; cursor:pointer;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper{padding:0;}
+  input[type="color"]::-webkit-color-swatch{border:3px solid #fff; border-radius:50%;}
+  input[type="color"]::-moz-color-swatch{border:3px solid #fff; border-radius:50%;}
+
+  .sizeval{font-weight:800; color:var(--ink); min-width:38px; text-align:center;}
+
+  /* ---------- Canvas stage ---------- */
+  #stage{
+    flex:1 1 auto;
+    position:relative;
+    background:var(--paper);
+    border-radius:var(--radius);
+    box-shadow:0 8px 22px rgba(0,0,0,.25);
+    overflow:hidden;
+    min-height:120px;
+  }
+  #board{
+    display:block;
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    touch-action:none;
+    cursor:crosshair;
+  }
+  #hint{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    color:var(--ink-soft); font-weight:800; font-size:16px;
+    text-align:center; pointer-events:none;
+    background:rgba(255,255,255,.7); padding:10px 16px; border-radius:14px;
+    max-width:80%;
+  }
+
+  /* ---------- Overlays ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:50;
+    display:flex; align-items:center; justify-content:center;
+    padding:14px;
+    background:rgba(15,12,40,.55);
+    backdrop-filter:blur(3px);
+  }
+  .overlay.hidden{display:none;}
+  .panel{
+    background:var(--paper); color:var(--ink);
+    border-radius:24px;
+    padding:20px;
+    width:min(560px,94vw);
+    max-height:94vh; overflow:auto;
+    box-shadow:0 18px 50px rgba(0,0,0,.4);
+    text-align:center;
+  }
+  .panel h1{font-size:30px; line-height:1.1;}
+  .panel .big-emoji{font-size:58px; line-height:1;}
+  .panel p.how{font-size:17px; color:var(--ink-soft); font-weight:700; margin:8px 0 4px;}
+  .badges{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0;}
+  .badge{
+    background:#eef1ff; color:var(--ink);
+    border-radius:999px; padding:8px 14px;
+    font-weight:800; font-size:14px;
+    box-shadow:inset 0 0 0 2px rgba(58,134,255,.25);
+  }
+  .badge.skill{background:#eafff7; box-shadow:inset 0 0 0 2px rgba(6,214,160,.35);}
+
+  .section-title{font-size:15px; font-weight:800; color:var(--ink-soft); margin:14px 0 6px; text-align:left;}
+
+  .diff-row, .theme-row{display:flex; flex-wrap:wrap; gap:8px; justify-content:center;}
+  .diff-btn{
+    flex:1 1 140px;
+    min-height:56px;
+    border-radius:18px;
+    background:#f4f6ff;
+    font-weight:800; font-size:16px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    box-shadow:0 4px 0 rgba(0,0,0,.12);
+    line-height:1.15;
+  }
+  .diff-btn small{font-weight:700; color:var(--ink-soft); font-size:12px;}
+  .diff-btn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.12);}
+  .diff-btn.sel{outline:4px solid var(--c-purple); background:#fff;}
+
+  .theme-btn{
+    width:88px; height:64px;
+    border-radius:14px;
+    box-shadow:0 4px 0 rgba(0,0,0,.14);
+    position:relative;
+    display:flex; align-items:flex-end; justify-content:center;
+    overflow:hidden;
+    font-weight:800; font-size:12px; color:#13183a;
+  }
+  .theme-btn span{background:rgba(255,255,255,.85); border-radius:8px; padding:1px 6px; margin-bottom:5px;}
+  .theme-btn:active{transform:translateY(3px);}
+  .theme-btn.sel{outline:4px solid var(--c-orange);}
+
+  .play-btn{
+    margin-top:16px;
+    width:100%;
+    min-height:64px;
+    border-radius:999px;
+    background:linear-gradient(90deg,var(--c-green),var(--c-blue));
+    color:#fff; font-size:24px; font-weight:800;
+    box-shadow:0 6px 0 rgba(0,0,0,.2);
+  }
+  .play-btn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.2);}
+
+  .ov-btns{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:16px;}
+  .ov-btn{
+    min-height:56px; padding:0 20px;
+    border-radius:999px;
+    font-weight:800; font-size:17px;
+    background:#eef1ff; color:var(--ink);
+    box-shadow:0 4px 0 rgba(0,0,0,.12);
+    flex:1 1 140px;
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .ov-btn.primary{background:linear-gradient(90deg,var(--c-green),var(--c-blue)); color:#fff;}
+  .ov-btn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.12);}
+
+  /* ---------- Confetti ---------- */
+  #confetti{position:fixed; inset:0; pointer-events:none; z-index:60;}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(120%);
+    background:var(--ink); color:#fff; font-weight:800;
+    padding:12px 18px; border-radius:999px; z-index:70;
+    box-shadow:0 8px 20px rgba(0,0,0,.4);
+    transition:transform .35s ease; font-size:16px; max-width:90vw; text-align:center;
+  }
+  #toast.show{transform:translateX(-50%) translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+    #toast{transition:none;}
+  }
+
+  /* Bigger toolbar room on wide screens */
+  @media (min-width:760px){
+    #toolbar{max-height:none;}
+    #app{padding:10px; gap:10px;}
+    .panel h1{font-size:36px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="topbar">
+    <a class="chip ghost" id="hubBtn" href="../index.html" title="Back to Hub" aria-label="Back to Hub">←<span style="font-size:13px">Hub</span></a>
+    <span id="title-mini"><span class="em">🎨</span> Create Studio</span>
+    <span class="grow"></span>
+    <button class="chip ghost" id="pauseBtn" title="Pause" aria-label="Pause">⏸</button>
+    <button class="chip ghost" id="restartBtn" title="New Page" aria-label="New blank page">↻</button>
+    <button class="chip ghost" id="muteBtn" title="Mute" aria-label="Mute sound">🔊</button>
+  </div>
+
+  <div id="toolbar" aria-label="Drawing tools">
+    <div class="row" id="paletteRow">
+      <span class="label">🎨 Color</span>
+      <!-- swatches injected -->
+      <label class="swatch" id="customWrap" title="Custom color" style="display:inline-flex;align-items:center;justify-content:center;background:conic-gradient(red,orange,yellow,lime,cyan,blue,magenta,red);">
+        <input type="color" id="customColor" value="#9b5de5" aria-label="Pick a custom color">
+      </label>
+    </div>
+
+    <div class="row" id="brushRow">
+      <span class="label">🖌️ Brush</span>
+      <input type="range" id="sizeRange" min="2" max="80" value="14" aria-label="Brush size">
+      <span class="sizeval" id="sizeVal">14</span>
+      <button class="tool" id="rainbowBtn" aria-pressed="false" title="Rainbow brush">🌈 Rainbow</button>
+      <button class="tool warn" id="eraserBtn" aria-pressed="false" title="Eraser">🧽 Erase</button>
+      <button class="tool" id="mirrorBtn" aria-pressed="false" title="Mirror magic">🪞 Mirror x4</button>
+    </div>
+
+    <div class="row" id="stampRow">
+      <span class="label">✨ Stamps</span>
+      <!-- emoji stamps injected -->
+    </div>
+
+    <div class="row" id="actionRow">
+      <button class="tool" id="undoBtn" title="Undo">↩️ Undo</button>
+      <button class="tool warnbtn" id="clearBtn" title="Clear page">🗑️ Clear</button>
+      <button class="tool" id="saveBtn" title="Save picture" style="background:var(--c-green);color:#fff;">💾 Save</button>
+      <button class="tool" id="sparkleBtn" title="Sparkle sound">🔔 Sparkle</button>
+    </div>
+  </div>
+
+  <div id="stage">
+    <canvas id="board"></canvas>
+    <div id="hint">👆 Touch and drag to draw! 🎨</div>
+  </div>
+</div>
+
+<!-- ===== START OVERLAY ===== -->
+<div class="overlay" id="startOverlay">
+  <div class="panel">
+    <div class="big-emoji">🎨✨</div>
+    <h1>Create Studio</h1>
+    <p class="how">👆 Draw, stamp, and make magic art!</p>
+    <div class="badges">
+      <span class="badge">👦 Junior (7-9)</span>
+      <span class="badge skill">🧠 Creativity & divergent thinking</span>
+    </div>
+
+    <div class="section-title">Pick your fun level</div>
+    <div class="diff-row" id="diffRow">
+      <button class="diff-btn" data-diff="easy">🟢 EASY<small>Big brush, simple tools</small></button>
+      <button class="diff-btn" data-diff="medium">🟡 MEDIUM<small>More colors & mirror</small></button>
+      <button class="diff-btn" data-diff="hard">🔴 HARD<small>All tools, 8-fold mirror</small></button>
+    </div>
+
+    <div class="section-title">Pick your paper</div>
+    <div class="theme-row" id="themeRow"><!-- themes injected --></div>
+
+    <button class="play-btn" id="playBtn">Play ▶</button>
+  </div>
+</div>
+
+<!-- ===== PAUSE OVERLAY ===== -->
+<div class="overlay hidden" id="pauseOverlay">
+  <div class="panel">
+    <div class="big-emoji">⏸️</div>
+    <h1>Paused</h1>
+    <p class="how">Take a break, your art is safe! 🎨</p>
+    <div class="ov-btns">
+      <button class="ov-btn primary" id="resumeBtn">▶ Resume</button>
+      <button class="ov-btn" id="pauseRestartBtn">↻ New Page</button>
+      <button class="ov-btn" id="pauseHubBtn">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SAVED / CELEBRATE OVERLAY ===== -->
+<div class="overlay hidden" id="doneOverlay">
+  <div class="panel">
+    <div class="big-emoji">🌟🖼️</div>
+    <h1 id="doneTitle">Beautiful work! 🌟</h1>
+    <p class="how" id="doneMsg">Your art is saved! Keep on creating! 🎨</p>
+    <p style="font-weight:800;font-size:18px;margin:6px 0;">✨ Marks made: <span id="doneScore">0</span></p>
+    <p style="font-weight:800;font-size:18px;margin:6px 0;">🏆 Best masterpiece: <span id="doneBest">0</span> marks</p>
+    <div class="ov-btns">
+      <button class="ov-btn primary" id="keepBtn">🎨 Keep Drawing</button>
+      <button class="ov-btn" id="doneRestartBtn">🔄 New Page</button>
+      <button class="ov-btn" id="doneLevelBtn">🎚️ Change Level</button>
+      <button class="ov-btn" id="doneHubBtn">← Hub</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CLEAR CONFIRM OVERLAY ===== -->
+<div class="overlay hidden" id="clearOverlay">
+  <div class="panel">
+    <div class="big-emoji">🗑️❓</div>
+    <h1>Clear the page?</h1>
+    <p class="how">This wipes your art. You can't undo a clear.</p>
+    <div class="ov-btns">
+      <button class="ov-btn" id="clearCancel">↩️ Keep Art</button>
+      <button class="ov-btn primary" id="clearYes" style="background:linear-gradient(90deg,var(--warn),#ff9a3c);">🗑️ Yes, Clear</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ====================== SOUND ====================== */
+const Sound=(()=>{let ctx,muted=false;function ac(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx;}
+function tone(freq,dur,type,vol){if(muted)return;dur=dur||0.12;type=type||"sine";vol=vol||0.2;var c=ac();var o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=freq;o.connect(g);g.connect(c.destination);var t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur+0.03);}
+return{resume:function(){try{ac().resume();}catch(e){}},tone:tone,click:function(){tone(420,0.06,"square",0.15);},good:function(){tone(660,0.1);setTimeout(function(){tone(880,0.12);},90);},bad:function(){tone(160,0.18,"sawtooth",0.15);},win:function(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){tone(f,0.16,"triangle",0.18);},i*120);});},toggleMute:function(){muted=!muted;return muted;},isMuted:function(){return muted;}};})();
+
+/* extra magical sparkle sound */
+function sparkleSound(){
+  if(Sound.isMuted())return;
+  var notes=[880,1175,1568,2093,1568,1175];
+  notes.forEach(function(f,i){setTimeout(function(){Sound.tone(f,0.09,"triangle",0.12);},i*55);});
+}
+
+/* ====================== STATE ====================== */
+var DIFF={
+  easy:{   min:6,  max:60, def:24, mirror:1, eightFold:false, stamps:["⭐","❤️","🐱","🌈","🌸","☀️"], colors:["#ff5d8f","#3a86ff","#06d6a0","#ffd166","#fb8500","#9b5de5","#13183a","#ffffff"] },
+  medium:{ min:3,  max:70, def:16, mirror:4, eightFold:false, stamps:["⭐","❤️","🐱","🐶","🌈","🌸","🦋","🍀","🎈","☀️","🐠","🍓"], colors:["#ff5d8f","#3a86ff","#06d6a0","#ffd166","#fb8500","#9b5de5","#00bbf9","#f15bb5","#8338ec","#2d6a4f","#13183a","#ffffff"] },
+  hard:{   min:2,  max:80, def:12, mirror:8, eightFold:true,  stamps:["⭐","❤️","🐱","🐶","🦄","🐲","🌈","🌸","🦋","🍀","🎈","☀️","🌙","🐠","🍓","🚀","🎸","👑"], colors:["#ff5d8f","#3a86ff","#06d6a0","#ffd166","#fb8500","#9b5de5","#00bbf9","#f15bb5","#8338ec","#2d6a4f","#ff006e","#fee440","#00f5d4","#7209b7","#13183a","#ffffff"] }
+};
+
+var THEMES={
+  white:  {name:"White",  draw:function(c,w,h){c.fillStyle="#ffffff";c.fillRect(0,0,w,h);}, dark:false},
+  cream:  {name:"Cream",  draw:function(c,w,h){c.fillStyle="#fff7e6";c.fillRect(0,0,w,h);}, dark:false},
+  sky:    {name:"Sky",    draw:function(c,w,h){var g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,"#bde0fe");g.addColorStop(1,"#e7f5ff");c.fillStyle=g;c.fillRect(0,0,w,h);
+            c.fillStyle="rgba(255,255,255,.9)";cloud(c,w*0.2,h*0.2,w*0.12);cloud(c,w*0.7,h*0.15,w*0.1);cloud(c,w*0.5,h*0.35,w*0.08);}, dark:false},
+  grass:  {name:"Meadow", draw:function(c,w,h){var g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,"#caf0c2");g.addColorStop(1,"#a8e6a1");c.fillStyle=g;c.fillRect(0,0,w,h);
+            c.fillStyle="#fff";for(var i=0;i<25;i++){star(c,Math.random()*w,Math.random()*h,3);}
+            c.fillStyle="#7bc96f";c.fillRect(0,h*0.82,w,h*0.18);}, dark:false},
+  space:  {name:"Space",  draw:function(c,w,h){var g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,"#1a1147");g.addColorStop(1,"#3b2fb0");c.fillStyle=g;c.fillRect(0,0,w,h);
+            c.fillStyle="#ffd166";for(var i=0;i<60;i++){star(c,Math.random()*w,Math.random()*h,Math.random()*2.4+0.6);}}, dark:true},
+  dots:   {name:"Dots",   draw:function(c,w,h){c.fillStyle="#fff0f6";c.fillRect(0,0,w,h);c.fillStyle="#ffc2d4";var s=Math.max(28,w*0.05);for(var y=s;y<h;y+=s){for(var x=s;x<w;x+=s){c.beginPath();c.arc(x,y,Math.max(3,s*0.09),0,Math.PI*2);c.fill();}}}, dark:false}
+};
+function cloud(c,x,y,r){c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.arc(x+r,y+r*0.2,r*0.8,0,Math.PI*2);c.arc(x-r,y+r*0.2,r*0.8,0,Math.PI*2);c.arc(x,y+r*0.4,r*0.9,0,Math.PI*2);c.fill();}
+function star(c,x,y,r){c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();}
+
+var state={
+  diff:"easy",
+  theme:"white",
+  color:"#9b5de5",
+  prevColor:"#9b5de5",
+  size:24,
+  rainbow:false,
+  eraser:false,
+  mirror:false,
+  stamp:null,           // emoji string if a stamp is selected
+  hue:0,
+  marks:0,
+  best:0,
+  running:false,
+  paused:false
+};
+
+/* ====================== CANVAS SETUP ====================== */
+var stage=document.getElementById("stage");
+var canvas=document.getElementById("board");
+var ctx=canvas.getContext("2d");
+var dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var cssW=0, cssH=0;
+
+var undoStack=[];           // array of ImageData snapshots
+var UNDO_LIMIT=14;
+
+function pushUndo(){
+  try{
+    if(canvas.width===0||canvas.height===0)return;
+    var snap=ctx.getImageData(0,0,canvas.width,canvas.height);
+    undoStack.push(snap);
+    if(undoStack.length>UNDO_LIMIT)undoStack.shift();
+  }catch(e){/* ignore */}
+}
+
+function paintBackground(){
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  THEMES[state.theme].draw(ctx,cssW,cssH);
+  // reset to identity-with-dpr for drawing (we draw in CSS px and let dpr scale)
+}
+
+function resizeCanvas(preserve){
+  var rect=stage.getBoundingClientRect();
+  var newW=Math.max(50,Math.round(rect.width));
+  var newH=Math.max(50,Math.round(rect.height));
+  // preserve current art if requested and sizes valid
+  var prev=null;
+  if(preserve && canvas.width>0 && canvas.height>0){
+    try{ prev=document.createElement("canvas"); prev.width=canvas.width; prev.height=canvas.height; prev.getContext("2d").drawImage(canvas,0,0); }catch(e){prev=null;}
+  }
+  dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+  cssW=newW; cssH=newH;
+  canvas.width=Math.round(newW*dpr);
+  canvas.height=Math.round(newH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(prev){
+    // scale old art into new box (keeps drawing visible after rotation/resize)
+    ctx.save();
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.drawImage(prev,0,0,prev.width,prev.height,0,0,canvas.width,canvas.height);
+    ctx.restore();
+  }else{
+    paintBackground();
+  }
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+}
+
+window.addEventListener("resize",function(){ if(cssW){ resizeCanvas(true);} });
+window.addEventListener("orientationchange",function(){ setTimeout(function(){ if(cssW){resizeCanvas(true);} },200); });
+
+/* ====================== DRAWING ====================== */
+var drawing=false;
+var lastX=0,lastY=0;
+var didStroke=false;
+
+function getPos(e){
+  var rect=canvas.getBoundingClientRect();
+  return { x:(e.clientX-rect.left), y:(e.clientY-rect.top) };
+}
+
+function currentStrokeColor(){
+  if(state.eraser) return null; // handled separately
+  if(state.rainbow){
+    state.hue=(state.hue+6)%360;
+    return "hsl("+state.hue+",90%,55%)";
+  }
+  return state.color;
+}
+
+/* draw a line segment, mirrored if mirror mode on */
+function drawSeg(x1,y1,x2,y2){
+  var folds = state.mirror ? DIFF[state.diff].mirror : 1;
+  var col = currentStrokeColor();
+  ctx.lineWidth=state.size;
+  if(state.eraser){
+    // erase reveals background -> we repaint background under the eraser stroke
+    eraseSeg(x1,y1,x2,y2);
+    return;
+  }
+  ctx.globalCompositeOperation="source-over";
+  ctx.strokeStyle=col;
+  var cx=cssW/2, cy=cssH/2;
+  if(folds<=1){
+    strokeRaw(x1,y1,x2,y2);
+    return;
+  }
+  // mirror: rotate around center for each fold, plus a horizontal flip for kaleidoscope sparkle
+  for(var f=0; f<folds; f++){
+    var ang=(Math.PI*2/folds)*f;
+    drawRotated(x1,y1,x2,y2,cx,cy,ang,false);
+    drawRotated(x1,y1,x2,y2,cx,cy,ang,true);
+  }
+}
+
+function strokeRaw(x1,y1,x2,y2){
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+}
+
+function rotPoint(x,y,cx,cy,ang,flip){
+  var dx=x-cx, dy=y-cy;
+  if(flip)dx=-dx;
+  var rx=dx*Math.cos(ang)-dy*Math.sin(ang);
+  var ry=dx*Math.sin(ang)+dy*Math.cos(ang);
+  return {x:cx+rx, y:cy+ry};
+}
+function drawRotated(x1,y1,x2,y2,cx,cy,ang,flip){
+  var a=rotPoint(x1,y1,cx,cy,ang,flip);
+  var b=rotPoint(x2,y2,cx,cy,ang,flip);
+  strokeRaw(a.x,a.y,b.x,b.y);
+}
+
+/* eraser: paint background color back. To keep it simple+correct across themes,
+   we use destination-out to make transparent, then we keep a background layer
+   approach via repaint of solid color. Simpler: paint a "background sample".
+   We implement erase by repainting the theme background clipped to the stroke. */
+function eraseSeg(x1,y1,x2,y2){
+  var folds = state.mirror ? DIFF[state.diff].mirror : 1;
+  var cx=cssW/2, cy=cssH/2;
+  function oneErase(ax1,ay1,ax2,ay2){
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineCap="round";ctx.lineJoin="round";
+    ctx.lineWidth=state.size;
+    ctx.moveTo(ax1,ay1);ctx.lineTo(ax2,ay2);
+    ctx.strokeStyle="rgba(0,0,0,1)";
+    ctx.globalCompositeOperation="destination-out";
+    ctx.stroke();
+    ctx.restore();
+    // now refill background only where now transparent: redraw bg under with destination-over
+    ctx.save();
+    ctx.globalCompositeOperation="destination-over";
+    THEMES[state.theme].draw(ctx,cssW,cssH);
+    ctx.restore();
+  }
+  if(folds<=1){ oneErase(x1,y1,x2,y2); return; }
+  for(var f=0; f<folds; f++){
+    var ang=(Math.PI*2/folds)*f;
+    var a=rotPoint(x1,y1,cx,cy,ang,false), b=rotPoint(x2,y2,cx,cy,ang,false);
+    var c2=rotPoint(x1,y1,cx,cy,ang,true), d=rotPoint(x2,y2,cx,cy,ang,true);
+    // batch erase strokes then one bg refill
+    ctx.save();
+    ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=state.size;
+    ctx.globalCompositeOperation="destination-out";
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(c2.x,c2.y);ctx.lineTo(d.x,d.y);ctx.stroke();
+    ctx.restore();
+  }
+  ctx.save();
+  ctx.globalCompositeOperation="destination-over";
+  THEMES[state.theme].draw(ctx,cssW,cssH);
+  ctx.restore();
+}
+
+/* place an emoji stamp, mirrored if mirror on */
+function placeStamp(x,y){
+  var folds = state.mirror ? DIFF[state.diff].mirror : 1;
+  var sz=Math.max(28, state.size*2.4);
+  ctx.save();
+  ctx.globalCompositeOperation="source-over";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.font=sz+"px "+getComputedStyle(document.body).fontFamily;
+  if(folds<=1){
+    ctx.fillText(state.stamp,x,y);
+  }else{
+    var cx=cssW/2, cy=cssH/2;
+    for(var f=0; f<folds; f++){
+      var ang=(Math.PI*2/folds)*f;
+      var p=rotPoint(x,y,cx,cy,ang,false);
+      ctx.fillText(state.stamp,p.x,p.y);
+    }
+  }
+  ctx.restore();
+}
+
+/* ====================== POINTER EVENTS ====================== */
+function onDown(e){
+  if(!state.running || state.paused) return;
+  e.preventDefault();
+  hideHint();
+  Sound.resume();
+  pushUndo();
+  var p=getPos(e);
+  if(state.stamp){
+    placeStamp(p.x,p.y);
+    state.marks++; updateScore();
+    Sound.tone(700+Math.random()*200,0.08,"triangle",0.12);
+    return;
+  }
+  drawing=true; didStroke=false;
+  lastX=p.x; lastY=p.y;
+  // dot so a single tap leaves a mark
+  drawSeg(p.x,p.y,p.x+0.01,p.y+0.01);
+  didStroke=true;
+  try{canvas.setPointerCapture(e.pointerId);}catch(err){}
+}
+function onMove(e){
+  if(!drawing||!state.running||state.paused) return;
+  e.preventDefault();
+  // coalesced events for smoother lines on fast strokes
+  var events=(e.getCoalescedEvents)?e.getCoalescedEvents():[e];
+  if(!events.length)events=[e];
+  for(var i=0;i<events.length;i++){
+    var p=getPos(events[i]);
+    var dx=p.x-lastX, dy=p.y-lastY;
+    if(dx*dx+dy*dy < 1) continue;
+    drawSeg(lastX,lastY,p.x,p.y);
+    lastX=p.x; lastY=p.y;
+    didStroke=true;
+  }
+}
+function onUp(e){
+  if(!drawing) return;
+  e.preventDefault();
+  drawing=false;
+  if(didStroke){
+    state.marks++; updateScore();
+    if(!state.eraser){ Sound.tone(520+Math.random()*120,0.05,"sine",0.06); }
+  }
+  try{canvas.releasePointerCapture(e.pointerId);}catch(err){}
+}
+
+canvas.addEventListener("pointerdown",onDown,{passive:false});
+canvas.addEventListener("pointermove",onMove,{passive:false});
+canvas.addEventListener("pointerup",onUp,{passive:false});
+canvas.addEventListener("pointercancel",onUp,{passive:false});
+canvas.addEventListener("pointerleave",function(e){ if(drawing){ /* keep drawing via capture, but if no capture, stop */ } },{passive:false});
+
+/* ====================== UI: BUILD PALETTE / STAMPS / THEMES ====================== */
+var paletteRow=document.getElementById("paletteRow");
+var customWrap=document.getElementById("customWrap");
+var stampRow=document.getElementById("stampRow");
+var themeRow=document.getElementById("themeRow");
+
+function buildPalette(){
+  // remove old swatches (keep label + custom)
+  Array.prototype.slice.call(paletteRow.querySelectorAll(".swatch.color-sw")).forEach(function(el){el.remove();});
+  var cfg=DIFF[state.diff];
+  cfg.colors.forEach(function(col){
+    var b=document.createElement("button");
+    b.className="swatch color-sw";
+    b.style.background=col;
+    if(col.toLowerCase()==="#ffffff"){ b.style.boxShadow="0 3px 7px rgba(0,0,0,.22), inset 0 0 0 1px #ddd"; }
+    b.setAttribute("aria-label","Color "+col);
+    b.title=col;
+    b.addEventListener("click",function(){ selectColor(col,b); });
+    paletteRow.insertBefore(b,customWrap);
+  });
+  // select first by default
+  var first=paletteRow.querySelector(".swatch.color-sw");
+  if(first){ selectColor(cfg.colors[0],first); }
+}
+
+function selectColor(col,btn){
+  state.color=col;
+  state.prevColor=col;
+  state.eraser=false; state.stamp=null;
+  state.rainbow=false;
+  syncToolButtons();
+  Array.prototype.slice.call(paletteRow.querySelectorAll(".swatch")).forEach(function(el){el.classList.remove("sel");});
+  if(btn)btn.classList.add("sel");
+  Sound.click();
+}
+
+function buildStamps(){
+  Array.prototype.slice.call(stampRow.querySelectorAll(".emoji-tool")).forEach(function(el){el.remove();});
+  DIFF[state.diff].stamps.forEach(function(em){
+    var b=document.createElement("button");
+    b.className="emoji-tool";
+    b.textContent=em;
+    b.setAttribute("aria-label","Stamp "+em);
+    b.addEventListener("click",function(){ toggleStamp(em,b); });
+    stampRow.appendChild(b);
+  });
+}
+
+function toggleStamp(em,btn){
+  if(state.stamp===em){
+    state.stamp=null;
+  }else{
+    state.stamp=em;
+    state.eraser=false;
+  }
+  syncStampButtons();
+  syncToolButtons();
+  Sound.click();
+}
+
+function syncStampButtons(){
+  Array.prototype.slice.call(stampRow.querySelectorAll(".emoji-tool")).forEach(function(el){
+    el.classList.toggle("on", el.textContent===state.stamp);
+  });
+}
+
+function buildThemes(){
+  themeRow.innerHTML="";
+  Object.keys(THEMES).forEach(function(key){
+    var b=document.createElement("button");
+    b.className="theme-btn";
+    b.setAttribute("aria-label","Paper "+THEMES[key].name);
+    // mini preview using a tiny canvas
+    var c=document.createElement("canvas"); c.width=88; c.height=64;
+    var cc=c.getContext("2d");
+    // temporarily emulate THEMES draw on small box
+    THEMES[key].draw(cc,88,64);
+    b.style.backgroundImage="url("+c.toDataURL()+")";
+    b.style.backgroundSize="cover";
+    var span=document.createElement("span"); span.textContent=THEMES[key].name; b.appendChild(span);
+    if(key===state.theme)b.classList.add("sel");
+    b.addEventListener("click",function(){
+      state.theme=key;
+      Array.prototype.slice.call(themeRow.querySelectorAll(".theme-btn")).forEach(function(el){el.classList.remove("sel");});
+      b.classList.add("sel");
+      Sound.click();
+    });
+    themeRow.appendChild(b);
+  });
+}
+
+/* ====================== TOOL BUTTONS ====================== */
+var sizeRange=document.getElementById("sizeRange");
+var sizeVal=document.getElementById("sizeVal");
+var rainbowBtn=document.getElementById("rainbowBtn");
+var eraserBtn=document.getElementById("eraserBtn");
+var mirrorBtn=document.getElementById("mirrorBtn");
+var customColor=document.getElementById("customColor");
+
+sizeRange.addEventListener("input",function(){ state.size=parseInt(sizeRange.value,10); sizeVal.textContent=state.size; });
+
+rainbowBtn.addEventListener("click",function(){
+  state.rainbow=!state.rainbow;
+  if(state.rainbow){ state.eraser=false; state.stamp=null; }
+  syncToolButtons(); syncStampButtons(); Sound.click();
+});
+eraserBtn.addEventListener("click",function(){
+  state.eraser=!state.eraser;
+  if(state.eraser){ state.rainbow=false; state.stamp=null; }
+  syncToolButtons(); syncStampButtons(); Sound.click();
+});
+mirrorBtn.addEventListener("click",function(){
+  state.mirror=!state.mirror;
+  syncToolButtons(); Sound.click();
+  if(state.mirror){ sparkleSound(); }
+});
+customColor.addEventListener("input",function(){
+  state.color=customColor.value; state.prevColor=customColor.value;
+  state.eraser=false; state.rainbow=false; state.stamp=null;
+  Array.prototype.slice.call(paletteRow.querySelectorAll(".swatch")).forEach(function(el){el.classList.remove("sel");});
+  customWrap.classList.add("sel");
+  syncToolButtons(); syncStampButtons();
+});
+
+function syncToolButtons(){
+  rainbowBtn.classList.toggle("on",state.rainbow);
+  rainbowBtn.setAttribute("aria-pressed",state.rainbow?"true":"false");
+  eraserBtn.classList.toggle("on",state.eraser);
+  eraserBtn.setAttribute("aria-pressed",state.eraser?"true":"false");
+  mirrorBtn.classList.toggle("on",state.mirror);
+  mirrorBtn.setAttribute("aria-pressed",state.mirror?"true":"false");
+  // mirror label reflects fold count
+  var folds=DIFF[state.diff].mirror;
+  mirrorBtn.innerHTML="🪞 Mirror"+(folds>1?(" x"+folds):"");
+}
+
+/* ====================== ACTIONS ====================== */
+document.getElementById("undoBtn").addEventListener("click",function(){
+  if(undoStack.length){
+    var snap=undoStack.pop();
+    ctx.save();
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.putImageData(snap,0,0);
+    ctx.restore();
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    Sound.tone(380,0.08,"square",0.12);
+  }else{
+    showToast("Nothing to undo 🙂");
+  }
+});
+
+var clearOverlay=document.getElementById("clearOverlay");
+document.getElementById("clearBtn").addEventListener("click",function(){ Sound.click(); showOverlay(clearOverlay); });
+document.getElementById("clearCancel").addEventListener("click",function(){ Sound.click(); hideOverlay(clearOverlay); });
+document.getElementById("clearYes").addEventListener("click",function(){
+  pushUndo();
+  paintBackground();
+  Sound.tone(220,0.18,"sawtooth",0.12);
+  hideOverlay(clearOverlay);
+  showToast("Fresh page! 🎨");
+});
+
+document.getElementById("sparkleBtn").addEventListener("click",function(){
+  Sound.resume();
+  sparkleSound();
+  // little visual sparkle burst on canvas center area
+  sparkleBurst();
+});
+
+document.getElementById("saveBtn").addEventListener("click",function(){
+  Sound.resume();
+  saveImage();
+});
+
+function saveImage(){
+  // make a clean export that includes background (canvas already has bg painted)
+  var url;
+  try{ url=canvas.toDataURL("image/png"); }
+  catch(e){ showToast("Could not save 😢"); return; }
+  var a=document.createElement("a");
+  var t=new Date();
+  a.download="my-art-"+t.getHours()+t.getMinutes()+t.getSeconds()+".png";
+  a.href=url;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // celebrate!
+  if(state.marks>state.best)state.best=state.marks;
+  document.getElementById("doneScore").textContent=state.marks;
+  document.getElementById("doneBest").textContent=state.best;
+  var praises=["Beautiful work! 🌟","Wow, so creative! 🎨","A real masterpiece! 🖼️","Amazing imagination! ✨","You're an artist! 🌈"];
+  document.getElementById("doneTitle").textContent=praises[Math.floor(Math.random()*praises.length)];
+  Sound.win();
+  confettiBurst();
+  showOverlay(document.getElementById("doneOverlay"));
+}
+
+/* ====================== SCORE / HINT ====================== */
+function updateScore(){
+  if(state.marks>state.best)state.best=state.marks;
+}
+var hintEl=document.getElementById("hint");
+var hintHidden=false;
+function hideHint(){ if(!hintHidden){ hintEl.style.display="none"; hintHidden=true; } }
+
+/* ====================== OVERLAYS ====================== */
+function showOverlay(el){ el.classList.remove("hidden"); }
+function hideOverlay(el){ el.classList.add("hidden"); }
+
+var startOverlay=document.getElementById("startOverlay");
+var pauseOverlay=document.getElementById("pauseOverlay");
+var doneOverlay=document.getElementById("doneOverlay");
+
+/* difficulty selection on start screen */
+var diffRow=document.getElementById("diffRow");
+Array.prototype.slice.call(diffRow.querySelectorAll(".diff-btn")).forEach(function(btn){
+  btn.addEventListener("click",function(){
+    state.diff=btn.getAttribute("data-diff");
+    Array.prototype.slice.call(diffRow.querySelectorAll(".diff-btn")).forEach(function(el){el.classList.remove("sel");});
+    btn.classList.add("sel");
+    Sound.click();
+  });
+});
+// default select easy
+(function(){ var d=diffRow.querySelector('[data-diff="easy"]'); if(d)d.classList.add("sel"); })();
+
+/* PLAY */
+document.getElementById("playBtn").addEventListener("click",function(){
+  Sound.resume();
+  Sound.good();
+  startGame();
+});
+
+function applyDiffToTools(){
+  var cfg=DIFF[state.diff];
+  sizeRange.min=cfg.min; sizeRange.max=cfg.max;
+  state.size=cfg.def; sizeRange.value=cfg.def; sizeVal.textContent=cfg.def;
+  buildPalette();
+  buildStamps();
+  // hard => allow rainbow visible always; medium/easy keep too (all difficulties keep core tools)
+  // mirror availability: easy has fold=1 so it's effectively off; hide mirror on easy to reduce clutter
+  if(DIFF[state.diff].mirror<=1){
+    mirrorBtn.style.display="none"; state.mirror=false;
+  }else{
+    mirrorBtn.style.display="";
+  }
+  syncToolButtons();
+  syncStampButtons();
+}
+
+function startGame(){
+  state.running=true; state.paused=false;
+  state.marks=0;
+  state.rainbow=false; state.eraser=false; state.stamp=null; state.mirror=false;
+  applyDiffToTools();
+  hideOverlay(startOverlay);
+  hideOverlay(doneOverlay);
+  hintHidden=false; hintEl.style.display="";
+  // ensure canvas sized AFTER overlay hidden (so stage has real size)
+  requestAnimationFrame(function(){
+    resizeCanvas(false);
+  });
+}
+
+/* PAUSE */
+document.getElementById("pauseBtn").addEventListener("click",function(){
+  if(!state.running)return;
+  state.paused=true; drawing=false;
+  Sound.click();
+  showOverlay(pauseOverlay);
+});
+document.getElementById("resumeBtn").addEventListener("click",function(){
+  state.paused=false; Sound.click(); hideOverlay(pauseOverlay);
+});
+document.getElementById("pauseRestartBtn").addEventListener("click",function(){
+  Sound.click(); hideOverlay(pauseOverlay); newPage();
+});
+document.getElementById("pauseHubBtn").addEventListener("click",function(){ Sound.click(); window.location.href="../index.html"; });
+
+/* RESTART (top bar) -> new page (keeps level) */
+document.getElementById("restartBtn").addEventListener("click",function(){
+  if(!state.running){ return; }
+  Sound.click(); newPage();
+});
+
+function newPage(){
+  state.paused=false;
+  state.marks=0;
+  undoStack=[];
+  resizeCanvas(false);
+  paintBackground();
+  hintHidden=false; hintEl.style.display="";
+  showToast("New blank page! 🎨");
+}
+
+/* DONE overlay buttons */
+document.getElementById("keepBtn").addEventListener("click",function(){ Sound.click(); hideOverlay(doneOverlay); state.paused=false; });
+document.getElementById("doneRestartBtn").addEventListener("click",function(){ Sound.click(); hideOverlay(doneOverlay); newPage(); });
+document.getElementById("doneLevelBtn").addEventListener("click",function(){
+  Sound.click(); hideOverlay(doneOverlay);
+  state.running=false; state.paused=false;
+  showOverlay(startOverlay);
+});
+document.getElementById("doneHubBtn").addEventListener("click",function(){ Sound.click(); window.location.href="../index.html"; });
+
+/* MUTE */
+var muteBtn=document.getElementById("muteBtn");
+muteBtn.addEventListener("click",function(){
+  var m=Sound.toggleMute();
+  muteBtn.textContent=m?"🔇":"🔊";
+  muteBtn.setAttribute("aria-label",m?"Unmute sound":"Mute sound");
+  if(!m)Sound.click();
+});
+
+/* ====================== KEYBOARD ====================== */
+window.addEventListener("keydown",function(e){
+  if(!state.running)return;
+  if(e.key==="p"||e.key==="P"){ document.getElementById("pauseBtn").click(); }
+  else if(e.key==="e"||e.key==="E"){ eraserBtn.click(); }
+  else if(e.key==="r"||e.key==="R"){ rainbowBtn.click(); }
+  else if(e.key==="m"||e.key==="M"){ if(mirrorBtn.style.display!=="none")mirrorBtn.click(); }
+  else if((e.key==="z"||e.key==="Z")){ document.getElementById("undoBtn").click(); }
+  else if(e.key==="s"||e.key==="S"){ document.getElementById("saveBtn").click(); }
+  else if(e.key==="+"||e.key==="="){ sizeRange.value=Math.min(parseInt(sizeRange.max,10),state.size+4); sizeRange.dispatchEvent(new Event("input")); }
+  else if(e.key==="-"||e.key==="_"){ sizeRange.value=Math.max(parseInt(sizeRange.min,10),state.size-4); sizeRange.dispatchEvent(new Event("input")); }
+});
+
+/* ====================== TOAST ====================== */
+var toastEl=document.getElementById("toast");
+var toastTimer=null;
+function showToast(msg){
+  toastEl.textContent=msg;
+  toastEl.classList.add("show");
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ toastEl.classList.remove("show"); },1600);
+}
+
+/* ====================== CONFETTI ====================== */
+var confettiCanvas=document.getElementById("confetti");
+var cctx=confettiCanvas.getContext("2d");
+var confParticles=[];
+var confRAF=null;
+var reduceMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function sizeConfetti(){ confettiCanvas.width=window.innerWidth; confettiCanvas.height=window.innerHeight; }
+sizeConfetti();
+window.addEventListener("resize",sizeConfetti);
+
+var confEmojis=["⭐","🌟","✨","🎉","🎊","🌈","💖","🟣","🟡","🟢","🔵","🟠"];
+function confettiBurst(){
+  if(reduceMotion){ return; }
+  sizeConfetti();
+  for(var i=0;i<70;i++){
+    confParticles.push({
+      x:Math.random()*confettiCanvas.width,
+      y:-20-Math.random()*confettiCanvas.height*0.3,
+      vx:(Math.random()-0.5)*4,
+      vy:2+Math.random()*4,
+      g:0.08+Math.random()*0.08,
+      em:confEmojis[Math.floor(Math.random()*confEmojis.length)],
+      sz:18+Math.random()*22,
+      rot:Math.random()*Math.PI,
+      vr:(Math.random()-0.5)*0.2,
+      life:0
+    });
+  }
+  if(!confRAF)confRAF=requestAnimationFrame(confLoop);
+}
+function sparkleBurst(){
+  if(reduceMotion){ return; }
+  sizeConfetti();
+  var rect=stage.getBoundingClientRect();
+  var cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+  for(var i=0;i<20;i++){
+    var ang=Math.random()*Math.PI*2, sp=2+Math.random()*4;
+    confParticles.push({
+      x:cx,y:cy,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp-1,g:0.05,
+      em:"✨",sz:16+Math.random()*16,rot:0,vr:(Math.random()-0.5)*0.2,life:0
+    });
+  }
+  if(!confRAF)confRAF=requestAnimationFrame(confLoop);
+}
+function confLoop(){
+  cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  for(var i=confParticles.length-1;i>=0;i--){
+    var p=confParticles[i];
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life++;
+    cctx.save();
+    cctx.translate(p.x,p.y);
+    cctx.rotate(p.rot);
+    cctx.font=p.sz+"px serif";
+    cctx.textAlign="center"; cctx.textBaseline="middle";
+    cctx.fillText(p.em,0,0);
+    cctx.restore();
+    if(p.y>confettiCanvas.height+40 || p.life>260){ confParticles.splice(i,1); }
+  }
+  if(confParticles.length){ confRAF=requestAnimationFrame(confLoop); }
+  else{ cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); confRAF=null; }
+}
+
+/* ====================== INIT ====================== */
+buildThemes();
+buildPalette();
+buildStamps();
+applyDiffToTools();
+muteBtn.textContent=Sound.isMuted()?"🔇":"🔊";
+
+/* prevent the whole page from scrolling on touch outside the canvas */
+document.addEventListener("touchmove",function(e){
+  if(e.target.closest("#toolbar")) return; // allow toolbar scroll
+  e.preventDefault();
+},{passive:false});
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>🧠 Brain Arcade — Fun Games for Curious Kids</title>
+<style>
+  :root{
+    --bg-grad: linear-gradient(160deg,#2b1e66 0%, #3b2fb0 45%, #1f6feb 100%);
+    --paper:#ffffff; --ink:#13183a; --ink-soft:#5b6488;
+    --c-blue:#3a86ff; --c-orange:#fb8500; --c-green:#06d6a0; --c-pink:#ff5d8f; --c-yellow:#ffd166; --c-purple:#9b5de5;
+    --ok:#06d6a0; --warn:#ff6b6b; --radius:20px;
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font); color:var(--paper);
+    background:var(--bg-grad); background-attachment:fixed; min-height:100vh;
+    padding:18px 16px 60px; overflow-x:hidden;
+  }
+  /* floating background shapes */
+  .blob{position:fixed;border-radius:50%;filter:blur(6px);opacity:.18;z-index:0;pointer-events:none;animation:float 14s ease-in-out infinite;}
+  .blob.b1{width:220px;height:220px;background:var(--c-pink);top:-40px;left:-40px;}
+  .blob.b2{width:280px;height:280px;background:var(--c-yellow);bottom:-60px;right:-50px;animation-delay:-4s;}
+  .blob.b3{width:160px;height:160px;background:var(--c-green);top:40%;right:8%;animation-delay:-8s;}
+  @keyframes float{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(-26px) translateX(14px)}}
+
+  header{position:relative;z-index:1;text-align:center;max-width:960px;margin:6px auto 14px;}
+  .logo{font-size:clamp(38px,9vw,72px);line-height:1;margin:0;font-weight:800;letter-spacing:-1px;
+    text-shadow:0 4px 0 rgba(0,0,0,.18);}
+  .logo .pop{display:inline-block;animation:pop 2.4s ease-in-out infinite;}
+  @keyframes pop{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.12) rotate(-6deg)}}
+  .tagline{font-size:clamp(15px,3.4vw,20px);font-weight:600;opacity:.95;margin:8px 0 4px;}
+  .subline{font-size:clamp(12px,2.8vw,15px);opacity:.8;margin:0 auto;max-width:620px;}
+  .break{display:inline-block;margin-top:12px;background:rgba(255,255,255,.16);padding:8px 16px;border-radius:999px;
+    font-size:13px;font-weight:600;backdrop-filter:blur(4px);}
+
+  /* filters */
+  .filters{position:relative;z-index:1;max-width:1000px;margin:14px auto 6px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .chiprow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+  .chip{border:0;cursor:pointer;font-family:var(--font);font-weight:700;font-size:13px;color:var(--ink);
+    background:rgba(255,255,255,.82);padding:9px 15px;border-radius:999px;transition:transform .08s, background .15s, color .15s;
+    display:inline-flex;align-items:center;gap:6px;min-height:40px;}
+  .chip:hover{transform:translateY(-2px);}
+  .chip:focus-visible{outline:3px solid var(--c-yellow);outline-offset:2px;}
+  .chip.active{background:var(--ink);color:#fff;}
+  .chip .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  /* grid */
+  .grid{position:relative;z-index:1;max-width:1080px;margin:18px auto;display:grid;gap:16px;
+    grid-template-columns:repeat(auto-fill,minmax(238px,1fr));}
+  .card{position:relative;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--ink);
+    background:var(--paper);border-radius:var(--radius);padding:16px 16px 18px;overflow:hidden;
+    box-shadow:0 10px 24px rgba(0,0,0,.22);transition:transform .12s ease, box-shadow .12s ease;border:3px solid transparent;}
+  .card:hover,.card:focus-visible{transform:translateY(-6px) rotate(-.4deg);box-shadow:0 18px 36px rgba(0,0,0,.3);outline:none;border-color:var(--accent);}
+  .card .topstrip{position:absolute;top:0;left:0;right:0;height:8px;background:var(--accent);}
+  .card .icon{font-size:46px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18));margin-top:4px;}
+  .card .name{font-size:20px;font-weight:800;margin:2px 0 0;}
+  .card .tag{font-size:13px;color:var(--ink-soft);font-weight:600;min-height:18px;}
+  .card .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .badge{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;}
+  .b-skill{background:rgba(58,134,255,.14);color:#1f4fb0;}
+  .b-age{background:rgba(155,93,229,.16);color:#6b2fb0;}
+  .b-mode{color:#fff;}
+  .b-1p{background:var(--c-green);}
+  .b-2p{background:var(--c-orange);}
+  .card .play{margin-top:auto;align-self:flex-start;background:var(--accent);color:#fff;font-weight:800;font-size:14px;
+    padding:9px 18px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;}
+  .empty{grid-column:1/-1;text-align:center;opacity:.85;font-weight:600;padding:30px;}
+
+  /* skills covered legend */
+  footer{position:relative;z-index:1;max-width:900px;margin:34px auto 0;text-align:center;}
+  footer h2{font-size:18px;margin:0 0 12px;font-weight:800;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;}
+  .legend span{background:rgba(255,255,255,.16);padding:7px 13px;border-radius:999px;font-size:12.5px;font-weight:600;}
+  .foot-note{font-size:12.5px;opacity:.78;line-height:1.6;}
+
+  /* surprise button */
+  .surprise{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:0;font-family:var(--font);
+    font-weight:800;font-size:15px;color:var(--ink);background:var(--c-yellow);padding:11px 22px;border-radius:999px;
+    box-shadow:0 6px 0 #d9a818;transition:transform .08s;min-height:46px;}
+  .surprise:active{transform:translateY(3px);box-shadow:0 3px 0 #d9a818;}
+  .surprise:focus-visible{outline:3px solid #fff;outline-offset:3px;}
+
+  @media (prefers-reduced-motion: reduce){
+    .blob,.logo .pop{animation:none;}
+    .card:hover,.card:focus-visible{transform:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+  <header>
+    <h1 class="logo">🧠 Brain <span class="pop">Arcade</span></h1>
+    <p class="tagline">13 fun games to train your amazing brain! 🚀</p>
+    <p class="subline">Pick a game, play for a few minutes, then try a different kind. Built for curious kids ages 7–13.</p>
+    <div style="margin-top:14px"><button class="surprise" id="surprise">🎲 Surprise me!</button></div>
+    <div class="break">🌿 Tip: take a little break every 30–45 minutes</div>
+  </header>
+
+  <div class="filters">
+    <div class="chiprow" id="modeRow"></div>
+    <div class="chiprow" id="skillRow"></div>
+  </div>
+
+  <main class="grid" id="grid" aria-live="polite"></main>
+
+  <footer>
+    <h2>🌟 This arcade trains all 8 thinking skills</h2>
+    <div class="legend">
+      <span>⚡ Reaction &amp; speed</span>
+      <span>🧠 Working memory</span>
+      <span>🧩 Logic &amp; problem-solving</span>
+      <span>📐 Spatial reasoning</span>
+      <span>🔷 Pattern recognition</span>
+      <span>🎨 Creativity</span>
+      <span>🔢 Numeracy / math</span>
+      <span>🔤 Language / vocabulary</span>
+    </div>
+    <p class="foot-note">Every game runs right here in your browser — no internet needed. 🎧 Sound on for the best fun.<br>
+    Be kind, take breaks, and have fun growing your brain! 💜</p>
+  </footer>
+
+<script>
+  // ---- Game catalog ----
+  // skills: reaction, memory, logic, spatial, pattern, creativity, numeracy, language
+  var GAMES = [
+    {file:'reaction-rush.html',  icon:'🎯', name:'Reaction Rush',  tag:'Tap targets super fast!',     skills:['reaction'],               age:'Junior (7–9)',    band:'junior',   players:1, accent:'#fb8500'},
+    {file:'memory-match.html',   icon:'🃏', name:'Memory Match',   tag:'Flip and match the pairs',    skills:['memory'],                 age:'Core (9–11)',     band:'core',     players:1, accent:'#3a86ff'},
+    {file:'simon-sequence.html', icon:'🎶', name:'Simon Sequence', tag:'Repeat the growing pattern',  skills:['memory','reaction'],      age:'Core (9–11)',     band:'core',     players:1, accent:'#06d6a0'},
+    {file:'pattern-quest.html',  icon:'🔷', name:'Pattern Quest',  tag:'What comes next? 🤔',          skills:['pattern'],                age:'Advanced (11–13)',band:'advanced', players:1, accent:'#9b5de5'},
+    {file:'maze-runner.html',    icon:'🐭', name:'Maze Runner',    tag:'Race to the cheese 🧀',        skills:['spatial','logic'],        age:'Core (9–11)',     band:'core',     players:1, accent:'#ff5d8f'},
+    {file:'tangram-puzzle.html', icon:'🧩', name:'Block Puzzle',   tag:'Fit pieces to fill the frame',skills:['spatial'],                age:'Advanced (11–13)',band:'advanced', players:1, accent:'#fb8500'},
+    {file:'math-meteor.html',    icon:'☄️', name:'Math Meteor',    tag:'Solve before it lands! 💥',    skills:['numeracy'],               age:'Core (9–11)',     band:'core',     players:1, accent:'#3a86ff'},
+    {file:'word-scramble.html',  icon:'🔤', name:'Word Scramble',  tag:'Unscramble the letters',      skills:['language'],               age:'Core (9–11)',     band:'core',     players:1, accent:'#06d6a0'},
+    {file:'odd-one-out.html',    icon:'🔍', name:'Odd One Out',    tag:'Spot the one that is different',skills:['logic'],                 age:'Core (9–11)',     band:'core',     players:1, accent:'#9b5de5'},
+    {file:'create-studio.html',  icon:'🎨', name:'Create Studio',  tag:'Draw, stamp & make art',      skills:['creativity'],             age:'Junior (7–9)',    band:'junior',   players:1, accent:'#ff5d8f'},
+    {file:'connect-four.html',   icon:'🔴', name:'Connect Four',   tag:'Get four in a row to win',    skills:['logic'],                  age:'Core (9–11)',     band:'core',     players:2, accent:'#fb8500'},
+    {file:'reaction-duel.html',  icon:'⚡', name:'Reaction Duel',  tag:'Two players race to green!',  skills:['reaction'],               age:'Junior (7–9)',    band:'junior',   players:2, accent:'#3a86ff'},
+    {file:'quiz-battle.html',    icon:'🏆', name:'Quiz Battle',    tag:'2-player quiz showdown',      skills:['numeracy','language','logic'], age:'Advanced (11–13)',band:'advanced', players:2, accent:'#9b5de5'}
+  ];
+
+  var SKILL_INFO = {
+    reaction:{label:'⚡ Reaction'}, memory:{label:'🧠 Memory'}, logic:{label:'🧩 Logic'},
+    spatial:{label:'📐 Spatial'}, pattern:{label:'🔷 Pattern'}, creativity:{label:'🎨 Creativity'},
+    numeracy:{label:'🔢 Math'}, language:{label:'🔤 Words'}
+  };
+
+  var state = {mode:'all', skill:'all'};
+
+  // build filter chips
+  var modeRow = document.getElementById('modeRow');
+  var modes = [['all','✨ All games'],['1','🙂 1 Player'],['2','👥 2 Players']];
+  modes.forEach(function(m){
+    var b=document.createElement('button'); b.className='chip'+(m[0]===state.mode?' active':''); b.textContent=m[1];
+    b.onclick=function(){state.mode=m[0]; render();};
+    modeRow.appendChild(b);
+  });
+  var skillRow = document.getElementById('skillRow');
+  var skillChips=[['all','All skills']];
+  Object.keys(SKILL_INFO).forEach(function(k){skillChips.push([k,SKILL_INFO[k].label]);});
+  skillChips.forEach(function(s){
+    var b=document.createElement('button'); b.className='chip'+(s[0]===state.skill?' active':''); b.textContent=s[1];
+    b.onclick=function(){state.skill=s[0]; render();};
+    skillRow.appendChild(b);
+  });
+  // mark the active chip in each row
+  function markActive(){
+    Array.prototype.forEach.call(modeRow.children,function(c,i){ c.classList.toggle('active', modes[i][0]===state.mode); });
+    Array.prototype.forEach.call(skillRow.children,function(c,i){ c.classList.toggle('active', skillChips[i][0]===state.skill); });
+  }
+
+  var grid = document.getElementById('grid');
+  function render(){
+    markActive();
+    grid.innerHTML='';
+    var list = GAMES.filter(function(g){
+      var okMode = state.mode==='all' || (state.mode==='1'&&g.players===1) || (state.mode==='2'&&g.players===2);
+      var okSkill = state.skill==='all' || g.skills.indexOf(state.skill)>-1;
+      return okMode && okSkill;
+    });
+    if(!list.length){ grid.innerHTML='<div class="empty">No games match — try another filter! 🔄</div>'; return; }
+    list.forEach(function(g){
+      var a=document.createElement('a'); a.className='card'; a.href='games/'+g.file; a.style.setProperty('--accent',g.accent);
+      a.setAttribute('aria-label', g.name+' — '+g.tag+' — '+(g.players===2?'2 players':'1 player')+' — '+g.age);
+      var skillBadges = g.skills.map(function(s){return '<span class="badge b-skill">'+SKILL_INFO[s].label+'</span>';}).join('');
+      var modeBadge = g.players===2 ? '<span class="badge b-mode b-2p">👥 2 Players</span>' : '<span class="badge b-mode b-1p">🙂 1 Player</span>';
+      a.innerHTML =
+        '<div class="topstrip"></div>'+
+        '<div class="icon">'+g.icon+'</div>'+
+        '<div class="name">'+g.name+'</div>'+
+        '<div class="tag">'+g.tag+'</div>'+
+        '<div class="meta">'+skillBadges+'<span class="badge b-age">'+g.age+'</span>'+modeBadge+'</div>'+
+        '<span class="play">Play ▶</span>';
+      grid.appendChild(a);
+    });
+  }
+  render();
+
+  // surprise me -> random visible game (falls back to full list)
+  document.getElementById('surprise').onclick=function(){
+    var pool = GAMES.filter(function(g){
+      var okMode = state.mode==='all' || (state.mode==='1'&&g.players===1) || (state.mode==='2'&&g.players===2);
+      var okSkill = state.skill==='all' || g.skills.indexOf(state.skill)>-1;
+      return okMode && okSkill;
+    });
+    if(!pool.length) pool=GAMES;
+    var pick = pool[Math.floor(Math.random()*pool.length)];
+    window.location.href='games/'+pick.file;
+  };
+</script>
+</body>
+</html>
