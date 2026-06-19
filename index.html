@@ -4,11 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>WiGa · William's Games</title>
-  <link rel="stylesheet" href="assets/site.css?v=4" />
+  <link rel="stylesheet" href="assets/site.css?v=5" />
   <style>
     /* Page-specific tweak: tighten the gap above the games grid since
        the hero already provides generous breathing room. */
     .home-grid { margin-top: 4px; }
+    /* Intro line under the Brain Arcade section heading. */
+    .brain-intro { text-align: center; max-width: 720px; margin: 0 auto 14px; }
+    .brain-intro p { margin: 4px 0; opacity: 0.85; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -1060,6 +1063,314 @@
       </article>
 
   </section>
+
+  <h2 class="section-heading" id="brain" data-i18n="section.brain_arcade">🧠 Brain Arcade</h2>
+  <div class="brain-intro">
+    <p data-i18n="section.brain_arcade_sub">Brain-training games for ages 7–13 — three difficulty levels, fully offline.</p>
+    <p><a class="card__play" href="brain-games/index.html" data-i18n="section.brain_arcade_hub">Open the Brain Arcade hub →</a></p>
+  </div>
+  <section class="card-grid home-grid" aria-label="Brain Arcade games">
+
+      <!-- ========== Reaction Rush ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/reaction-rush.html" aria-label="Play Reaction Rush">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="target with a dartboard">
+            <defs><linearGradient id="ba1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb8500"/><stop offset="100%" stop-color="#ffd166"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba1)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🎯</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Reaction Rush</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Reaction Rush</h2>
+          <p class="card__desc" data-i18n="card.br_reaction_rush.desc">Tap the smiley targets as fast as you can — but skip the bombs! 💣</p>
+          <div class="card__tags">
+            <span class="card__tag">Reaction</span>
+            <span class="card__tag">Junior 7–9</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/reaction-rush.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Memory Match ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/memory-match.html" aria-label="Play Memory Match">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="playing cards">
+            <defs><linearGradient id="ba2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a86ff"/><stop offset="100%" stop-color="#8be9fd"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba2)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🃏</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Memory Match</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Memory Match</h2>
+          <p class="card__desc" data-i18n="card.br_memory_match.desc">Flip cards two at a time and remember where the matching emoji pairs hide.</p>
+          <div class="card__tags">
+            <span class="card__tag">Memory</span>
+            <span class="card__tag">Core 9–11</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/memory-match.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Simon Sequence ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/simon-sequence.html" aria-label="Play Simon Sequence">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="musical notes">
+            <defs><linearGradient id="ba3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#06d6a0"/><stop offset="100%" stop-color="#bdf7d1"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba3)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🎶</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Simon Sequence</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Simon Sequence</h2>
+          <p class="card__desc" data-i18n="card.br_simon_sequence.desc">Watch the lights and sounds, then repeat the growing pattern. How far can you go?</p>
+          <div class="card__tags">
+            <span class="card__tag">Memory</span>
+            <span class="card__tag">Core 9–11</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/simon-sequence.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Pattern Quest ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/pattern-quest.html" aria-label="Play Pattern Quest">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="blue diamond shape">
+            <defs><linearGradient id="ba4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9b5de5"/><stop offset="100%" stop-color="#e9d5ff"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba4)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🔷</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Pattern Quest</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Pattern Quest</h2>
+          <p class="card__desc" data-i18n="card.br_pattern_quest.desc">Spot the rule and pick the tile that comes next. Shapes, colors, and numbers!</p>
+          <div class="card__tags">
+            <span class="card__tag">Patterns</span>
+            <span class="card__tag">Advanced 11–13</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/pattern-quest.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Maze Runner ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/maze-runner.html" aria-label="Play Maze Runner">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="mouse character">
+            <defs><linearGradient id="ba5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff5d8f"/><stop offset="100%" stop-color="#fecdd3"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba5)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="64">🐭🧀</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Maze Runner</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Maze Runner</h2>
+          <p class="card__desc" data-i18n="card.br_maze_runner.desc">Guide the mouse 🐭 to the cheese 🧀 — grab every star before time runs out!</p>
+          <div class="card__tags">
+            <span class="card__tag">Spatial</span>
+            <span class="card__tag">Core 9–11</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/maze-runner.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Block Puzzle ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/tangram-puzzle.html" aria-label="Play Block Puzzle">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="puzzle piece">
+            <defs><linearGradient id="ba6" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb8500"/><stop offset="100%" stop-color="#fde68a"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba6)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🧩</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Block Puzzle</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Block Puzzle</h2>
+          <p class="card__desc" data-i18n="card.br_block_puzzle.desc">Drag, spin, and flip the blocks to fill the frame completely. No gaps allowed!</p>
+          <div class="card__tags">
+            <span class="card__tag">Spatial</span>
+            <span class="card__tag">Advanced 11–13</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/tangram-puzzle.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Math Meteor ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/math-meteor.html" aria-label="Play Math Meteor">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="comet">
+            <defs><linearGradient id="ba7" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1f6feb"/><stop offset="100%" stop-color="#9be0ff"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba7)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="64">☄️</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Math Meteor</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Math Meteor</h2>
+          <p class="card__desc" data-i18n="card.br_math_meteor.desc">Solve the falling math problems and blast each meteor before it lands! ☄️💥</p>
+          <div class="card__tags">
+            <span class="card__tag">Math</span>
+            <span class="card__tag">Core 9–11</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/math-meteor.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Word Scramble ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/word-scramble.html" aria-label="Play Word Scramble">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="input letters">
+            <defs><linearGradient id="ba8" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#06d6a0"/><stop offset="100%" stop-color="#fff7ad"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba8)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🔤</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Word Scramble</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Word Scramble</h2>
+          <p class="card__desc" data-i18n="card.br_word_scramble.desc">Unscramble the mixed-up letters to spell the hidden word. Need a hint?</p>
+          <div class="card__tags">
+            <span class="card__tag">Words</span>
+            <span class="card__tag">Core 9–11</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/word-scramble.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Odd One Out ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/odd-one-out.html" aria-label="Play Odd One Out">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="magnifying glass">
+            <defs><linearGradient id="ba9" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9b5de5"/><stop offset="100%" stop-color="#dbeafe"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba9)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🔍</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Odd One Out</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Odd One Out</h2>
+          <p class="card__desc" data-i18n="card.br_odd_one_out.desc">Find the one item that doesn't belong — then learn the reason why.</p>
+          <div class="card__tags">
+            <span class="card__tag">Logic</span>
+            <span class="card__tag">Core 9–11</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/odd-one-out.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Create Studio ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/create-studio.html" aria-label="Play Create Studio">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="artist palette">
+            <defs><linearGradient id="ba10" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff5d8f"/><stop offset="100%" stop-color="#ffd166"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba10)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🎨</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Create Studio</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Create Studio</h2>
+          <p class="card__desc" data-i18n="card.br_create_studio.desc">Draw, stamp, and mirror-paint your own art, then save it. Pure imagination! 🎨</p>
+          <div class="card__tags">
+            <span class="card__tag">Creativity</span>
+            <span class="card__tag">Junior 7–9</span>
+            <span class="card__tag">1 Player</span>
+          </div>
+          <a class="card__play" href="brain-games/games/create-studio.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Connect Four ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/connect-four.html" aria-label="Play Connect Four">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="red disc">
+            <defs><linearGradient id="ba11" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb8500"/><stop offset="100%" stop-color="#ff6b6b"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba11)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="62">🔴🟡</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Connect Four</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Connect Four</h2>
+          <p class="card__desc" data-i18n="card.br_connect_four.desc">Drop your discs and line up four in a row. Play a friend or the computer 🤖.</p>
+          <div class="card__tags">
+            <span class="card__tag">Strategy</span>
+            <span class="card__tag">Core 9–11</span>
+            <span class="card__tag">2 Players</span>
+          </div>
+          <a class="card__play" href="brain-games/games/connect-four.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Reaction Duel ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/reaction-duel.html" aria-label="Play Reaction Duel">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="lightning bolt">
+            <defs><linearGradient id="ba12" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a86ff"/><stop offset="100%" stop-color="#9be0ff"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba12)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">⚡</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Reaction Duel</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Reaction Duel</h2>
+          <p class="card__desc" data-i18n="card.br_reaction_duel.desc">Two players, one screen — wait for green, then race to tap your side first!</p>
+          <div class="card__tags">
+            <span class="card__tag">Reaction</span>
+            <span class="card__tag">Junior 7–9</span>
+            <span class="card__tag">2 Players</span>
+          </div>
+          <a class="card__play" href="brain-games/games/reaction-duel.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+      <!-- ========== Quiz Battle ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="brain-games/games/quiz-battle.html" aria-label="Play Quiz Battle">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="trophy">
+            <defs><linearGradient id="ba13" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9b5de5"/><stop offset="100%" stop-color="#ffd166"/></linearGradient></defs>
+            <rect width="320" height="180" fill="url(#ba13)"/>
+            <circle cx="44" cy="42" r="30" fill="#fff" opacity="0.16"/><circle cx="282" cy="148" r="40" fill="#fff" opacity="0.12"/>
+            <text x="160" y="104" text-anchor="middle" font-size="68">🏆</text>
+            <text x="160" y="150" text-anchor="middle" font-size="21" font-weight="900" fill="#13183a">Quiz Battle</text>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Quiz Battle</h2>
+          <p class="card__desc" data-i18n="card.br_quiz_battle.desc">Take turns answering math, word, and logic questions. Highest score wins! 🏆</p>
+          <div class="card__tags">
+            <span class="card__tag">Quiz</span>
+            <span class="card__tag">Advanced 11–13</span>
+            <span class="card__tag">2 Players</span>
+          </div>
+          <a class="card__play" href="brain-games/games/quiz-battle.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
+  </section>
 </main>
 
 <footer class="site-footer"><div class="site-footer__inner">
@@ -1070,6 +1381,6 @@
 </div></footer>
 
 <script src="assets/site.js"></script>
-<script src="assets/i18n.js?v=4"></script>
+<script src="assets/i18n.js?v=5"></script>
 </body>
 </html>

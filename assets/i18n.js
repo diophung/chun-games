@@ -151,6 +151,126 @@
       es: "Desliza una cesta a izquierda y derecha para atrapar frutas que caen 🍎🍌🍇 — ¡pero esquiva las bombas 💣! Las chispas doradas valen 5. ¿Cuánto durarás cuando se acelere?",
       zh: "左右滑动篮子接住掉落的水果 🍎🍌🍇 — 但要躲开炸弹 💣!金色闪光值 5 分。速度越来越快,你能坚持多久?"
     },
+
+    // ----- WiGa cards added in a prior commit that were missing translations
+    //       (without these, t() returns the raw key and the card shows "card.x.desc") -----
+    "card.simon_says.desc": {
+      en: "Watch the lights, listen to the tones, and repeat the growing color sequence. Each round adds one more step — how far can your memory go?",
+      vi: "Xem ánh sáng, nghe âm thanh, và lặp lại chuỗi màu ngày càng dài. Mỗi vòng thêm một bước — trí nhớ của bạn đi được bao xa?",
+      es: "Observa las luces, escucha los tonos y repite la secuencia de colores que crece. Cada ronda añade un paso — ¿hasta dónde llega tu memoria?",
+      zh: "观察灯光,聆听音调,重复越来越长的颜色序列。每轮多一步 — 你的记忆能走多远?"
+    },
+    "card.color_match.desc": {
+      en: "Match the colored circle as fast as you can. Each round shrinks the timer — ignore the trickster word and tap the right color!",
+      vi: "Chọn đúng vòng tròn màu thật nhanh. Mỗi vòng đồng hồ ngắn lại — đừng để chữ đánh lừa, hãy chạm đúng màu!",
+      es: "Acierta el círculo de color lo más rápido posible. Cada ronda acorta el tiempo — ignora la palabra tramposa y toca el color correcto.",
+      zh: "尽快选出对应颜色的圆圈。每轮计时越来越短 — 别被捣乱的文字骗到,点对颜色!"
+    },
+    "card.whack_a_mole.desc": {
+      en: "Tap moles as they pop out of a 3×3 grid of holes. Difficulty ramps up — golden moles are fast but worth +5.",
+      vi: "Chạm vào chuột chũi khi chúng nhô lên từ lưới 3×3 lỗ. Độ khó tăng dần — chuột vàng nhanh nhưng được +5.",
+      es: "Toca a los topos cuando salen de una cuadrícula de 3×3 agujeros. La dificultad sube — los topos dorados son rápidos pero valen +5.",
+      zh: "在 3×3 的洞口网格中,地鼠冒头时点击它们。难度逐渐提升 — 金色地鼠很快,但值 +5。"
+    },
+    "card.bubble_pop.desc": {
+      en: "Tap drifting bubbles before they escape the top. Pop 3+ same-color in a row for combos — and dodge the dark bombs!",
+      vi: "Chạm vào bong bóng trôi nổi trước khi chúng thoát lên trên. Nổ 3 bong bóng cùng màu liên tiếp để được combo — và tránh bom đen!",
+      es: "Toca las burbujas que flotan antes de que escapen por arriba. Revienta 3 o más del mismo color seguidas para combos — ¡y esquiva las bombas oscuras!",
+      zh: "在气泡飘出顶部之前点破它们。连续消除 3 个以上同色气泡可得连击 — 还要躲开黑色炸弹!"
+    },
+
+    // ----- Brain Arcade (self-contained suite in brain-games/) -----
+    "section.brain_arcade": { en: "🧠 Brain Arcade", vi: "🧠 Khu Trí Tuệ", es: "🧠 Arcade Mental", zh: "🧠 大脑游乐场" },
+    "section.brain_arcade_sub": {
+      en: "Brain-training games for ages 7–13 — three difficulty levels, fully offline.",
+      vi: "Trò chơi rèn luyện trí não cho 7–13 tuổi — ba mức độ khó, chơi offline hoàn toàn.",
+      es: "Juegos para entrenar el cerebro de 7 a 13 años — tres niveles de dificultad, totalmente sin conexión.",
+      zh: "为 7–13 岁打造的脑力训练游戏 — 三种难度,完全离线。"
+    },
+    "section.brain_arcade_hub": {
+      en: "Open the Brain Arcade hub →",
+      vi: "Mở trang Khu Trí Tuệ →",
+      es: "Abrir el hub de Arcade Mental →",
+      zh: "打开大脑游乐场主页 →"
+    },
+    "card.br_reaction_rush.desc": {
+      en: "Tap the smiley targets as fast as you can — but skip the bombs! 💣",
+      vi: "Chạm vào mặt cười thật nhanh — nhưng đừng chạm vào bom nhé! 💣",
+      es: "Toca las caritas sonrientes lo más rápido que puedas — ¡pero evita las bombas! 💣",
+      zh: "尽快点击笑脸目标 — 但要避开炸弹!💣"
+    },
+    "card.br_memory_match.desc": {
+      en: "Flip cards two at a time and remember where the matching emoji pairs hide.",
+      vi: "Lật hai thẻ mỗi lượt và nhớ vị trí các cặp emoji giống nhau.",
+      es: "Voltea las cartas de dos en dos y recuerda dónde se esconden las parejas de emojis.",
+      zh: "每次翻开两张牌,记住相同表情配对藏在哪里。"
+    },
+    "card.br_simon_sequence.desc": {
+      en: "Watch the lights and sounds, then repeat the growing pattern. How far can you go?",
+      vi: "Xem ánh sáng và âm thanh, rồi lặp lại chuỗi ngày càng dài. Bạn nhớ được bao xa?",
+      es: "Observa las luces y los sonidos, luego repite la secuencia que crece. ¿Hasta dónde llegas?",
+      zh: "观察灯光和声音,然后重复越来越长的序列。你能记到多远?"
+    },
+    "card.br_pattern_quest.desc": {
+      en: "Spot the rule and pick the tile that comes next. Shapes, colors, and numbers!",
+      vi: "Tìm ra quy luật và chọn ô tiếp theo. Hình, màu và số!",
+      es: "Descubre la regla y elige la ficha que sigue. ¡Formas, colores y números!",
+      zh: "找出规律,选出下一个图块。有形状、颜色和数字!"
+    },
+    "card.br_maze_runner.desc": {
+      en: "Guide the mouse 🐭 to the cheese 🧀 — grab every star before time runs out!",
+      vi: "Dẫn chú chuột 🐭 tới miếng phô mai 🧀 — nhặt hết sao trước khi hết giờ!",
+      es: "Guía al ratón 🐭 hasta el queso 🧀 — ¡recoge todas las estrellas antes de que se acabe el tiempo!",
+      zh: "带领小老鼠 🐭 找到奶酪 🧀 — 在时间结束前收集所有星星!"
+    },
+    "card.br_block_puzzle.desc": {
+      en: "Drag, spin, and flip the blocks to fill the frame completely. No gaps allowed!",
+      vi: "Kéo, xoay và lật các khối để lấp đầy khung hoàn toàn. Không được chừa chỗ trống!",
+      es: "Arrastra, gira y voltea los bloques para llenar el marco por completo. ¡Sin huecos!",
+      zh: "拖动、旋转、翻转方块,把框完全填满。不能留空隙!"
+    },
+    "card.br_math_meteor.desc": {
+      en: "Solve the falling math problems and blast each meteor before it lands! ☄️💥",
+      vi: "Giải các phép tính rơi xuống và bắn nổ thiên thạch trước khi chạm đất! ☄️💥",
+      es: "Resuelve las operaciones que caen y destruye cada meteorito antes de que aterrice. ☄️💥",
+      zh: "解出下落的算式,在陨石落地前把它炸掉!☄️💥"
+    },
+    "card.br_word_scramble.desc": {
+      en: "Unscramble the mixed-up letters to spell the hidden word. Need a hint?",
+      vi: "Sắp xếp lại các chữ cái lộn xộn để tạo thành từ ẩn. Cần gợi ý không?",
+      es: "Ordena las letras revueltas para formar la palabra oculta. ¿Necesitas una pista?",
+      zh: "把打乱的字母重新排好,拼出隐藏的单词。需要提示吗?"
+    },
+    "card.br_odd_one_out.desc": {
+      en: "Find the one item that doesn't belong — then learn the reason why.",
+      vi: "Tìm món không cùng nhóm — rồi xem lý do vì sao.",
+      es: "Encuentra el elemento que no encaja — y descubre por qué.",
+      zh: "找出那个不属于同类的 — 再看看原因。"
+    },
+    "card.br_create_studio.desc": {
+      en: "Draw, stamp, and mirror-paint your own art, then save it. Pure imagination! 🎨",
+      vi: "Vẽ, đóng dấu và vẽ đối xứng tác phẩm của bạn, rồi lưu lại. Thỏa sức sáng tạo! 🎨",
+      es: "Dibuja, pon stickers y pinta en espejo tu propio arte, y guárdalo. ¡Pura imaginación! 🎨",
+      zh: "自由绘画、盖印章、镜像作画,完成后保存。尽情发挥想象!🎨"
+    },
+    "card.br_connect_four.desc": {
+      en: "Drop your discs and line up four in a row. Play a friend or the computer 🤖.",
+      vi: "Thả quân và xếp bốn quân thành hàng. Chơi với bạn bè hoặc máy tính 🤖.",
+      es: "Suelta tus fichas y alinea cuatro en raya. Juega contra un amigo o la computadora 🤖.",
+      zh: "放下你的棋子,连成四子一线。和朋友或电脑对战 🤖。"
+    },
+    "card.br_reaction_duel.desc": {
+      en: "Two players, one screen — wait for green, then race to tap your side first!",
+      vi: "Hai người chơi, một màn hình — chờ đèn xanh, rồi đua chạm vào phần của mình trước!",
+      es: "Dos jugadores, una pantalla — espera el verde y corre a tocar tu lado primero.",
+      zh: "两个玩家,一块屏幕 — 等绿灯亮起,抢先点你这一侧!"
+    },
+    "card.br_quiz_battle.desc": {
+      en: "Take turns answering math, word, and logic questions. Highest score wins! 🏆",
+      vi: "Lần lượt trả lời câu hỏi toán, từ vựng và logic. Ai điểm cao hơn thì thắng! 🏆",
+      es: "Por turnos, responde preguntas de matemáticas, palabras y lógica. ¡Gana quien más puntúe! 🏆",
+      zh: "轮流回答数学、词汇和逻辑题。得分最高者获胜!🏆"
+    },
   };
 
   function currentLang() {
