@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Star Racer 🚀</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html, body {
+    width:100%; height:100%; overflow:hidden; background:#04060f;
+    font-family:'Avenir Next','Segoe UI',system-ui,-apple-system,sans-serif;
+    touch-action:none;
+  }
+  canvas { display:block; }
+
+  #hud {
+    position:absolute; top:0; left:0; width:100%; pointer-events:none;
+    color:#d9f6ff; text-shadow:0 0 8px rgba(0,229,255,0.8), 0 2px 4px rgba(0,0,0,0.9);
+    font-weight:800; letter-spacing:1px;
+  }
+  #topbar {
+    display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center;
+    gap:8px; padding:10px 18px 10px 92px;
+    font-size:clamp(15px, 3.4vw, 26px);
+  }
+  #speed { margin-left:auto; }
+  .pill {
+    background:rgba(4,16,32,0.55); border:1px solid rgba(0,229,255,0.35);
+    padding:6px 14px; border-radius:14px; white-space:nowrap;
+  }
+  #shield { position:absolute; top:66px; left:18px; font-size:clamp(15px,3.2vw,24px); }
+  #boostwrap {
+    position:absolute; top:66px; right:18px; width:min(34vw, 190px);
+    background:rgba(4,16,32,0.55); border:1px solid rgba(0,229,255,0.35);
+    border-radius:14px; padding:6px 10px; font-size:clamp(11px,2.4vw,14px);
+  }
+  #boostbar { height:8px; border-radius:6px; background:rgba(255,255,255,0.12); margin-top:4px; overflow:hidden; }
+  #boostfill { height:100%; width:100%; border-radius:6px; background:linear-gradient(90deg,#00e5ff,#7c4dff); transition:width 0.1s linear; }
+  #message {
+    position:absolute; top:32%; left:50%; transform:translate(-50%,-50%) scale(0);
+    font-size:clamp(44px, 11vw, 120px); color:#9ff3ff; text-align:center; white-space:nowrap;
+    text-shadow:0 0 18px #00e5ff, 0 0 60px #0077ff, 0 4px 8px #000;
+    transition:transform 0.35s cubic-bezier(.5,1.7,.5,.9);
+  }
+  #message.show { transform:translate(-50%,-50%) scale(1); }
+  #flash { position:absolute; inset:0; background:#ff2244; opacity:0; pointer-events:none; transition:opacity 0.18s; }
+  #flash.show { opacity:0.32; }
+
+  /* ---- touch controls ---- */
+  #boostBtn {
+    position:absolute; bottom:26px; right:22px; z-index:5;
+    width:96px; height:96px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #7c4dff, #3b1e8f);
+    border:3px solid #b39dff; color:#fff; font-weight:900; font-size:17px; letter-spacing:1px;
+    box-shadow:0 0 22px rgba(124,77,255,0.7); cursor:pointer;
+  }
+  #boostBtn:active { background:radial-gradient(circle at 35% 30%, #b388ff, #5e35b1); transform:scale(0.94); }
+  #stickBase {
+    position:absolute; z-index:4; width:110px; height:110px; border-radius:50%;
+    border:2px solid rgba(0,229,255,0.55); background:rgba(0,229,255,0.08);
+    transform:translate(-50%,-50%); pointer-events:none; display:none;
+  }
+  #stickKnob {
+    position:absolute; z-index:4; width:52px; height:52px; border-radius:50%;
+    background:rgba(0,229,255,0.4); border:2px solid rgba(210,250,255,0.85);
+    transform:translate(-50%,-50%); pointer-events:none; display:none;
+  }
+  #gyroBtn {
+    position:absolute; top:112px; right:18px; z-index:5; display:none;
+    background:rgba(4,16,32,0.7); border:1px solid rgba(0,229,255,0.5); color:#9ff3ff;
+    padding:8px 14px; border-radius:14px; font-weight:800; font-size:13px; letter-spacing:1px;
+    cursor:pointer;
+  }
+  #gyroBtn.on { background:rgba(0,229,255,0.25); color:#fff; box-shadow:0 0 14px rgba(0,229,255,0.6); }
+  .touch-only { display:none; }
+  @media (hover: none), (pointer: coarse) {
+    .touch-only { display:block; }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    #boostBtn { display:none; }
+  }
+
+  /* ---- start screen ---- */
+  #start {
+    position:absolute; inset:0; z-index:10; cursor:pointer;
+    background:radial-gradient(ellipse at 50% 120%, #1b2a5e 0%, #0a1030 45%, #04060f 100%);
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    color:#e6fbff; text-align:center; padding:16px; overflow:hidden;
+  }
+  #start::before {
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 22%, #fff 50%, transparent 55%),
+      radial-gradient(1px 1px at 32% 68%, #aef 50%, transparent 55%),
+      radial-gradient(2px 2px at 54% 14%, #fff 50%, transparent 55%),
+      radial-gradient(1px 1px at 68% 44%, #fda 50%, transparent 55%),
+      radial-gradient(1.5px 1.5px at 82% 76%, #fff 50%, transparent 55%),
+      radial-gradient(1px 1px at 92% 28%, #aef 50%, transparent 55%),
+      radial-gradient(1.5px 1.5px at 22% 86%, #fff 50%, transparent 55%),
+      radial-gradient(1px 1px at 44% 38%, #fff 50%, transparent 55%);
+  }
+  #start h1 {
+    font-size:clamp(42px, 10vw, 96px); letter-spacing:4px;
+    text-shadow:0 0 24px #00e5ff, 0 0 80px #0055ff;
+  }
+  #start .sub { font-size:clamp(15px, 3.4vw, 24px); margin:10px 0 2px; color:#9ff3ff; font-weight:700; }
+  #start .hint { font-size:clamp(13px, 2.8vw, 18px); margin-top:4px; color:#b9c8e8; }
+  #start .play {
+    margin-top:28px; padding:16px 54px; font-size:clamp(24px, 5.5vw, 42px); font-weight:900;
+    letter-spacing:3px; color:#fff; cursor:pointer; border-radius:999px;
+    background:linear-gradient(180deg, #00c6ff, #0072ff);
+    border:3px solid #9ff3ff; box-shadow:0 0 30px rgba(0,180,255,0.8), 0 8px 0 #003a80;
+  }
+  #start .play:active { transform:translateY(5px); box-shadow:0 0 30px rgba(0,180,255,0.8), 0 3px 0 #003a80; }
+
+  /* ---- results ---- */
+  #results {
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    z-index:12; width:min(520px, calc(100vw - 28px)); padding:24px;
+    border-radius:22px; background:rgba(8,18,40,0.96); color:#e6fbff;
+    border:1px solid rgba(0,229,255,0.5); text-align:center;
+    box-shadow:0 0 50px rgba(0,120,255,0.45); pointer-events:auto;
+  }
+  #results h2 { font-size:clamp(28px,6.5vw,46px); margin-bottom:8px; text-shadow:0 0 16px #00e5ff; }
+  #result-line { font-size:clamp(15px,3.6vw,21px); font-weight:800; margin-bottom:10px; color:#9ff3ff; }
+  #race-again {
+    margin-top:14px; padding:12px 30px; border-radius:999px; border:2px solid #9ff3ff;
+    background:linear-gradient(180deg,#00c6ff,#0072ff); color:#fff;
+    font:inherit; font-weight:900; font-size:19px; letter-spacing:2px;
+    box-shadow:0 5px 0 #003a80; cursor:pointer;
+  }
+  #race-again:active { transform:translateY(4px); box-shadow:0 1px 0 #003a80; }
+  .hide { display:none !important; }
+
+  /* WiGa minimal chrome — small floating back-link + footer */
+  .wiga-back {
+    position:fixed; top:10px; left:10px; z-index:1000;
+    display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px;
+    background:rgba(8,18,40,0.85); color:#d9f6ff;
+    font-family:"SF Pro Rounded","Avenir Next",system-ui,-apple-system,sans-serif;
+    font-weight:800; font-size:13px; text-decoration:none;
+    border:1px solid rgba(0,229,255,0.5); box-shadow:0 4px 12px rgba(0,0,0,0.4);
+  }
+  .wiga-back:hover { background:rgba(0,229,255,0.25); }
+  .wiga-mini-footer {
+    position:fixed; bottom:8px; right:12px; z-index:3;
+    display:inline-flex; align-items:center; gap:8px; padding:4px 10px; border-radius:999px;
+    background:rgba(8,18,40,0.7); color:#8fa3c8;
+    font-family:"SF Pro Rounded","Avenir Next",system-ui,-apple-system,sans-serif;
+    font-size:11px; font-weight:600;
+  }
+  .wiga-mini-footer a { color:#8fa3c8; text-decoration:none; border-bottom:1px dashed rgba(143,163,200,0.4); }
+  .wiga-mini-footer a:hover { color:#00e5ff; border-bottom-color:#00e5ff; }
+</style>
+</head>
+<body>
+<a class="wiga-back" href="../index.html" aria-label="Back to WiGa home">← WiGa</a>
+
+<div id="start">
+  <h1>🚀 STAR RACER</h1>
+  <p class="sub">3 laps through the asteroid belt — beat the rival squadron!</p>
+  <p class="hint">Fly through <b style="color:#7df3ff">cyan rings</b> to refill boost · <b style="color:#ffb74d">orange rings</b> fire the afterburner · dodge asteroids!</p>
+  <p class="hint">🖥️ Arrows / WASD to steer · SPACE to boost</p>
+  <p class="hint touch-only">📱 Drag left side to steer (or turn on 🧭 TILT) · hold BOOST button</p>
+  <button class="play" id="playBtn">LAUNCH</button>
+</div>
+
+<div id="hud">
+  <div id="topbar">
+    <div class="pill" id="lap">LAP 1/3</div>
+    <div class="pill" id="place">🚀 1st</div>
+    <div class="pill" id="time">0.0s</div>
+    <div class="pill" id="speed">0</div>
+  </div>
+  <div id="shield" class="pill">🛡️🛡️🛡️🛡️🛡️</div>
+  <div id="boostwrap">BOOST<div id="boostbar"><div id="boostfill"></div></div></div>
+  <div id="message"></div>
+</div>
+<div id="flash"></div>
+
+<button id="gyroBtn" type="button">🧭 TILT: OFF</button>
+<button id="boostBtn" type="button">BOOST</button>
+<div id="stickBase"></div>
+<div id="stickKnob"></div>
+
+<div id="results" class="hide">
+  <h2 id="result-title">🏁 Race Complete!</h2>
+  <p id="result-line"></p>
+  <button id="race-again" type="button">Race Again</button>
+</div>
+
+<div class="wiga-mini-footer">
+  Made by William with ❤️ and 🤖 ·
+  <a href="https://github.com/diophung/chun-games" target="_blank" rel="noopener noreferrer">GitHub</a>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script src="high-scores.js"></script>
+<script type="module">
+import * as THREE from 'three';
+
+// ---------- TUNING ----------
+const LAPS = Math.max(1, parseInt(new URLSearchParams(location.search).get('laps'), 10) || 3);
+const CORRIDOR = 12.5;      // how far the ship may drift from the track line
+const CRUISE = 62;          // base forward speed (units/s)
+const BOOST_SPEED = 118;    // speed while boosting
+const AFTERBURN_SPEED = 134;// speed during an orange-ring afterburner
+const LAT_SPEED = 30;       // max lateral speed
+const RING_RADIUS = 10;
+
+// ---------- BASIC SETUP ----------
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04060f);
+scene.fog = new THREE.FogExp2(0x070b1e, 0.00055);
+
+const camera = new THREE.PerspectiveCamera(68, window.innerWidth/window.innerHeight, 0.1, 6000);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---------- LIGHTS ----------
+scene.add(new THREE.AmbientLight(0x8899cc, 0.5));
+const starlight = new THREE.DirectionalLight(0xfff2dd, 2.2);
+starlight.position.set(-600, 400, 900);
+scene.add(starlight);
+const bluefill = new THREE.HemisphereLight(0x3355ff, 0x110a22, 0.7);
+scene.add(bluefill);
+
+// ---------- HELPER TEXTURES ----------
+function radialTexture(stops, size = 128){
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  for (const [off, col] of stops) g.addColorStop(off, col);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+  return new THREE.CanvasTexture(c);
+}
+function streakTexture(){
+  const c = document.createElement('canvas'); c.width = 64; c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, 'rgba(255,255,255,0.95)');
+  g.addColorStop(0.25, 'rgba(120,220,255,0.55)');
+  g.addColorStop(1, 'rgba(60,120,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 256);
+  return new THREE.CanvasTexture(c);
+}
+const glowTex = radialTexture([[0,'rgba(255,255,255,1)'],[0.3,'rgba(140,230,255,0.9)'],[1,'rgba(0,80,255,0)']]);
+const streakTex = streakTexture();
+
+// ---------- BACKDROP: stars, nebulae, planet, sun ----------
+{
+  const starGeo = new THREE.BufferGeometry();
+  const n = 2600, pos = new Float32Array(n*3);
+  for (let i = 0; i < n; i++){
+    const r = 1600 + Math.random()*2600;
+    const th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1);
+    pos[i*3]   = r*Math.sin(ph)*Math.cos(th);
+    pos[i*3+1] = r*Math.cos(ph);
+    pos[i*3+2] = r*Math.sin(ph)*Math.sin(th);
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({
+    color: 0xffffff, size: 2.6, sizeAttenuation: false, fog: false
+  })));
+
+  const nebulaColors = [
+    [[0,'rgba(120,60,220,0.55)'],[1,'rgba(20,10,60,0)']],
+    [[0,'rgba(0,180,220,0.45)'],[1,'rgba(0,30,60,0)']],
+    [[0,'rgba(220,60,140,0.40)'],[1,'rgba(60,10,40,0)']],
+  ];
+  for (let i = 0; i < 9; i++){
+    const tex = radialTexture(nebulaColors[i % 3], 256);
+    const m = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.4,
+      blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+    const s = new THREE.Sprite(m);
+    const r = 1900 + Math.random()*900;
+    const th = Math.random()*Math.PI*2, y = (Math.random()-0.5)*1400;
+    s.position.set(r*Math.cos(th), y, r*Math.sin(th));
+    const sc = 1400 + Math.random()*1400;
+    s.scale.set(sc, sc, 1);
+    scene.add(s);
+  }
+
+  // ringed planet
+  const planet = new THREE.Mesh(
+    new THREE.SphereGeometry(180, 40, 28),
+    new THREE.MeshStandardMaterial({ color: 0xc9784a, roughness: 0.9, metalness: 0.05,
+      emissive: 0x351505, emissiveIntensity: 0.6 })
+  );
+  planet.position.set(1050, 180, -850);
+  scene.add(planet);
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(230, 330, 64),
+    new THREE.MeshBasicMaterial({ color: 0xd8c9a8, transparent: true, opacity: 0.35, side: THREE.DoubleSide, fog: false })
+  );
+  ring.position.copy(planet.position);
+  ring.rotation.x = Math.PI/2.4; ring.rotation.y = 0.3;
+  scene.add(ring);
+
+  // the local star
+  const sun = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: radialTexture([[0,'rgba(255,255,240,1)'],[0.2,'rgba(255,230,170,0.9)'],[1,'rgba(255,140,40,0)']], 256),
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false
+  }));
+  sun.position.set(-1500, 900, 2200);
+  sun.scale.set(900, 900, 1);
+  scene.add(sun);
+}
+
+// ---------- THE TRACK ----------
+const ctrl = [];
+const NC = 14;
+for (let i = 0; i < NC; i++){
+  const a = i/NC * Math.PI*2;
+  const r = 380 + Math.sin(i*2.3)*85 + Math.cos(i*1.7)*55;
+  const y = Math.sin(i*1.3)*42 + Math.cos(i*0.8)*26;
+  ctrl.push(new THREE.Vector3(Math.cos(a)*r, y, Math.sin(a)*r));
+}
+const curve = new THREE.CatmullRomCurve3(ctrl, true, 'catmullrom', 0.5);
+const curveLen = curve.getLength();
+
+// sampled frames: position + tangent, with a twist-free up vector (world-up projected)
+const SAMPLES = 2048;
+const fPos = [], fTan = [], fRight = [], fUp = [];
+{
+  const WORLD_UP = new THREE.Vector3(0, 1, 0);
+  for (let i = 0; i < SAMPLES; i++){
+    const t = i/SAMPLES;
+    const p = curve.getPointAt(t);
+    const tan = curve.getTangentAt(t).normalize();
+    const right = new THREE.Vector3().crossVectors(tan, WORLD_UP).normalize();
+    const up = new THREE.Vector3().crossVectors(right, tan).normalize();
+    fPos.push(p); fTan.push(tan); fRight.push(right); fUp.push(up);
+  }
+}
+const _fa = new THREE.Vector3(), _fb = new THREE.Vector3();
+function frameAt(t, out){ // out = {pos, tan, right, up}
+  t = ((t % 1) + 1) % 1;
+  const f = t*SAMPLES, i0 = Math.floor(f) % SAMPLES, i1 = (i0+1) % SAMPLES, k = f - Math.floor(f);
+  out.pos.lerpVectors(fPos[i0], fPos[i1], k);
+  out.tan.lerpVectors(fTan[i0], fTan[i1], k).normalize();
+  out.right.lerpVectors(fRight[i0], fRight[i1], k).normalize();
+  out.up.lerpVectors(fUp[i0], fUp[i1], k).normalize();
+  return out;
+}
+function makeFrame(){ return { pos:new THREE.Vector3(), tan:new THREE.Vector3(), right:new THREE.Vector3(), up:new THREE.Vector3() }; }
+function worldAt(t, ox, oy, target){
+  const fr = frameAt(t, _tmpFrame);
+  return target.copy(fr.pos).addScaledVector(fr.right, ox).addScaledVector(fr.up, oy);
+}
+const _tmpFrame = makeFrame();
+
+// faint guide tube so the racing line reads clearly
+{
+  const tube = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, 420, CORRIDOR + 2.5, 12, true),
+    new THREE.MeshBasicMaterial({ color: 0x1040aa, transparent: true, opacity: 0.07,
+      side: THREE.BackSide, depthWrite: false })
+  );
+  scene.add(tube);
+  // dotted centre-line of small emissive markers
+  const dotGeo = new THREE.SphereGeometry(0.5, 6, 6);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0x3f77ff });
+  const dots = new THREE.InstancedMesh(dotGeo, dotMat, 240);
+  const m4 = new THREE.Matrix4();
+  const fr = makeFrame();
+  for (let i = 0; i < 240; i++){
+    frameAt(i/240, fr);
+    m4.setPosition(fr.pos.x, fr.pos.y - CORRIDOR - 1.5, fr.pos.z);
+    dots.setMatrixAt(i, m4);
+  }
+  scene.add(dots);
+}
+
+// ---------- RINGS (gates) ----------
+const gates = [];
+{
+  const NG = 12;
+  for (let i = 1; i < NG; i++){
+    const t = i/NG;
+    const boost = (i % 4 === 0); // 2 orange afterburner rings
+    const color = boost ? 0xff9100 : 0x00e5ff;
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0x0a1626, emissive: color, emissiveIntensity: 1.6, roughness: 0.4, metalness: 0.4
+    });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(RING_RADIUS, 0.7, 10, 36), mat);
+    const fr = frameAt(t, makeFrame());
+    ring.position.copy(fr.pos);
+    ring.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fr.right, fr.up, fr.tan));
+    scene.add(ring);
+    gates.push({ t, boost, mesh: ring, mat, pulse: 0 });
+  }
+  // start / finish arch
+  const fr = frameAt(0, makeFrame());
+  const archMat = new THREE.MeshStandardMaterial({ color: 0x223044, emissive: 0xffee66, emissiveIntensity: 1.2, roughness: 0.5, metalness: 0.5 });
+  const arch = new THREE.Mesh(new THREE.TorusGeometry(CORRIDOR + 3, 1.1, 10, 40), archMat);
+  arch.position.copy(fr.pos);
+  arch.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fr.right, fr.up, fr.tan));
+  scene.add(arch);
+  for (const sx of [-1, 1]){
+    const pylon = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 26, 1.6),
+      new THREE.MeshStandardMaterial({ color: 0x39465e, emissive: 0x2244aa, emissiveIntensity: 0.8, metalness: 0.7, roughness: 0.4 })
+    );
+    pylon.position.copy(fr.pos).addScaledVector(fr.right, sx*(CORRIDOR + 3)).addScaledVector(fr.up, -6);
+    scene.add(pylon);
+  }
+}
+
+// ---------- ASTEROIDS ----------
+function asteroidGeometry(){
+  const g = new THREE.IcosahedronGeometry(1, 1);
+  const p = g.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++){
+    v.fromBufferAttribute(p, i).multiplyScalar(0.75 + Math.random()*0.5);
+    p.setXYZ(i, v.x, v.y, v.z);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+const astGeos = [asteroidGeometry(), asteroidGeometry(), asteroidGeometry()];
+const astMats = [
+  new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.08 }),
+  new THREE.MeshStandardMaterial({ color: 0x6e6a75, roughness: 0.9, metalness: 0.12 }),
+  new THREE.MeshStandardMaterial({ color: 0x9c8468, roughness: 0.92, metalness: 0.06 }),
+];
+
+// obstacle asteroids inside the corridor
+const obstacles = [];
+{
+  const _p = new THREE.Vector3();
+  let placed = 0, guard = 0;
+  while (placed < 58 && guard++ < 800){
+    const t = Math.random();
+    if (t < 0.03 || t > 0.985) continue;                       // keep the grid clear
+    if (gates.some(g => Math.abs(g.t - t) < 0.014)) continue;  // keep rings clear
+    const ang = Math.random()*Math.PI*2, rad = Math.random()*(CORRIDOR - 2);
+    const ox = Math.cos(ang)*rad, oy = Math.sin(ang)*rad;
+    const r = 1.8 + Math.random()*2.4;
+    const mesh = new THREE.Mesh(astGeos[placed % 3], astMats[placed % 3]);
+    mesh.scale.setScalar(r);
+    mesh.position.copy(worldAt(t, ox, oy, _p));
+    mesh.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+    mesh.userData.spin = 0.2 + Math.random()*0.6;
+    scene.add(mesh);
+    obstacles.push({ t, ox, oy, r, mesh });
+    placed++;
+  }
+}
+
+// scenery asteroid belt outside the corridor (instanced, static)
+{
+  const inst = new THREE.InstancedMesh(astGeos[0], astMats[1], 170);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+  const s = new THREE.Vector3(), p = new THREE.Vector3();
+  for (let i = 0; i < 170; i++){
+    const t = Math.random();
+    const ang = Math.random()*Math.PI*2;
+    const rad = CORRIDOR + 26 + Math.random()*230;
+    worldAt(t, Math.cos(ang)*rad, Math.sin(ang)*rad, p);
+    e.set(Math.random()*3, Math.random()*3, Math.random()*3);
+    q.setFromEuler(e);
+    s.setScalar(3 + Math.random()*15);
+    m4.compose(p, q, s);
+    inst.setMatrixAt(i, m4);
+  }
+  scene.add(inst);
+}
+
+// ---------- SHIPS ----------
+function buildShip(bodyColor, accentColor, glowColor){
+  const g = new THREE.Group();
+  const body = new THREE.MeshStandardMaterial({ color: bodyColor, metalness: 0.75, roughness: 0.32 });
+  const accent = new THREE.MeshStandardMaterial({ color: accentColor, metalness: 0.6, roughness: 0.4 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x232a38, metalness: 0.8, roughness: 0.5 });
+
+  const hull = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 1.05, 5.6, 10), body);
+  hull.rotation.x = Math.PI/2;
+  g.add(hull);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.55, 2.4, 10), accent);
+  nose.rotation.x = Math.PI/2;
+  nose.position.z = 4.0;
+  g.add(nose);
+
+  const canopy = new THREE.Mesh(
+    new THREE.SphereGeometry(0.75, 14, 10),
+    new THREE.MeshStandardMaterial({ color: 0x0a2b4a, metalness: 0.9, roughness: 0.15,
+      emissive: 0x1188cc, emissiveIntensity: 0.35 })
+  );
+  canopy.scale.set(0.9, 0.62, 1.7);
+  canopy.position.set(0, 0.68, 1.1);
+  g.add(canopy);
+
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.16, 2.3), body);
+  wing.position.set(0, -0.1, -0.9);
+  g.add(wing);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(7.62, 0.18, 0.5), accent);
+  stripe.position.set(0, -0.1, -0.35);
+  g.add(stripe);
+
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.5, 1.7), accent);
+  fin.position.set(0, 0.85, -2.0);
+  g.add(fin);
+
+  for (const sx of [-1, 1]){
+    const nac = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.55, 2.8, 10), dark);
+    nac.rotation.x = Math.PI/2;
+    nac.position.set(sx*2.6, -0.15, -1.6);
+    g.add(nac);
+    const wtFin = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.1, 1.6), dark);
+    wtFin.position.set(sx*3.7, 0.35, -1.0);
+    g.add(wtFin);
+    const nozzle = new THREE.Mesh(
+      new THREE.CircleGeometry(0.4, 12),
+      new THREE.MeshBasicMaterial({ color: glowColor })
+    );
+    nozzle.position.set(sx*2.6, -0.15, -3.05);
+    nozzle.rotation.y = Math.PI;
+    g.add(nozzle);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTex, color: glowColor, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+    glow.position.set(sx*2.6, -0.15, -3.3);
+    glow.scale.set(2.2, 2.2, 1);
+    g.add(glow);
+  }
+
+  // engine trail — cross-ribbon stretched behind the ship
+  const trailMat = new THREE.MeshBasicMaterial({
+    map: streakTex, color: glowColor, transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+  });
+  const trail = new THREE.Group();
+  for (const rz of [0, Math.PI/2]){
+    const rib = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 9), trailMat);
+    rib.rotation.x = Math.PI/2;   // lie along the Z axis
+    rib.rotation.y = rz;
+    rib.position.z = -4.5;
+    trail.add(rib);
+  }
+  const trailPivot = new THREE.Group();
+  trailPivot.position.z = -3.0;
+  trailPivot.add(trail);
+  trail.position.z = 0;
+  g.add(trailPivot);
+  g.userData.trail = trailPivot;
+
+  return g;
+}
+
+const player = {
+  group: buildShip(0x4f8cc9, 0xe8eef7, 0x66d9ff),
+  t: 0.0015, lap: 0, ox: 0, oy: 0, vx: 0, vy: 0,
+  speed: 0, boostEnergy: 100, afterburn: 0, shield: 5, invuln: 0,
+  gatesHit: 0, finished: false,
+};
+scene.add(player.group);
+
+const RIVAL_DEFS = [
+  { color: 0xc94f4f, accent: 0xf7d9d9, glow: 0xff7755, base: 58, ox0: -8, phase: 0.9 },
+  { color: 0x59b56b, accent: 0xe0f7d9, glow: 0x88ff66, base: 63, ox0:  5, phase: 2.4 },
+  { color: 0x9159b5, accent: 0xead9f7, glow: 0xcc66ff, base: 67, ox0:  9, phase: 4.6 },
+];
+const rivals = RIVAL_DEFS.map(d => {
+  const group = buildShip(d.color, d.accent, d.glow);
+  scene.add(group);
+  return { ...d, group, t: 0.0015, lap: 0, ox: d.ox0, oy: 0, prevOx: d.ox0, speed: 0, finished: false, finishPlace: 0 };
+});
+let finishedCount = 0;
+
+// ---------- HUD ----------
+const lapEl = document.getElementById('lap');
+const placeEl = document.getElementById('place');
+const timeEl = document.getElementById('time');
+const speedEl = document.getElementById('speed');
+const shieldEl = document.getElementById('shield');
+const boostFillEl = document.getElementById('boostfill');
+const msgEl = document.getElementById('message');
+const flashEl = document.getElementById('flash');
+const ORD = ['1st', '2nd', '3rd', '4th'];
+
+let msgTimer = null;
+function setMessage(text, ms){
+  msgEl.textContent = text;
+  msgEl.classList.add('show');
+  if (msgTimer) clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => msgEl.classList.remove('show'), ms);
+}
+function updateShieldHud(){
+  shieldEl.textContent = '🛡️'.repeat(player.shield) + '▫️'.repeat(5 - player.shield);
+}
+
+// ---------- AUDIO ----------
+let audioCtx = null, engineOsc = null, engineGain = null, engineFilter = null;
+function initAudio(){
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    engineOsc = audioCtx.createOscillator();
+    engineOsc.type = 'sawtooth';
+    engineFilter = audioCtx.createBiquadFilter();
+    engineFilter.type = 'lowpass';
+    engineFilter.frequency.value = 300;
+    engineGain = audioCtx.createGain();
+    engineGain.gain.value = 0;
+    engineOsc.connect(engineFilter).connect(engineGain).connect(audioCtx.destination);
+    engineOsc.start();
+  } catch (e) { audioCtx = null; }
+}
+function blip(freq, dur = 0.12, type = 'sine', vol = 0.18){
+  if (!audioCtx) return;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur);
+}
+function thud(){
+  if (!audioCtx) return;
+  const dur = 0.25;
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*dur, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * (1 - i/d.length);
+  const src = audioCtx.createBufferSource(); src.buffer = buf;
+  const f = audioCtx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 420;
+  const g = audioCtx.createGain(); g.gain.value = 0.5;
+  src.connect(f).connect(g).connect(audioCtx.destination);
+  src.start();
+  blip(70, 0.3, 'square', 0.25);
+}
+
+// ---------- INPUT ----------
+const input = { x: 0, y: 0, boost: false };
+const keys = {};
+window.addEventListener('keydown', (e) => {
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  keys[e.key.toLowerCase()] = true;
+});
+window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+// touch joystick (left side of screen) + boost button
+const stickBase = document.getElementById('stickBase');
+const stickKnob = document.getElementById('stickKnob');
+let stickId = null, stickX0 = 0, stickY0 = 0;
+const touchSteer = { active: false, x: 0, y: 0 };
+window.addEventListener('touchstart', (e) => {
+  for (const t of e.changedTouches){
+    if (stickId !== null) continue;
+    if (t.target.closest && t.target.closest('#boostBtn,#gyroBtn,#start,#results,.wiga-back,.wiga-mini-footer')) continue;
+    stickId = t.identifier; stickX0 = t.clientX; stickY0 = t.clientY;
+    touchSteer.active = true; touchSteer.x = 0; touchSteer.y = 0;
+    stickBase.style.left = stickX0 + 'px'; stickBase.style.top = stickY0 + 'px';
+    stickKnob.style.left = stickX0 + 'px'; stickKnob.style.top = stickY0 + 'px';
+    stickBase.style.display = 'block'; stickKnob.style.display = 'block';
+  }
+}, { passive: true });
+window.addEventListener('touchmove', (e) => {
+  for (const t of e.changedTouches){
+    if (t.identifier !== stickId) continue;
+    const dx = t.clientX - stickX0, dy = t.clientY - stickY0;
+    touchSteer.x = THREE.MathUtils.clamp(dx/60, -1, 1);
+    touchSteer.y = THREE.MathUtils.clamp(-dy/60, -1, 1);
+    const len = Math.hypot(dx, dy), max = 55;
+    const kx = stickX0 + (len > max ? dx/len*max : dx);
+    const ky = stickY0 + (len > max ? dy/len*max : dy);
+    stickKnob.style.left = kx + 'px'; stickKnob.style.top = ky + 'px';
+  }
+}, { passive: true });
+function endTouch(e){
+  for (const t of e.changedTouches){
+    if (t.identifier !== stickId) continue;
+    stickId = null; touchSteer.active = false; touchSteer.x = 0; touchSteer.y = 0;
+    stickBase.style.display = 'none'; stickKnob.style.display = 'none';
+  }
+}
+window.addEventListener('touchend', endTouch, { passive: true });
+window.addEventListener('touchcancel', endTouch, { passive: true });
+
+const boostBtn = document.getElementById('boostBtn');
+let touchBoost = false;
+boostBtn.addEventListener('touchstart', (e) => { e.preventDefault(); touchBoost = true; }, { passive: false });
+boostBtn.addEventListener('touchend', () => { touchBoost = false; });
+boostBtn.addEventListener('touchcancel', () => { touchBoost = false; });
+boostBtn.addEventListener('mousedown', () => { touchBoost = true; });
+window.addEventListener('mouseup', () => { touchBoost = false; });
+
+// gyroscope steering (opt-in toggle; iOS needs a permission prompt)
+const gyroBtn = document.getElementById('gyroBtn');
+const gyro = { on: false, ready: false, calX: 0, calY: 0, x: 0, y: 0 };
+const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+if (isTouchDevice && window.DeviceOrientationEvent) gyroBtn.style.display = 'block';
+
+function orientationAngle(){
+  if (screen.orientation && typeof screen.orientation.angle === 'number') return screen.orientation.angle;
+  return window.orientation || 0;
+}
+function onGyro(e){
+  if (e.beta === null || e.gamma === null) return;
+  const a = orientationAngle();
+  let x, y;
+  if (a === 90)                    { x = e.beta;   y = -e.gamma; }
+  else if (a === -90 || a === 270) { x = -e.beta;  y = e.gamma;  }
+  else if (a === 180)              { x = -e.gamma; y = -e.beta;  }
+  else                             { x = e.gamma;  y = e.beta;   }
+  if (!gyro.ready){ gyro.calX = x; gyro.calY = y; gyro.ready = true; }
+  gyro.x = THREE.MathUtils.clamp((x - gyro.calX)/22, -1, 1);
+  gyro.y = THREE.MathUtils.clamp((y - gyro.calY)/22, -1, 1);
+}
+gyroBtn.addEventListener('click', async () => {
+  if (gyro.on){
+    gyro.on = false;
+    window.removeEventListener('deviceorientation', onGyro);
+    gyroBtn.classList.remove('on');
+    gyroBtn.textContent = '🧭 TILT: OFF';
+    gyro.x = gyro.y = 0;
+    return;
+  }
+  try {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function'){
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res !== 'granted') return;
+    }
+    gyro.ready = false;              // re-calibrate: current tilt becomes neutral
+    window.addEventListener('deviceorientation', onGyro);
+    gyro.on = true;
+    gyroBtn.classList.add('on');
+    gyroBtn.textContent = '🧭 TILT: ON';
+  } catch (err) { /* permission API unavailable */ }
+});
+
+function readInput(){
+  let x = 0, y = 0;
+  if (keys['arrowleft'] || keys['a']) x -= 1;
+  if (keys['arrowright'] || keys['d']) x += 1;
+  if (keys['arrowup'] || keys['w']) y += 1;
+  if (keys['arrowdown'] || keys['s']) y -= 1;
+  if (gyro.on && !touchSteer.active){ x = gyro.x; y = gyro.y; }
+  if (touchSteer.active){ x = touchSteer.x; y = touchSteer.y; }
+  input.x = THREE.MathUtils.clamp(x, -1, 1);
+  input.y = THREE.MathUtils.clamp(y, -1, 1);
+  input.boost = !!(keys[' '] || keys['shift'] || touchBoost);
+}
+
+// ---------- RACE STATE ----------
+let gameStarted = false;
+let raceTime = 0;
+let scoreRecorded = false;
+let shake = 0;
+let simTime = 0;
+
+function crossed(a, b, g){
+  return a <= b ? (g > a && g <= b) : (g > a || g <= b);
+}
+
+function playerProgress(){ return player.lap + player.t; }
+
+// ---------- UPDATE ----------
+const _shipPos = new THREE.Vector3();
+const _camTarget = new THREE.Vector3();
+const _camDesired = new THREE.Vector3();
+const _bankQ = new THREE.Quaternion();
+const _bankE = new THREE.Euler();
+const _basis = new THREE.Matrix4();
+const _frP = makeFrame(), _frR = makeFrame();
+
+function updatePlayer(dt){
+  readInput();
+  if (player.finished){ input.x = input.y = 0; input.boost = false; }
+
+  // forward speed
+  player.afterburn = Math.max(0, player.afterburn - dt);
+  let target = CRUISE;
+  const boosting = input.boost && player.boostEnergy > 0;
+  if (boosting){
+    target = BOOST_SPEED;
+    player.boostEnergy = Math.max(0, player.boostEnergy - 30*dt);
+  } else {
+    player.boostEnergy = Math.min(100, player.boostEnergy + 9*dt);
+  }
+  if (player.afterburn > 0) target = AFTERBURN_SPEED;
+  if (!gameStarted) target = 0;
+  player.speed += (target - player.speed) * Math.min(1, dt*1.8);
+
+  // lateral steering
+  player.vx += (input.x*LAT_SPEED - player.vx) * Math.min(1, dt*6);
+  player.vy += (input.y*LAT_SPEED - player.vy) * Math.min(1, dt*6);
+  player.ox += player.vx*dt;
+  player.oy += player.vy*dt;
+  const r = Math.hypot(player.ox, player.oy);
+  if (r > CORRIDOR){
+    player.ox *= CORRIDOR/r; player.oy *= CORRIDOR/r;
+    player.vx *= 0.5; player.vy *= 0.5;
+  }
+
+  // advance along the track
+  const prevT = player.t;
+  player.t += player.speed*dt/curveLen;
+  if (player.t >= 1){
+    player.t -= 1;
+    player.lap++;
+    if (player.lap >= LAPS && !player.finished){
+      finishRace();
+    } else if (!player.finished){
+      lapEl.textContent = `LAP ${player.lap + 1}/${LAPS}`;
+      setMessage(player.lap === LAPS - 1 ? '🔥 FINAL LAP!' : `LAP ${player.lap + 1}`, 1400);
+      blip(660, 0.15); blip(880, 0.2);
+    }
+  }
+
+  // gates
+  if (gameStarted && !player.finished){
+    for (const g of gates){
+      if (!crossed(prevT, player.t, g.t)) continue;
+      if (Math.hypot(player.ox, player.oy) < RING_RADIUS - 1.4){
+        player.gatesHit++;
+        g.pulse = 1;
+        if (g.boost){
+          player.afterburn = 2.2;
+          setMessage('⚡ AFTERBURNER!', 900);
+          blip(440, 0.3, 'sawtooth', 0.2); blip(880, 0.4, 'sawtooth', 0.15);
+        } else {
+          player.boostEnergy = Math.min(100, player.boostEnergy + 25);
+          blip(1046, 0.12); blip(1318, 0.16);
+        }
+      }
+    }
+  }
+
+  // asteroid collisions
+  player.invuln = Math.max(0, player.invuln - dt);
+  if (gameStarted && !player.finished && player.invuln <= 0){
+    for (const a of obstacles){
+      let dAlong = Math.abs(player.t - a.t);
+      dAlong = Math.min(dAlong, 1 - dAlong) * curveLen;
+      if (dAlong > a.r + 4) continue;
+      const dLat = Math.hypot(player.ox - a.ox, player.oy - a.oy);
+      if (dLat < a.r + 2.2){
+        player.shield = Math.max(0, player.shield - 1);
+        player.speed *= 0.35;
+        player.invuln = 2;
+        shake = 0.9;
+        updateShieldHud();
+        flashEl.classList.add('show');
+        setTimeout(() => flashEl.classList.remove('show'), 200);
+        thud();
+        break;
+      }
+    }
+  }
+
+  // place ship in the world
+  const fr = frameAt(player.t, _frP);
+  _shipPos.copy(fr.pos).addScaledVector(fr.right, player.ox).addScaledVector(fr.up, player.oy);
+  player.group.position.copy(_shipPos);
+  _basis.makeBasis(fr.right, fr.up, fr.tan);
+  player.group.quaternion.setFromRotationMatrix(_basis);
+  _bankE.set(-player.vy/LAT_SPEED*0.45, 0, -player.vx/LAT_SPEED*0.75);
+  _bankQ.setFromEuler(_bankE);
+  player.group.quaternion.multiply(_bankQ);
+  const blink = player.invuln > 0 && Math.floor(player.invuln*10) % 2 === 0;
+  player.group.visible = !blink;
+
+  // engine trail scales with speed
+  const tp = player.group.userData.trail;
+  const sMax = Math.max(0.12, player.speed/AFTERBURN_SPEED);
+  tp.scale.set(1, 1, sMax*2.2);
+
+  // camera chase
+  const fov = 68 + (player.speed - CRUISE)/(AFTERBURN_SPEED - CRUISE)*10;
+  camera.fov += (THREE.MathUtils.clamp(fov, 62, 80) - camera.fov)*Math.min(1, dt*3);
+  camera.updateProjectionMatrix();
+  _camDesired.copy(_shipPos).addScaledVector(fr.tan, -17).addScaledVector(fr.up, 5.5);
+  camera.position.lerp(_camDesired, 1 - Math.exp(-dt*4.5));
+  shake = Math.max(0, shake - dt*1.6);
+  if (shake > 0){
+    camera.position.x += (Math.random()-0.5)*shake*1.6;
+    camera.position.y += (Math.random()-0.5)*shake*1.6;
+    camera.position.z += (Math.random()-0.5)*shake*1.6;
+  }
+  _camTarget.copy(_shipPos).addScaledVector(fr.tan, 24);
+  camera.lookAt(_camTarget);
+}
+
+function updateRivals(dt){
+  const pProg = playerProgress();
+  for (const rv of rivals){
+    if (!gameStarted){ rv.speed = 0; }
+    else {
+      // rubber-banding keeps the race close and kid-friendly
+      const diff = pProg - (rv.lap + rv.t);
+      const factor = THREE.MathUtils.clamp(1 + diff*0.35, 0.85, 1.22);
+      const wobble = 1 + Math.sin(simTime*0.7 + rv.phase*3)*0.04;
+      const targetSpeed = rv.base * factor * wobble;
+      rv.speed += (targetSpeed - rv.speed)*Math.min(1, dt*1.5);
+    }
+    rv.t += rv.speed*dt/curveLen;
+    if (rv.t >= 1){
+      rv.t -= 1;
+      rv.lap++;
+      if (rv.lap >= LAPS && !rv.finished){
+        rv.finished = true;
+        finishedCount++;
+        rv.finishPlace = finishedCount;
+      }
+    }
+    // weave around the corridor, hugging centre near rings
+    let nearGate = 1;
+    for (const g of gates){
+      let d = Math.abs(rv.t - g.t); d = Math.min(d, 1 - d);
+      nearGate = Math.min(nearGate, THREE.MathUtils.clamp(d*40, 0.15, 1));
+    }
+    const prevOx = rv.ox;
+    if (gameStarted){
+      rv.ox = (rv.ox0*0.3 + Math.sin(simTime*0.55 + rv.phase)*7) * nearGate;
+      rv.oy = Math.cos(simTime*0.4 + rv.phase*1.7)*4 * nearGate;
+    }
+
+    const fr = frameAt(rv.t, _frR);
+    rv.group.position.copy(fr.pos).addScaledVector(fr.right, rv.ox).addScaledVector(fr.up, rv.oy);
+    _basis.makeBasis(fr.right, fr.up, fr.tan);
+    rv.group.quaternion.setFromRotationMatrix(_basis);
+    const roll = THREE.MathUtils.clamp(-(rv.ox - prevOx)/Math.max(dt, 0.001)/LAT_SPEED, -1, 1)*0.6;
+    _bankE.set(0, 0, roll);
+    _bankQ.setFromEuler(_bankE);
+    rv.group.quaternion.multiply(_bankQ);
+    const tp = rv.group.userData.trail;
+    tp.scale.set(1, 1, Math.max(0.12, rv.speed/AFTERBURN_SPEED)*2.2);
+  }
+}
+
+function updateHud(){
+  if (!player.finished){
+    let place = 1;
+    const pProg = playerProgress();
+    for (const rv of rivals) if (rv.lap + rv.t > pProg) place++;
+    placeEl.textContent = `🚀 ${ORD[place - 1]}`;
+    timeEl.textContent = raceTime.toFixed(1) + 's';
+    speedEl.textContent = Math.round(player.speed*8) + ' km/h';
+    boostFillEl.style.width = player.boostEnergy + '%';
+  }
+  if (engineGain){
+    engineGain.gain.value = gameStarted ? 0.028 + player.speed/AFTERBURN_SPEED*0.05 : 0;
+    if (engineOsc) engineOsc.frequency.value = 42 + player.speed*1.15;
+    if (engineFilter) engineFilter.frequency.value = 240 + player.speed*6;
+  }
+}
+
+function updateScenery(dt){
+  for (const a of obstacles){
+    a.mesh.rotation.x += a.mesh.userData.spin*dt;
+    a.mesh.rotation.y += a.mesh.userData.spin*0.7*dt;
+  }
+  for (const g of gates){
+    g.pulse = Math.max(0, g.pulse - dt*2);
+    const s = 1 + g.pulse*0.25 + Math.sin(simTime*3 + g.t*40)*0.02;
+    g.mesh.scale.setScalar(s);
+    g.mat.emissiveIntensity = 1.6 + g.pulse*2.5;
+  }
+}
+
+// ---------- FINISH ----------
+function finishRace(){
+  if (scoreRecorded) return;
+  scoreRecorded = true;
+  player.finished = true;
+  const place = finishedCount + 1;
+  const placeBonus = [6000, 4000, 2500, 1000][place - 1];
+  const score = Math.max(1, Math.round(60000 - raceTime*180 + player.gatesHit*250 + player.shield*800 + placeBonus));
+  const medal = ['🥇', '🥈', '🥉', '🏁'][place - 1];
+  const timeStr = raceTime.toFixed(1);
+
+  setMessage(`${medal} ${ORD[place - 1]} PLACE!`, 2500);
+  blip(523, 0.18); setTimeout(() => blip(659, 0.18), 180); setTimeout(() => blip(784, 0.35), 360);
+
+  const panel = document.getElementById('results');
+  const again = document.getElementById('race-again');
+  document.getElementById('result-title').textContent = `${medal} Finished ${ORD[place - 1]}!`;
+  document.getElementById('result-line').textContent =
+    `Score: ${score} pts · Time: ${timeStr}s · Rings: ${player.gatesHit} · Shield: ${player.shield}`;
+  if (window.ChunHighScores){
+    window.ChunHighScores.record({
+      gameId: 'star-racer',
+      gameName: 'Star Racer',
+      score,
+      scoreLabel: 'pts',
+      detail: ORD[place - 1] + ' · ' + timeStr + 's · ' + player.gatesHit + ' rings',
+    });
+    window.ChunHighScores.render(panel, 'star-racer', { scoreLabel: 'pts' }, again);
+  }
+  setTimeout(() => panel.classList.remove('hide'), 1800);
+}
+
+// ---------- MAIN LOOP ----------
+const clock = new THREE.Clock();
+function animate(){
+  const dt = Math.min(0.05, clock.getDelta());
+  simTime += dt;
+  if (gameStarted && !player.finished) raceTime += dt;
+  updatePlayer(dt);
+  updateRivals(dt);
+  updateScenery(dt);
+  updateHud();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+// put the camera somewhere sensible before the first frame
+{
+  const fr = frameAt(player.t, _frP);
+  camera.position.copy(fr.pos).addScaledVector(fr.tan, -17).addScaledVector(fr.up, 5.5);
+  camera.lookAt(fr.pos);
+}
+updateShieldHud();
+animate();
+
+// ---------- START ----------
+const startEl = document.getElementById('start');
+document.getElementById('playBtn').addEventListener('click', startGame);
+document.getElementById('race-again').addEventListener('click', () => window.location.reload());
+startEl.addEventListener('click', startGame);
+let launched = false;
+function startGame(){
+  if (launched) return;
+  launched = true;
+  initAudio();
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  startEl.classList.add('hide');
+  setMessage('3', 700); blip(440, 0.15);
+  setTimeout(() => { setMessage('2', 700); blip(440, 0.15); }, 800);
+  setTimeout(() => { setMessage('1', 700); blip(440, 0.15); }, 1600);
+  setTimeout(() => {
+    setMessage('GO! 🚀', 900);
+    blip(880, 0.4);
+    gameStarted = true;
+  }, 2400);
+}
+</script>
+</body>
+</html>
