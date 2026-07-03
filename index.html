@@ -257,6 +257,63 @@
         </div>
       </article>
 
+      <!-- ========== Nebula Rush ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="games/nebula-rush.html" aria-label="Play Nebula Rush">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="spaceship racing on a glowing space track">
+            <!-- deep space -->
+            <rect width="320" height="180" fill="#070a18"/>
+            <!-- nebula clouds -->
+            <ellipse cx="70"  cy="50"  rx="90" ry="46" fill="#3d1d63" opacity="0.55"/>
+            <ellipse cx="250" cy="120" rx="100" ry="52" fill="#12365c" opacity="0.5"/>
+            <ellipse cx="200" cy="30"  rx="70" ry="30" fill="#4a1d6e" opacity="0.4"/>
+            <!-- stars -->
+            <g fill="#ffffff">
+              <circle cx="30" cy="24" r="1.4"/><circle cx="94" cy="12" r="1"/><circle cx="150" cy="40" r="1.6"/>
+              <circle cx="210" cy="18" r="1"/><circle cx="286" cy="34" r="1.4"/><circle cx="262" cy="72" r="1"/>
+              <circle cx="46" cy="98" r="1.2"/><circle cx="18" cy="150" r="1"/><circle cx="300" cy="150" r="1.2"/>
+              <circle cx="120" cy="80" r="1"/><circle cx="180" cy="64" r="1.2"/>
+            </g>
+            <!-- asteroids -->
+            <polygon points="272,52 288,46 298,58 290,70 274,68" fill="#4d4a58"/>
+            <polygon points="36,64 48,58 56,68 50,80 38,78" fill="#3f3c4a"/>
+            <!-- track ribbon sweeping in perspective -->
+            <path d="M -10,178 C 90,120 150,116 320,132" stroke="#141a2b" stroke-width="52" fill="none"/>
+            <path d="M -10,158 C 90,102 160,98 320,114" stroke="#35f0ff" stroke-width="3" fill="none" opacity="0.9"/>
+            <path d="M -6,196 C 100,140 170,134 320,150" stroke="#35f0ff" stroke-width="3" fill="none" opacity="0.9"/>
+            <!-- boost pad -->
+            <polygon points="196,124 226,120 232,128 202,132" fill="#ff8a2a" opacity="0.9"/>
+            <!-- checkpoint ring -->
+            <ellipse cx="268" cy="112" rx="12" ry="20" fill="none" stroke="#7de9ff" stroke-width="2.5" opacity="0.85"/>
+            <!-- rival ship far ahead -->
+            <g transform="translate(232,116) scale(0.45)">
+              <polygon points="0,-14 10,4 22,10 12,14 0,10 -12,14 -22,10 -10,4" fill="#ff5e5e"/>
+              <ellipse cx="-5" cy="14" rx="3" ry="5" fill="#ffd0a8" opacity="0.8"/>
+              <ellipse cx="5"  cy="14" rx="3" ry="5" fill="#ffd0a8" opacity="0.8"/>
+            </g>
+            <!-- player ship -->
+            <g transform="translate(120,132) rotate(-8)">
+              <polygon points="0,-30 14,-4 40,10 24,18 8,10 0,22 -8,10 -24,18 -40,10 -14,-4" fill="#37c4ff" stroke="#0a1420" stroke-width="2"/>
+              <ellipse cx="0" cy="-10" rx="5" ry="9" fill="#0a1a26" stroke="#66e0ff" stroke-width="1.4"/>
+              <ellipse cx="-8" cy="26" rx="4.5" ry="12" fill="#9af2ff" opacity="0.9"/>
+              <ellipse cx="8"  cy="26" rx="4.5" ry="12" fill="#9af2ff" opacity="0.9"/>
+              <ellipse cx="-8" cy="40" rx="2.5" ry="10" fill="#66e0ff" opacity="0.45"/>
+              <ellipse cx="8"  cy="40" rx="2.5" ry="10" fill="#66e0ff" opacity="0.45"/>
+            </g>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Nebula Rush</h2>
+          <p class="card__desc" data-i18n="card.nebula_rush.desc">3D spaceship racing in deep space — 3 laps vs 5 AI pilots, boost pads, drifting, asteroid fields &amp; tilt controls.</p>
+          <div class="card__tags">
+            <span class="card__tag">Racing</span>
+            <span class="card__tag">3D · Three.js</span>
+            <span class="card__tag">Space</span>
+          </div>
+          <a class="card__play" href="games/nebula-rush.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
       <!-- ========== Child Feeder ========== -->
       <article class="card">
         <a class="card__thumb-link" href="games/child-feeder.html" aria-label="Play Child Feeder">
@@ -1434,6 +1491,6 @@
 </div></footer>
 
 <script src="assets/site.js"></script>
-<script src="assets/i18n.js?v=6"></script>
+<script src="assets/i18n.js?v=7"></script>
 </body>
 </html>

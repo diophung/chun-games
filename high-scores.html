@@ -112,7 +112,7 @@
 
 <script src="games/high-scores.js"></script>
 <script src="assets/site.js"></script>
-<script src="assets/i18n.js?v=6"></script>
+<script src="assets/i18n.js?v=7"></script>
 <script>
   (function () {
     "use strict";
@@ -121,6 +121,7 @@
       { id: "type2build",      name: "Type2Build",            scoreLabel: "pts" },
       { id: "zoomy-car",       name: "Zoomy Cars",            scoreLabel: "pts" },
       { id: "star-racer",      name: "Star Racer",            scoreLabel: "pts" },
+      { id: "nebula-rush",     name: "Nebula Rush",           scoreLabel: "ms", sort: "asc" },
       { id: "child-feeder",    name: "Child Feeder",          scoreLabel: "pts" },
       { id: "dragon",          name: "Dragon Eating Cheese",  scoreLabel: "pts" },
       { id: "car-memory",      name: "Car Memory",            scoreLabel: "pts" },
@@ -162,7 +163,7 @@
           empty.appendChild(playLink);
           tile.appendChild(empty);
         } else if (window.ChunHighScores) {
-          window.ChunHighScores.render(tile, g.id, { scoreLabel: g.scoreLabel });
+          window.ChunHighScores.render(tile, g.id, { scoreLabel: g.scoreLabel, sort: g.sort });
         }
         frag.appendChild(tile);
       }
