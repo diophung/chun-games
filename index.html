@@ -204,6 +204,59 @@
         </div>
       </article>
 
+      <!-- ========== Star Racer ========== -->
+      <article class="card">
+        <a class="card__thumb-link" href="games/star-racer.html" aria-label="Play Star Racer">
+          <svg class="card__thumb" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="spaceship racing through a glowing ring in space">
+            <!-- deep space -->
+            <rect width="320" height="180" fill="#060a1c"/>
+            <!-- nebula glow -->
+            <ellipse cx="70" cy="40" rx="90" ry="55" fill="#3b1e8f" opacity="0.35"/>
+            <ellipse cx="270" cy="140" rx="80" ry="50" fill="#0d4a63" opacity="0.4"/>
+            <!-- stars -->
+            <circle cx="30" cy="26" r="1.6" fill="#fff"/>
+            <circle cx="72" cy="98" r="1.1" fill="#aee6ff"/>
+            <circle cx="120" cy="18" r="1.4" fill="#fff"/>
+            <circle cx="176" cy="60" r="1.1" fill="#ffd9a8"/>
+            <circle cx="228" cy="24" r="1.6" fill="#fff"/>
+            <circle cx="288" cy="52" r="1.2" fill="#aee6ff"/>
+            <circle cx="256" cy="92" r="1.1" fill="#fff"/>
+            <circle cx="46" cy="150" r="1.3" fill="#fff"/>
+            <circle cx="140" cy="164" r="1.1" fill="#aee6ff"/>
+            <!-- ringed planet -->
+            <circle cx="270" cy="38" r="20" fill="#c9784a"/>
+            <ellipse cx="270" cy="40" rx="32" ry="8" fill="none" stroke="#d8c9a8" stroke-width="3" opacity="0.6"/>
+            <!-- asteroids -->
+            <path d="M 48 118 l 8 -5 9 3 3 8 -6 7 -10 1 -5 -7 z" fill="#8a7f72"/>
+            <path d="M 208 148 l 6 -4 7 2 2 6 -4 5 -8 1 -4 -5 z" fill="#6e6a75"/>
+            <!-- glowing race ring -->
+            <ellipse cx="160" cy="96" rx="52" ry="60" fill="none" stroke="#00e5ff" stroke-width="6" opacity="0.9"/>
+            <ellipse cx="160" cy="96" rx="52" ry="60" fill="none" stroke="#9ff3ff" stroke-width="2"/>
+            <!-- engine trail -->
+            <path d="M 118 132 Q 90 150 62 166" stroke="#66d9ff" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.55"/>
+            <path d="M 118 132 Q 94 147 74 159" stroke="#d2faff" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.8"/>
+            <!-- spaceship -->
+            <g transform="translate(140, 112) rotate(-32)">
+              <polygon points="26,0 -12,-9 -6,0 -12,9" fill="#4f8cc9" stroke="#1d3f63" stroke-width="1.4"/>
+              <polygon points="4,-4 -14,-16 -8,-3" fill="#3a6ea5"/>
+              <polygon points="4,4 -14,16 -8,3" fill="#3a6ea5"/>
+              <circle cx="10" cy="0" r="3.4" fill="#9ff3ff"/>
+              <circle cx="-11" cy="0" r="3" fill="#66d9ff"/>
+            </g>
+          </svg>
+        </a>
+        <div class="card__body">
+          <h2 class="card__title">Star Racer</h2>
+          <p class="card__desc" data-i18n="card.star_racer.desc">Realistic 3D spaceship racing — fly 3 laps through the asteroid belt, thread glowing boost rings, beat the rival squadron. Tilt or touch on mobile!</p>
+          <div class="card__tags">
+            <span class="card__tag">Racing</span>
+            <span class="card__tag">3D · Three.js</span>
+            <span class="card__tag">Space</span>
+          </div>
+          <a class="card__play" href="games/star-racer.html" data-i18n="card.play">Play →</a>
+        </div>
+      </article>
+
       <!-- ========== Child Feeder ========== -->
       <article class="card">
         <a class="card__thumb-link" href="games/child-feeder.html" aria-label="Play Child Feeder">
@@ -1381,6 +1434,6 @@
 </div></footer>
 
 <script src="assets/site.js"></script>
-<script src="assets/i18n.js?v=5"></script>
+<script src="assets/i18n.js?v=6"></script>
 </body>
 </html>

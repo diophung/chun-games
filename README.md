@@ -19,6 +19,7 @@ The site is split into four sections, all reachable from the top nav on every ch
 | --- | --- | --- | --- |
 | [Type2Build](#type2build) | <img src="docs/screenshots/type2build.png" width="240" alt="Type2Build preview" /> | [`games/type2build.html`](./games/type2build.html) | 2D · SVG |
 | [Zoomy Cars](#zoomy-cars) | <img src="docs/screenshots/zoomy-car.png" width="240" alt="Zoomy Cars preview" /> | [`games/zoomy-car.html`](./games/zoomy-car.html) | 3D · Three.js |
+| [Star Racer](#star-racer) | <img src="docs/screenshots/star-racer.png" width="240" alt="Star Racer preview" /> | [`games/star-racer.html`](./games/star-racer.html) | 3D · Three.js |
 | [Child Feeder](#child-feeder) | <img src="docs/screenshots/child-feeder.png" width="240" alt="Child Feeder preview" /> | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
 | [Dragon Eating Cheese](#dragon-eating-cheese) | <img src="docs/screenshots/dragon.png" width="240" alt="Dragon Eating Cheese preview" /> | [`games/dragon.html`](./games/dragon.html) | 2D · Canvas |
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
@@ -74,6 +75,29 @@ A cartoon 3D racing game. Drive a googly-eyed car around a looped track, grab sp
 - At 0 HP the car limps along at half speed until you repair it
 
 ▶ [Open `games/zoomy-car.html`](./games/zoomy-car.html)
+
+---
+
+### Star Racer
+
+![Star Racer — racing through a boost ring in the asteroid belt](docs/screenshots/star-racer.png)
+
+A realistic 3D spaceship race, sci-fi RTS style: pilot a Terran-inspired starfighter for 3 laps around a winding track through an asteroid belt, past a ringed planet and glowing nebulae. Built with Three.js loaded from a CDN.
+
+**Controls**
+- Desktop: arrow keys or **WASD** to steer, **SPACE**/**SHIFT** to boost
+- Mobile/tablet: drag anywhere on the left of the screen for a virtual joystick, hold the **BOOST** button — or tap **🧭 TILT** to steer with the gyroscope (asks for motion permission on iOS)
+
+**Highlights**
+- Full 3D flight inside a track corridor — steer left/right *and* up/down, with banking and camera FOV kick
+- **Cyan rings** refill boost energy, **orange rings** fire a 2-second afterburner
+- Asteroid obstacles spin inside the corridor — hits cost 1 🛡️ shield and most of your speed
+- 3 rival AI ships with rubber-band difficulty so the race stays close
+- Live standings (1st–4th), lap counter, speedometer, boost gauge
+- Score from finish time, rings threaded, shields left, and final place — saved to the shared high-score board
+- Synthesized engine hum, ring chimes, and collision thuds via Web Audio
+
+▶ [Open `games/star-racer.html`](./games/star-racer.html)
 
 ---
 

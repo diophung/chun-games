@@ -91,6 +91,12 @@
       es: "Carreras 3D estilo dibujos animados — completa 3 vueltas, recoge ⭐ giratorias, usa rampas de boost, esquiva conos y árboles.",
       zh: "卡通 3D 赛车 — 跑完 3 圈,收集旋转的 ⭐ 金币,踩加速板,避开锥筒和树木。"
     },
+    "card.star_racer.desc": {
+      en: "Realistic 3D spaceship racing — fly 3 laps through the asteroid belt, thread glowing boost rings, beat the rival squadron. Tilt or touch on mobile!",
+      vi: "Đua phi thuyền 3D chân thực — bay 3 vòng qua vành đai thiên thạch, xuyên qua các vòng tăng tốc phát sáng, đánh bại phi đội đối thủ. Nghiêng máy hoặc chạm trên điện thoại!",
+      es: "Carreras realistas de naves espaciales en 3D — vuela 3 vueltas por el cinturón de asteroides, atraviesa anillos de impulso brillantes y vence al escuadrón rival. ¡Inclina o toca en el móvil!",
+      zh: "逼真的 3D 飞船竞速 — 穿越小行星带飞行 3 圈,穿过发光的加速环,击败对手中队。手机上可倾斜或触屏操作!"
+    },
     "card.child_feeder.desc": {
       en: "Raise a cartoon child from age 3 to 18 with food & activities. Healthy choices grow them up faster — junk wears them down.",
       vi: "Nuôi một đứa trẻ hoạt hình từ 3 đến 18 tuổi bằng đồ ăn và hoạt động. Đồ ăn lành mạnh giúp lớn nhanh hơn — đồ ăn vặt làm yếu đi.",
