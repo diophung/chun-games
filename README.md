@@ -20,6 +20,7 @@ The site is split into four sections, all reachable from the top nav on every ch
 | [Type2Build](#type2build) | <img src="docs/screenshots/type2build.png" width="240" alt="Type2Build preview" /> | [`games/type2build.html`](./games/type2build.html) | 2D · SVG |
 | [Zoomy Cars](#zoomy-cars) | <img src="docs/screenshots/zoomy-car.png" width="240" alt="Zoomy Cars preview" /> | [`games/zoomy-car.html`](./games/zoomy-car.html) | 3D · Three.js |
 | [Star Racer](#star-racer) | <img src="docs/screenshots/star-racer.png" width="240" alt="Star Racer preview" /> | [`games/star-racer.html`](./games/star-racer.html) | 3D · Three.js |
+| [Nebula Rush](#nebula-rush) | <img src="docs/screenshots/nebula-rush.png" width="240" alt="Nebula Rush preview" /> | [`games/nebula-rush.html`](./games/nebula-rush.html) | 3D · Three.js · WebGL2 |
 | [Child Feeder](#child-feeder) | <img src="docs/screenshots/child-feeder.png" width="240" alt="Child Feeder preview" /> | [`games/child-feeder.html`](./games/child-feeder.html) | 2D · SVG |
 | [Dragon Eating Cheese](#dragon-eating-cheese) | <img src="docs/screenshots/dragon.png" width="240" alt="Dragon Eating Cheese preview" /> | [`games/dragon.html`](./games/dragon.html) | 2D · Canvas |
 | [Car Memory](#car-memory) | <img src="docs/screenshots/car-memory.png" width="240" alt="Car Memory preview" /> | [`games/car-memory.html`](./games/car-memory.html) | 2D · CSS |
@@ -98,6 +99,30 @@ A realistic 3D spaceship race, sci-fi RTS style: pilot a Terran-inspired starfig
 - Synthesized engine hum, ring chimes, and collision thuds via Web Audio
 
 ▶ [Open `games/star-racer.html`](./games/star-racer.html)
+
+---
+
+### Nebula Rush
+
+![Nebula Rush — spaceship racing through an asteroid field](docs/screenshots/nebula-rush.png)
+
+A 3D anti-grav spaceship racer set in deep space. Pick one of 3 original military-sci-fi ships (speed / balanced / heavy-boost), pick a circuit — the technical **Asteroid Graveyard** or the banked **Orbital Ring** superspeedway — then race 3 laps against 5 AI pilots through nebula clouds, drifting derelict capital ships, and holographic checkpoint gates. Hit orange boost pads, drift through corners, and shave past rivals to charge the boost meter.
+
+**Controls**
+- Desktop: **W/↑** throttle, **S/↓** brake, **A/D** or **←/→** steer, **Shift** boost, **Space** drift, **R** reset, **Esc** pause (optional mouse-steer in Settings)
+- Mobile: drag the left half of the screen to steer (or enable **tilt/gyroscope** controls, with the iOS permission flow + calibration), on-screen gas/boost/brake/drift buttons, auto-throttle on by default
+
+**Highlights**
+- Fixed-timestep (60 Hz) physics decoupled from the render loop with interpolation — frame-rate independent
+- Data-driven tracks: one closed Catmull-Rom spline generates the track ribbon, banking, checkpoints, boost pads, minimap and the AI racing line
+- AI pilots with per-racer skill, aggression, blocking and subtle rubber-banding
+- Speed sensation: FOV widening, camera shake, speed-streak lines, engine trails, spark showers on wall scrapes
+- PBR hulls + ACES tone mapping + bloom, shader nebula skybox, instanced asteroid fields — all procedural, no asset downloads
+- Auto quality scaler keeps mid-range phones near 60 fps (drops bloom/particles/pixel ratio when the frame rate dips)
+- Fully synthesized Web Audio: engine hum that pitch-shifts with speed, boost whoosh, checkpoint chimes, countdown beeps
+- Best lap saved with the shared `ChunHighScores` helper (milliseconds, lower is better)
+
+▶ [Open `games/nebula-rush.html`](./games/nebula-rush.html)
 
 ---
 

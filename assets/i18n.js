@@ -97,6 +97,12 @@
       es: "Carreras realistas de naves espaciales en 3D — vuela 3 vueltas por el cinturón de asteroides, atraviesa anillos de impulso brillantes y vence al escuadrón rival. ¡Inclina o toca en el móvil!",
       zh: "逼真的 3D 飞船竞速 — 穿越小行星带飞行 3 圈,穿过发光的加速环,击败对手中队。手机上可倾斜或触屏操作!"
     },
+    "card.nebula_rush.desc": {
+      en: "3D spaceship racing in deep space — 3 laps vs 5 AI pilots, boost pads, drifting, asteroid fields & tilt controls.",
+      vi: "Đua phi thuyền 3D giữa không gian sâu thẳm — 3 vòng đấu với 5 phi công AI, bàn tăng tốc, drift, bãi thiên thạch và điều khiển nghiêng máy.",
+      es: "Carreras de naves espaciales en 3D — 3 vueltas contra 5 pilotos IA, rampas de turbo, derrapes, campos de asteroides y control por inclinación.",
+      zh: "深空 3D 太空飞船竞速 — 与 5 名 AI 飞行员比拼 3 圈,有加速板、漂移、小行星带和重力感应操控。"
+    },
     "card.child_feeder.desc": {
       en: "Raise a cartoon child from age 3 to 18 with food & activities. Healthy choices grow them up faster — junk wears them down.",
       vi: "Nuôi một đứa trẻ hoạt hình từ 3 đến 18 tuổi bằng đồ ăn và hoạt động. Đồ ăn lành mạnh giúp lớn nhanh hơn — đồ ăn vặt làm yếu đi.",
